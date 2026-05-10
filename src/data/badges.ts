@@ -1,0 +1,62 @@
+import type { Badge } from '@/types';
+
+export const badges: Badge[] = [
+  {
+    id: 'first-assessment',
+    title: 'Penjelajah Pertama',
+    description: 'Menyelesaikan asesmen motorik pertama.',
+    icon: 'star',
+    unlocked: true,
+    date: '30 Apr 2026',
+    color: 'bg-secondary-fixed',
+  },
+  {
+    id: 'worksheet-master',
+    title: 'Kolektor Lembar Kerja',
+    description: 'Mengunduh 5 lembar kerja atau lebih.',
+    icon: 'fileText',
+    unlocked: true,
+    date: '29 Apr 2026',
+    color: 'bg-primary-fixed',
+  },
+  {
+    id: 'consistent-learner',
+    title: 'Pintar & Tekun',
+    description: 'Membuka aplikasi selama 3 hari berturut-turut.',
+    icon: 'award',
+    unlocked: false,
+    color: 'bg-tertiary-fixed',
+  },
+  {
+    id: 'all-milestones',
+    title: 'Juara Montessori',
+    description: 'Mencapai skor "Bagus" di semua kategori motorik.',
+    icon: 'trophy',
+    unlocked: false,
+    color: 'bg-secondary-container',
+  },
+  {
+    id: 'tips-reader',
+    title: 'Pembaca Setia',
+    description: 'Membaca lebih dari 10 tips perkembangan.',
+    icon: 'lightbulb',
+    unlocked: false,
+    color: 'bg-surface-container-high',
+  },
+  {
+    id: 'first-flight',
+    title: 'Siap Meluncur',
+    description: 'Menyelesaikan semua aktivitas dalam 1 hari.',
+    icon: 'rocket',
+    unlocked: false,
+    color: 'bg-primary-fixed',
+  },
+  {
+    id: 'on-fire',
+    title: 'Semangat Membara',
+    description: 'Menggunakan aplikasi 7 hari berturut-turut.',
+    icon: 'flame',
+    unlocked: false,
+    color: 'bg-tertiary-fixed',
+  },
+];

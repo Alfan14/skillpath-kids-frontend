@@ -1,0 +1,9 @@
+{
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(dashboard)/page": "app/(dashboard)/page.js",
+  "/(dashboard)/achievements/page": "app/(dashboard)/achievements/page.js",
+  "/(teacher)/teacher/questions/page": "app/(teacher)/teacher/questions/page.js",
+  "/(teacher)/teacher/dashboard/page": "app/(teacher)/teacher/dashboard/page.js",
+  "/(teacher)/teacher/tips/page": "app/(teacher)/teacher/tips/page.js",
+  "/(teacher)/teacher/files/page": "app/(teacher)/teacher/files/page.js"
+}

@@ -1,0 +1,54 @@
+skillpath-kids/
+├── app/                        # Next.js App Router (Routing & Pages)
+│   ├── (auth)/                 # Auth group
+│   │   ├── login/page.tsx
+│   │   └── signup/page.tsx
+│   ├── (dashboard)/            # Dashboard group
+│   │   ├── layout.tsx          # Nav + Shell
+│   │   ├── page.tsx            # Home Dashboard
+│   │   ├── assessment/page.tsx
+│   │   ├── results/page.tsx
+│   │   ├── tips/page.tsx
+│   │   ├── files/page.tsx
+│   │   └── achievements/page.tsx
+│   ├── globals.css
+│   └── layout.tsx              # Root Layout (Providers, Fonts)
+├── components/                 # Shared UI & Layout Components
+│   ├── ui/                     # Shadcn style / Atomic buttons
+│   │   ├── button.tsx          # (Rename BigTouchButton -> Button)
+│   │   ├── card.tsx            # (Rename KidCard -> Card)
+│   │   ├── progress-ring.tsx
+│   │   ├── progress-bar.tsx
+│   │   └── badge.tsx           # (Rename SkillBadge -> Badge)
+│   └── layout/                 # Global layout parts
+│       ├── app-shell.tsx
+│       ├── top-bar.tsx
+│       └── bottom-nav.tsx
+├── features/                   # Core Business Logic (Vertical Slices)
+│   ├── assessment/             
+│   │   ├── components/         # Feature-specific components
+│   │   │   ├── assessment-screen.tsx
+│   │   │   └── assessment-option.tsx
+│   │   ├── hooks/              # Feature-specific hooks
+│   │   │   └── use-assessment.ts
+│   │   ├── api.ts              # assessmentApi.ts moved here
+│   │   └── types.ts            
+│   ├── results/
+│   │   ├── components/
+│   │   ├── hooks/              # use-skill-score.ts
+│   │   └── types.ts
+│   └── achievements/           # Follow same pattern...
+├── hooks/                      # Global shared hooks
+│   ├── use-sound.ts
+│   ├── use-navigation.ts
+│   └── use-child-profile.ts
+├── lib/                        # Infrastructure & Config
+│   ├── gemini.ts               # geminiClient.ts
+│   ├── utils.ts                # (cn.ts + shared formatting)
+│   └── sound-service.ts        # Service logic
+├── data/                       # Static Data / Constants
+│   ├── questions.ts
+│   ├── badges.ts
+│   └── recommendations.ts
+└── types/                      # Global TypeScript Definitions
+    └── index.ts
