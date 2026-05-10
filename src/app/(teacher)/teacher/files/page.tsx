@@ -5,8 +5,10 @@ export const metadata = {
   title: 'Kelola Worksheet - SkillPath Teacher',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function FilesPage() {
   const files = await getFiles();
-  
+
   return <FilesClient files={files} />;
 }

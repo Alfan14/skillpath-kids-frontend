@@ -1,4 +1,5 @@
 "use server";
+import type { AssessmentQuestion } from "@/types";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL;
@@ -16,7 +17,7 @@ function mapQuestion(
       IMPORTANT:
       send STRING only
     */
-    iconName:
+    icon:
       question.iconName,
 
     color:
@@ -56,7 +57,7 @@ export async function getQuestions() {
 }
 
 export async function createQuestion(
-  payload: any,
+  payload: Partial<AssessmentQuestion>,
   token: string
 ) {
   const response = await fetch(
@@ -81,8 +82,8 @@ export async function createQuestion(
 }
 
 export async function updateQuestion(
-  id: number,
-  payload: any,
+  id: string | number,
+  payload: Partial<AssessmentQuestion>,
   token: string
 ) {
   const response = await fetch(
@@ -107,7 +108,7 @@ export async function updateQuestion(
 }
 
 export async function deleteQuestion(
-  id: number,
+  id: string | number,
   token: string
 ) {
   const response = await fetch(

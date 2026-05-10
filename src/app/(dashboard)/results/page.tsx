@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   title: 'Hasil Asesmen — SkillPath Kids',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function ResultsPage() {
   return (
     <ErrorBoundary>

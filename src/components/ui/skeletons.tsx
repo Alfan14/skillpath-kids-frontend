@@ -81,31 +81,61 @@ export function WorksheetGridSkeleton() {
   );
 }
 
-/* ── Full-page Skeleton (assessment-like) ──────────────────────────────────── */
+/* ── Assessment Skeleton ───────────────────────────────────────────────────── */
 export function AssessmentSkeleton() {
   return (
-    <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto animate-pulse" aria-hidden="true">
-      <div className="flex flex-col items-center gap-3 w-full pt-4">
-        <div className="w-16 h-16 bg-surface-container-high rounded-2xl" />
-        <div className="flex items-center justify-between w-full">
-          <div className="h-7 w-52 bg-surface-container-high rounded" />
-          <div className="h-6 w-20 bg-surface-container-high rounded-full" />
-        </div>
-        <div className="w-full h-3 bg-surface-container-high rounded-pill" />
+    <div className="flex flex-col gap-4 max-w-2xl mx-auto animate-pulse" aria-hidden="true">
+
+      {/* hero header skeleton */}
+      <div className="relative -mx-4 md:-mx-8 h-[120px] rounded-b-[32px] bg-primary/20" />
+
+      {/* page dots skeleton */}
+      <div className="flex items-center justify-center gap-1.5 pt-1">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="h-2 rounded-full bg-surface-container-high"
+            style={{ width: i === 1 ? 24 : 8 }}
+          />
+        ))}
       </div>
+
+      {/* legend strip skeleton */}
+      <div className="h-16 w-full rounded-[18px] bg-surface-container-high" />
+
+      {/* question card skeletons */}
       {[1, 2, 3].map((i) => (
-        <div key={i} className="w-full bg-surface-container rounded-2xl p-5">
-          <div className="flex items-start gap-3 mb-5">
-            <div className="w-10 h-10 bg-surface-container-high rounded-full shrink-0" />
-            <div className="h-5 w-full bg-surface-container-high rounded" />
+        <div
+          key={i}
+          className="relative overflow-hidden rounded-[22px] bg-surface-container p-5"
+        >
+          {/* left accent bar */}
+          <div className="absolute inset-y-0 left-0 w-1.5 rounded-l-[22px] bg-surface-container-high" />
+
+          {/* icon + text row */}
+          <div className="mb-5 flex items-start gap-3">
+            <div className="h-11 w-11 shrink-0 rounded-2xl bg-surface-container-high" />
+            <div className="flex flex-1 flex-col gap-1.5 pt-1">
+              <div className="h-2.5 w-24 rounded bg-surface-container-high" />
+              <div className="h-4 w-full rounded bg-surface-container-high" />
+              <div className="h-4 w-3/4 rounded bg-surface-container-high" />
+            </div>
           </div>
+
+          {/* likert buttons row */}
           <div className="flex gap-2">
             {[1, 2, 3, 4].map((j) => (
-              <div key={j} className="h-10 flex-1 bg-surface-container-high rounded-xl" />
+              <div
+                key={j}
+                className="h-16 flex-1 rounded-2xl bg-surface-container-high"
+              />
             ))}
           </div>
         </div>
       ))}
+
+      {/* nav button skeleton */}
+      <div className="h-14 w-full rounded-[18px] bg-surface-container-high" />
     </div>
   );
 }

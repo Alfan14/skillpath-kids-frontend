@@ -7,13 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, KidCard } from '@/components/ui/card';
 import { BadgePill } from '@/components/ui/badge';
 import { ProgressRing } from '@/components/ui/progress-ring';
-import { SkillProgressBar } from '@/components/ui/skill-progess-bar';
+import { SkillProgressBar } from '@/components/ui/skill-progress-bar';
 import type { HistoryResult, SkillResult } from '@/types';
 
-function scoreToStatus(score: number) {
-  if (score >= 80) return 'Bagus';
-  if (score >= 50) return 'Cukup';
-  return 'Perlu Latihan';
+function scoreToStatus(score: number): 'excellent' | 'warning' | 'low' {
+  if (score >= 80) return 'excellent';
+  if (score >= 50) return 'warning';
+  return 'low';
 }
 
 function getBarColor(status: string) {
@@ -156,8 +156,7 @@ export function ResultsScreen() {
             key={skill.label}
             label={skill.label}
             value={skill.score}
-            status={skill.status as 'Bagus' | 'Cukup' | 'Perlu Latihan'}
-            animated
+            status={scoreToStatus(skill.score)}
           />
         ))}
       </Card>

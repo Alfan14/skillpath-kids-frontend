@@ -1,4 +1,5 @@
 "use server";
+import type { Worksheet } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,11 +13,14 @@ export async function getFiles() {
 
   const data = await response.json();
 
-  return data.data;
+  return (data.data || []).map((file: any) => ({
+    ...file,
+    icon: file.icon || file.iconName,
+  }));
 }
 
 export async function createFile(
-  payload: any,
+  payload: Partial<Worksheet>,
   token: string
 ) {
   const response = await fetch(
@@ -36,8 +40,8 @@ export async function createFile(
 }
 
 export async function updateFile(
-  id: number,
-  payload: any,
+  id: string | number,
+  payload: Partial<Worksheet>,
   token: string
 ) {
   const response = await fetch(
@@ -57,7 +61,7 @@ export async function updateFile(
 }
 
 export async function deleteFile(
-  id: number,
+  id: string | number,
   token: string
 ) {
   const response = await fetch(

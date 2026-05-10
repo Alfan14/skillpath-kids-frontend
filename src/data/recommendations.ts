@@ -1,4 +1,3 @@
-import { Scissors, Palette, Brush, Shapes } from 'lucide-react';
 import type { Recommendation, SkillResult, Worksheet } from '@/types';
 
 // ─── Recommendations ──────────────────────────────────────────────────────────
@@ -14,7 +13,7 @@ export const recommendations: Recommendation[] = [
     title: 'Latihan menggunting garis lurus',
     description:
       'Membantu koordinasi mata dan tangan serta memperkuat otot jari untuk persiapan menulis.',
-    icon: Scissors,
+    icon: 'Scissors',
     duration: '15 Menit',
     category: 'Motorik Halus',
     isMain: true,
@@ -23,7 +22,7 @@ export const recommendations: Recommendation[] = [
     id: '2',
     title: 'Mewarnai dalam pola kecil',
     description: 'Melatih fokus dan kontrol gerakan tangan presisi.',
-    icon: Palette,
+    icon: 'Palette',
     duration: '20 Menit',
     category: 'Konsentrasi',
   },
@@ -31,7 +30,7 @@ export const recommendations: Recommendation[] = [
     id: '3',
     title: 'Tracing bentuk sederhana',
     description: 'Dasar pra-menulis dan koordinasi alur.',
-    icon: Brush,
+    icon: 'Brush',
     duration: '10 Menit',
     category: 'Pra-Menulis',
   },
@@ -39,7 +38,7 @@ export const recommendations: Recommendation[] = [
     id: '4',
     title: 'Menyusun Balok Kayu',
     description: 'Melatih persepsi ruang dan koordinasi motorik kasar.',
-    icon: Shapes,
+    icon: 'Shapes',
     duration: '30 Menit',
     category: 'Sensorial',
   },
@@ -83,7 +82,7 @@ export const worksheets: Worksheet[] = [
     title: 'Buku Montessori',
     description:
       'Panduan sensorial lengkap untuk mengasah kemampuan motorik si kecil secara natural.',
-    icon: Shapes,
+    icon: 'Shapes',
     variant: 'paid',
     badge: 'PRODUK UTAMA',
     accent: 'secondary',
@@ -93,7 +92,7 @@ export const worksheets: Worksheet[] = [
     id: 'lembar-gunting',
     title: 'Lembar Gunting',
     description: 'Melatih koordinasi bilateral dan kekuatan otot tangan si kecil.',
-    icon: Scissors,
+    icon: 'Scissors',
     variant: 'free',
     badge: 'PALING DICARI',
     accent: 'primary',
@@ -103,7 +102,7 @@ export const worksheets: Worksheet[] = [
     id: 'lembar-mewarnai',
     title: 'Lembar Mewarnai',
     description: 'Eksplorasi warna sekaligus melatih kontrol pensil yang presisi.',
-    icon: Palette,
+    icon: 'Palette',
     variant: 'free',
     accent: 'tertiary',
     url: '/worksheets/lembar-mewarnai.pdf',
@@ -112,7 +111,7 @@ export const worksheets: Worksheet[] = [
     id: 'lembar-tracing',
     title: 'Lembar Tracing',
     description: 'Dasar pra-menulis dengan mengikuti garis putus-putus yang seru.',
-    icon: Brush,
+    icon: 'Brush',
     variant: 'free',
     accent: 'secondary',
     url: '/worksheets/lembar-tracing.pdf',

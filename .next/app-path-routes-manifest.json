@@ -1,0 +1,16 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/api/assess/route": "/api/assess",
+  "/(auth)/login/page": "/login",
+  "/(auth)/signup/page": "/signup",
+  "/(dashboard)/achievements/page": "/achievements",
+  "/(dashboard)/assessment/page": "/assessment",
+  "/(dashboard)/files/page": "/files",
+  "/(dashboard)/results/page": "/results",
+  "/(dashboard)/tips/page": "/tips",
+  "/(dashboard)/page": "/",
+  "/(teacher)/teacher/files/page": "/teacher/files",
+  "/(teacher)/teacher/dashboard/page": "/teacher/dashboard",
+  "/(teacher)/teacher/questions/page": "/teacher/questions",
+  "/(teacher)/teacher/tips/page": "/teacher/tips"
+}

@@ -5,8 +5,10 @@ export const metadata = {
   title: 'Kelola Pertanyaan - SkillPath Teacher',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function QuestionsPage() {
   const questions = await getQuestions();
-  
+
   return <QuestionsClient questions={questions} />;
 }

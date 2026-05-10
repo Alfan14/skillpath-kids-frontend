@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: 'Asesmen Montessori — SkillPath Kids',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function AssessmentPage() {
   return (
     <ErrorBoundary>

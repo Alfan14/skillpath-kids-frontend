@@ -5,7 +5,7 @@ import { Lightbulb } from 'lucide-react';
 import { Card, KidCard } from '@/components/ui/card';
 import { BadgePill } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { getIconFromName } from '@/lib/icon-mapper';
+import { getIcon } from '@/lib/icon-map';
 import type { Recommendation } from '@/types';
 
 export function TipsScreen() {
@@ -80,11 +80,10 @@ export function TipsScreen() {
       {/* Main recommendation */}
       {mainRec && (
         <KidCard accent="primary" variant="featured" badge="Paling Disarankan">
-          {getIconFromName(mainRec.iconName) &&
-            React.createElement(getIconFromName(mainRec.iconName), {
-              className: 'w-8 h-8 text-on-surface-variant',
-              'aria-hidden': true,
-            })}
+          {(() => {
+            const Icon = getIcon(mainRec.icon);
+            return <Icon className="w-8 h-8 text-on-surface-variant" aria-hidden="true" />;
+          })()}
           <h2 className="text-2xl font-black italic text-on-surface mb-2">
             {mainRec.title}
           </h2>
@@ -108,11 +107,10 @@ export function TipsScreen() {
             key={rec.id}
             className="flex items-start gap-3 p-4 hover:shadow-md transition-shadow cursor-pointer"
           >
-            {getIconFromName(rec.iconName) &&
-              React.createElement(getIconFromName(rec.iconName), {
-                className: 'w-5 h-5 text-on-surface-variant',
-                'aria-hidden': true,
-              })}
+            {(() => {
+              const Icon = getIcon(rec.icon);
+              return <Icon className="w-5 h-5 text-on-surface-variant" aria-hidden="true" />;
+            })()}
             <div>
               <h3 className="font-black italic text-on-surface text-sm mb-0.5">
                 {rec.title}

@@ -8,6 +8,7 @@ import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { TipForm } from '@/components/forms/tip-form';
 import { deleteTip } from '@/actions/tip-actions';
 import { useRouter } from 'next/navigation';
+import { getToken } from '@/lib/auth';
 import type { Recommendation } from '@/types';
 
 export function TipsClient({ tips }: { tips: Recommendation[] }) {
@@ -38,7 +39,8 @@ export function TipsClient({ tips }: { tips: Recommendation[] }) {
     if (!tipToDelete) return;
     setIsDeleting(true);
     try {
-      await deleteTip(tipToDelete.id);
+      const token = getToken();
+      await deleteTip(Number(tipToDelete.id), token || '');
       setIsDeleteModalOpen(false);
       setTipToDelete(null);
       router.refresh();

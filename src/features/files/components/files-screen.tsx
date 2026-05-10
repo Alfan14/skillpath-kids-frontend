@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { BadgePill } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { getFiles } from '@/actions/file-actions';
-import { getIconFromName } from '@/lib/icon-mapper';
+import { getIcon } from '@/lib/icon-map';
 
 /**
  * FilesScreen — Server Component.
@@ -30,7 +30,7 @@ export async function FilesScreen() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         {worksheets.map((ws: any) => {
-          const Icon = getIconFromName(ws.iconName);
+          const Icon = getIcon(ws.icon);
           const isPaid = ws.variant?.toLowerCase() === 'paid';
 
           return (

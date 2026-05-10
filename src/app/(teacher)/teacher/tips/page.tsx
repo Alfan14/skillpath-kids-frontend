@@ -5,8 +5,10 @@ export const metadata = {
   title: 'Kelola Tips - SkillPath Teacher',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function TipsPage() {
   const tips = await getTips();
-  
+
   return <TipsClient tips={tips} />;
 }

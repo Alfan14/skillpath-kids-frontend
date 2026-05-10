@@ -1,17 +1,17 @@
 'use client';
 
-import { ClipboardCheck, AlertCircle } from 'lucide-react';
+import { ClipboardCheck, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { AssessmentGroup } from '@/components/ui/assessment-option';
 import { useAssessment } from '../hooks/use-assessment';
-import { getIconFromName } from '@/lib/icon-mapper';
+import { getIcon } from '@/lib/icon-map';
 
 const LIKERT_LEGEND = [
-  { code: 'SS', label: 'Sangat Setuju',      score: '(4)', color: 'text-tertiary' },
-  { code: 'S',  label: 'Setuju',             score: '(3)', color: 'text-on-surface' },
-  { code: 'TS', label: 'Tidak Setuju',       score: '(2)', color: 'text-error' },
-  { code: 'STS',label: 'Sangat Tidak Setuju',score: '(1)', color: 'text-error' },
+  { code: 'SS', label: 'Sangat Setuju', score: '(4)', chipBg: 'bg-tertiary-container', chipText: 'text-on-tertiary-container' },
+  { code: 'S', label: 'Setuju', score: '(3)', chipBg: 'bg-primary-container', chipText: 'text-on-primary-container' },
+  { code: 'TS', label: 'Tidak Setuju', score: '(2)', chipBg: 'bg-secondary-container', chipText: 'text-on-secondary-container' },
+  { code: 'STS', label: 'Sangat Tidak Setuju', score: '(1)', chipBg: 'bg-error-container', chipText: 'text-on-error-container' },
 ];
 
 export function AssessmentScreen() {
@@ -36,60 +36,130 @@ export function AssessmentScreen() {
   } = useAssessment();
 
   return (
-    <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto">
+    <div className="flex flex-col gap-4 max-w-2xl mx-auto">
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-3 w-full pt-4">
-        <div className="w-16 h-16 flex items-center justify-center rounded-2xl bg-secondary-container">
-          <ClipboardCheck className="w-8 h-8 text-on-secondary-container" aria-hidden="true" />
+      {/* ── Hero Header ──────────────────────────────────────────────────────── */}
+      <div className="relative -mx-4 md:-mx-8 overflow-hidden rounded-b-[32px] bg-primary px-5 pb-6 pt-4">
+        {/* decorative blobs */}
+        <div className="pointer-events-none absolute -right-10 -top-12 h-40 w-40 rounded-full bg-[#004883] opacity-50" />
+        <div className="pointer-events-none absolute -bottom-8 -left-4 h-20 w-20 rounded-full bg-secondary opacity-20" />
+
+        {/* top row */}
+        <div className="relative z-10 mb-4 flex items-center gap-3">
+          {/* icon badge */}
+          <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[18px] bg-secondary shadow-[0_4px_0_0_#e8c426]">
+            <ClipboardCheck className="h-7 w-7 text-on-surface" aria-hidden="true" />
+          </div>
+
+          <div className="flex flex-col">
+            <h1 className="font-black text-xl leading-tight text-white tracking-wide uppercase italic">
+              Asesmen Montessori
+            </h1>
+            <p className="mt-0.5 text-[11px] font-bold text-primary-container">
+              Yuk, ceritakan tentang si Kecil! 💕
+            </p>
+          </div>
+
+          {/* answered counter pill */}
+          <div className="ml-auto shrink-0 rounded-2xl bg-secondary px-4 py-1.5 text-center shadow-[0_4px_0_0_#e8c426]">
+            <p className="text-2xl font-black leading-none text-on-surface">{totalAnswered}</p>
+            <p className="text-[10px] font-bold text-on-surface-variant">dari {totalQuestions}</p>
+          </div>
         </div>
-        <div className="flex items-center justify-between w-full">
-          <h1 className="text-2xl font-black italic text-primary tracking-wide uppercase">
-            Asesmen Montessori
-          </h1>
-          <span className="bg-secondary-container text-on-secondary-container font-bold text-sm px-4 py-1.5 rounded-full">
-            {totalAnswered} dari {totalQuestions}
-          </span>
-        </div>
-        <div className="w-full" aria-live="polite" aria-label={`Progres: ${progress}%`}>
+
+        {/* progress bar */}
+        <div
+          className="relative z-10"
+          aria-live="polite"
+          aria-label={`Progres: ${progress}%`}
+        >
           <ProgressBar
             value={progress}
-            fillClass="bg-secondary-container"
-            heightClass="h-3"
+            fillClass="bg-secondary"
+            heightClass="h-3.5"
             label={`Progres asesmen: ${progress}%`}
+            className="border-transparent bg-[#004883] shadow-none"
           />
+          <div className="mt-1.5 flex justify-between text-[11px] font-bold text-primary-container">
+            <span>Mulai</span>
+            <span>{progress}% selesai ⭐</span>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm w-full">
-        {LIKERT_LEGEND.map(({ code, label, score, color }) => (
-          <span key={code} className="flex items-center gap-1">
-            <strong className={`font-black ${color}`}>{code}:</strong>
-            <span className="text-on-surface-variant">{label} {score}</span>
-          </span>
+      {/* ── Page dots ────────────────────────────────────────────────────────── */}
+      <div className="flex items-center justify-center gap-1.5 pt-1">
+        {Array.from({ length: totalPages }).map((_, i) => (
+          <div
+            key={i}
+            className="h-2 rounded-full transition-all duration-300"
+            style={{
+              width: i === page ? 24 : 8,
+              background: i === page ? '#005da7' : i < page ? '#96f89f' : '#e0f0fa',
+            }}
+          />
         ))}
       </div>
 
-      <div className="flex flex-col gap-4 w-full">
+      {/* ── Legend strip ─────────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap gap-2 rounded-[18px] border-2 border-primary-container bg-white px-3 py-2.5">
+        {LIKERT_LEGEND.map(({ code, label, score, chipBg, chipText }) => (
+          <div key={code} className="flex flex-1 basis-[40%] items-center gap-2">
+            <span
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-[10px] font-black ${chipBg} ${chipText}`}
+            >
+              {code}
+            </span>
+            <div>
+              <p className={`text-[10px] font-extrabold leading-none ${chipText}`}>{label}</p>
+              <p className="text-[9px] text-on-surface-variant">{score}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Question cards ───────────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-4">
         {questionsOnPage.map((question) => {
-          const Icon = getIconFromName(question.iconName);
+          const Icon = getIcon(question.icon);
+          const isAnswered = answers[question.id] !== undefined;
+
           return (
             <div
               key={question.id}
-              className="bg-white rounded-2xl p-5 shadow-[0_10px_30px_rgba(0,96,172,0.06)]
-                         border border-surface-container-highest"
+              className={[
+                'relative overflow-hidden rounded-[22px] border-2 p-5 transition-all duration-300',
+                isAnswered
+                  ? 'border-tertiary-container bg-[#f4fff5]'
+                  : 'border-transparent bg-white shadow-[0_10px_30px_rgba(0,93,167,0.06)]',
+              ].join(' ')}
             >
-              {/* Question icon + text */}
-              <div className="flex items-start gap-3 mb-5">
+              {/* left accent bar */}
+              <div className={`absolute inset-y-0 left-0 w-1.5 rounded-l-[22px] ${question.color}`} />
+
+              {/* answered checkmark */}
+              {isAnswered && (
+                <CheckCircle2
+                  className="absolute right-3 top-3 h-5 w-5 text-tertiary"
+                  aria-hidden="true"
+                />
+              )}
+
+              {/* Question icon + number label + text — single block, no duplication */}
+              <div className="mb-5 flex items-start gap-3">
                 <div
-                  className={`w-10 h-10 flex items-center justify-center rounded-full
-                              ${question.color} shrink-0`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${question.color}`}
                 >
-                  <Icon className="w-5 h-5 text-on-surface" aria-hidden="true" />
+                  <Icon className="h-5 w-5 text-on-surface" aria-hidden="true" />
                 </div>
-                <p className="text-base font-semibold text-on-surface leading-snug">
-                  {question.text}
-                </p>
+                <div>
+                  <p className="mb-0.5 text-[10px] font-extrabold uppercase tracking-wide text-on-surface-variant">
+                    Pertanyaan {question.id} dari {totalQuestions}
+                  </p>
+                  <p className="text-base font-bold leading-snug text-on-surface">
+                    {question.text}
+                  </p>
+                </div>
               </div>
 
               {/* Likert radio group */}
@@ -104,6 +174,7 @@ export function AssessmentScreen() {
         })}
       </div>
 
+      {/* ── Info message ─────────────────────────────────────────────────────── */}
       {message && (
         <div
           aria-live="polite"
@@ -113,25 +184,27 @@ export function AssessmentScreen() {
         </div>
       )}
 
+      {/* ── Error alert ──────────────────────────────────────────────────────── */}
       {error && (
         <div
           role="alert"
           aria-live="polite"
-          className="flex items-center gap-3 w-full p-4 rounded-2xl bg-error-container text-on-error-container"
+          className="flex w-full items-center gap-3 rounded-2xl bg-error-container p-4 text-on-error-container"
         >
-          <AlertCircle className="w-5 h-5 shrink-0" aria-hidden="true" />
+          <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
           <p className="text-sm font-medium">{error}</p>
         </div>
       )}
 
-      <div className="flex gap-3 w-full">
+      {/* ── Navigation buttons ───────────────────────────────────────────────── */}
+      <div className="flex gap-3 w-full pb-4 pt-1">
         {page > 0 && (
           <Button
             variant="outline"
             size="lg"
             onClick={prevPage}
             disabled={isSubmitting}
-            className="flex-1"
+            className="flex-1 rounded-[18px] border-2 border-primary font-extrabold text-primary hover:bg-primary-container"
             aria-label="Kembali ke halaman sebelumnya"
           >
             ← Sebelumnya
@@ -145,10 +218,10 @@ export function AssessmentScreen() {
             onClick={submitAssessment}
             disabled={!answeredOnPage || isSubmitting}
             loading={isSubmitting}
-            className="flex-1"
+            className="flex-1 rounded-[18px] font-black"
             aria-label="Simpan dan lihat hasil asesmen"
           >
-            {isSubmitting ? 'Menyimpan...' : 'Simpan & Lihat Hasil →'}
+            {isSubmitting ? 'Menyimpan...' : '🎉 Simpan & Lihat Hasil'}
           </Button>
         ) : (
           <Button
@@ -156,15 +229,15 @@ export function AssessmentScreen() {
             size="lg"
             onClick={nextPage}
             disabled={!answeredOnPage}
-            className="flex-1"
+            className="flex-1 rounded-[18px] font-black"
             aria-label="Lanjut ke halaman berikutnya"
           >
-            Simpan & Lanjutkan →
+            Simpan & Lanjutkan ✨
           </Button>
         )}
       </div>
 
-      <footer className="text-center text-xs text-on-surface-variant pb-4">
+      <footer className="pb-4 text-center text-xs text-on-surface-variant">
         © 2026 SkillPath Kids. Didesain dengan penuh kasih sayang.
       </footer>
     </div>

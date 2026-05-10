@@ -74,6 +74,7 @@ src/app/api/assess/route.ts
 src/app/globals.css
 src/app/layout.tsx
 src/assets/images/children_edukatif.jpg
+src/components/feedback/error-boundary.tsx
 src/components/feedback/unauthorized.tsx
 src/components/forms/file-form.tsx
 src/components/forms/question-form.tsx
@@ -91,6 +92,7 @@ src/components/ui/card.tsx
 src/components/ui/progress-bar.tsx
 src/components/ui/progress-ring.tsx
 src/components/ui/section-heading.tsx
+src/components/ui/skeletons.tsx
 src/components/ui/skill-progess-bar.tsx
 src/components/ui/skill-progress-bar.tsx
 src/components/ui/tooltip.tsx
@@ -121,6 +123,7 @@ src/lib/auth.ts
 src/lib/dashboard-status.ts
 src/lib/gemini.ts
 src/lib/icon-map.ts
+src/lib/icon-mapper.ts
 src/lib/services/file-service.ts
 src/lib/services/question-service.ts
 src/lib/services/tip-service.ts
@@ -283,26 +286,149 @@ export default {
 </file>
 
 <file path="README.md">
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# SkillPath Kids Frontend
 
-# Run and deploy your AI Studio app
+## 🎯 Project Overview
+SkillPath Kids is a **premium, calm‑focused educational web app** for parents and teachers to assess, track, and support early‑child development.  The frontend is a **Next.js 13+** application built with **React**, **TypeScript**, and **Tailwind CSS**.  It communicates with a backend API that returns standardized responses (`{ success, data, message }`).
 
-This contains everything you need to run your app locally.
+The UI follows a **guided‑companion** philosophy: progressive disclosure, skeleton loaders, and gentle error handling keep parents from feeling overwhelmed.
 
-View your app in AI Studio: https://ai.studio/apps/d74c1b45-867e-4498-ba84-917813135f61
+---
 
-## Run Locally
+## ✨ Key Features
+- **Parent Dashboard** – Progress cards, daily tips, and worksheet recommendations.
+- **Assessment Flow** – Server‑driven questions with a calm, responsive UI.
+- **Results & History** – Displays `HistoryResult` from the backend.
+- **Tips & Recommendations** – Progressive disclosure of side‑tips, with icon mapping.
+- **Worksheet Library** – Free and premium worksheets with graceful download actions.
+- **Skeleton Loaders** – Reusable skeleton components for progress, tip, and worksheet cards.
+- **Error Boundary** – Global client‑side error handling with a friendly retry UI.
+- **Icon Mapper** – Centralised `getIconFromName` that maps backend `iconName` strings to Lucide icons.
+- **Type‑Safe API Client** – Handles `success`, `data`, `message` and throws descriptive errors.
 
-**Prerequisites:**  Node.js
+---
 
+## 🛠️ Tech Stack
+| Layer | Technology |
+|------|------------|
+| Framework | **Next.js (app router)** |
+| Language | **TypeScript** |
+| Styling | **Tailwind CSS** (custom design tokens, dark mode, glassmorphism) |
+| UI Components | Custom component library (`ui/*`) & **Lucide‑React** icons |
+| State Management | React hooks & server actions |
+| Data fetching | `fetch` with `no‑store` cache, `apiClient` wrapper |
+| Build tool | **Vite** (via Next.js) |
+| Testing | (not configured yet) |
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+---
+
+## 🚀 Getting Started
+### Prerequisites
+- **Node.js** >= 18
+- **pnpm** (or npm/yarn) – the repo uses the default npm scripts.
+- A running backend API (see `.env.local.example`).
+
+### Installation
+```bash
+# Clone the repo (already done in your workspace)
+cd "d:/TIYAN/UNIPMA/Side Jobs/Skill Paths/skillpath-kids/frontend"
+# Install dependencies
+npm install
+```
+
+### Environment variables
+Create a `.env.local` file at the project root:
+```env
+NEXT_PUBLIC_API_URL=https://your-backend.example.com/api
+# (any other env vars required by the backend)
+```
+> **Note:** The project already contains a `.env.local` placeholder.
+
+### Development server
+```bash
+npm run dev
+```
+Open `http://localhost:3000` – the app hot‑reloads on file changes.
+
+### Build for production
+```bash
+npm run build   # creates an optimized static bundle
+npm start       # runs the production server
+```
+
+---
+
+## 📦 Scripts
+| Script | Description |
+|--------|-------------|
+| `dev` | Starts Next.js in development mode with hot reloading. |
+| `build` | Compiles the app for production. |
+| `start` | Runs the compiled production server. |
+| `lint` | Executes ESLint (if configured). |
+| `type-check` | Runs `tsc --noEmit` to verify TypeScript types. |
+
+---
+
+## 📂 Folder Structure (high‑level)
+```
+frontend/
+├─ src/
+│  ├─ app/                # Next.js app router (pages)
+│  │  └─ (dashboard)/    # Dashboard routes (home, results, tips, files)
+│  ├─ components/          # UI primitives (button, card, skeletons, etc.)
+│  ├─ features/            # Feature‑based modules
+│  │  ├─ assessment/      # Assessment screen + hooks
+│  │  ├─ dashboard/       # Dashboard shells, hero, progress, tip, recommendation
+│  │  ├─ files/            # Worksheet library
+│  │  └─ tips/             # Daily tip screen
+│  ├─ lib/                 # API client, icon‑mapper, services
+│  ├─ actions/             # Server actions for questions, tips, files
+│  ├─ types/               # Shared TypeScript interfaces (AssessmentQuestion, HistoryResult, etc.)
+│  └─ data/                # Static fallback data (used only during dev)
+├─ public/                 # Static assets (favicon, images)
+├─ .env.local              # Local environment variables (not committed)
+├─ next.config.js          # Next.js configuration (including experimental app dir)
+├─ tailwind.config.js      # Tailwind custom design tokens
+└─ package.json            # Dependencies & scripts
+```
+
+---
+
+## 🔄 Data Flow & API Conventions
+- All API calls go through `src/lib/api-client.ts`. The client expects a response shape:
+  ```json
+  { "success": true, "data": <payload>, "message": "optional" }
+  ```
+  Errors are thrown with the `message` field when `success` is `false`.
+- **Icon mapping** – Backend sends `iconName: string`. The utility `src/lib/icon-mapper.ts` resolves it to a Lucide component, falling back to `ClipboardCheck`.
+- **Progress & History** – Dashboard fetches `/results/history?limit=1` and renders `DashboardProgress`. Skeletons are shown while loading.
+- **Error Boundary** – Wraps each top‑level route (`/(dashboard)/assessment`, `/results`, `/tips`, `/files`). On network/API failure a calm message appears with a “Coba Lagi” button that retries the component.
+
+---
+
+## 🎨 UI/UX Details
+- **Skeleton loaders** (`src/components/ui/skeletons.tsx`) match the exact shapes of their content cards and are used via React `Suspense`.
+- **Progressive disclosure** – Tips screen shows three side‑tips and a “Lihat Lainnya” button that expands the list.
+- **Calm color palette** – Tailwind custom colors, soft shadows, and generous spacing provide a stress‑free experience.
+- **ARIA live regions** – Loading states, error messages, and analyzing feedback use `aria-live="polite"` for screen‑reader accessibility.
+
+---
+
+## 🤝 Contributing
+1. Fork the repository.
+2. Create a feature branch (`git checkout -b feat/your-feature`).
+3. Install dependencies and run the dev server.
+4. Follow the existing code style (Prettier + ESLint).  All new UI components should use the design system in `src/components/ui/`.
+5. Open a Pull Request with a clear description of the change.
+
+---
+
+## 📄 License
+This project is **private** and intended for internal use by the SkillPath Kids team.  If you plan to open‑source it, replace this section with the appropriate license.
+
+---
+
+*Generated by Antigravity – your AI‑powered code‑assistant.*
 </file>
 
 <file path="src/actions/file-actions.ts">
@@ -874,27 +1000,45 @@ export default function AchievementsPage() {
 
 <file path="src/app/(dashboard)/assessment/page.tsx">
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { AssessmentScreen } from '@/features/assessment/components/assessment-screen';
+import { ErrorBoundary } from '@/components/feedback/error-boundary';
+import { AssessmentSkeleton } from '@/components/ui/skeletons';
 
 export const metadata: Metadata = {
   title: 'Asesmen Montessori — SkillPath Kids',
 };
 
 export default function AssessmentPage() {
-  return <AssessmentScreen />;
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<AssessmentSkeleton />}>
+        <AssessmentScreen />
+      </Suspense>
+    </ErrorBoundary>
+  );
 }
 </file>
 
 <file path="src/app/(dashboard)/files/page.tsx">
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { FilesScreen } from '@/features/files/components/files-screen';
+import { ErrorBoundary } from '@/components/feedback/error-boundary';
+import { WorksheetGridSkeleton } from '@/components/ui/skeletons';
 
 export const metadata: Metadata = {
   title: 'Koleksi Worksheet — SkillPath Kids',
 };
 
 export default function FilesPage() {
-  return <FilesScreen />;
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<WorksheetGridSkeleton />}>
+        <FilesScreen />
+      </Suspense>
+    </ErrorBoundary>
+  );
 }
 </file>
 
@@ -962,9 +1106,10 @@ export default function DashboardLayout({
 <file path="src/app/(dashboard)/page.tsx">
 import { DashboardShell } from '@/features/dashboard/components/dashboard-shell';
 import { DashboardHero } from '@/features/dashboard/components/dashboard-hero';
-import { DashboardProgress } from '@/features/dashboard/components/dashboard-progress';
+import { DashboardProgress, DashboardProgressSkeleton } from '@/features/dashboard/components/dashboard-progress';
 import { DashboardRecommendation } from '@/features/dashboard/components/dashboard-recommendation';
-import { DashboardTip } from '@/features/dashboard/components/dashboard-tip';
+import { DashboardTip, DashboardTipSkeleton } from '@/features/dashboard/components/dashboard-tip';
+import { Suspense } from 'react';
 
 /**
  * Dashboard — Server Component.
@@ -974,9 +1119,16 @@ export default function DashboardPage() {
   return (
     <DashboardShell>
       <DashboardHero />
-      <DashboardProgress />
+      
+      <Suspense fallback={<DashboardProgressSkeleton />}>
+        <DashboardProgress />
+      </Suspense>
+      
       <DashboardRecommendation />
-      <DashboardTip />
+      
+      <Suspense fallback={<DashboardTipSkeleton />}>
+        <DashboardTip />
+      </Suspense>
     </DashboardShell>
   );
 }
@@ -985,26 +1137,36 @@ export default function DashboardPage() {
 <file path="src/app/(dashboard)/results/page.tsx">
 import type { Metadata } from 'next';
 import { ResultsScreen } from '@/features/results/components/results-screen';
+import { ErrorBoundary } from '@/components/feedback/error-boundary';
 
 export const metadata: Metadata = {
   title: 'Hasil Asesmen — SkillPath Kids',
 };
 
 export default function ResultsPage() {
-  return <ResultsScreen />;
+  return (
+    <ErrorBoundary>
+      <ResultsScreen />
+    </ErrorBoundary>
+  );
 }
 </file>
 
 <file path="src/app/(dashboard)/tips/page.tsx">
 import type { Metadata } from 'next';
 import { TipsScreen } from '@/features/tips/components/tips-screen';
+import { ErrorBoundary } from '@/components/feedback/error-boundary';
 
 export const metadata: Metadata = {
   title: 'Tips & Rekomendasi — SkillPath Kids',
 };
 
 export default function TipsPage() {
-  return <TipsScreen />;
+  return (
+    <ErrorBoundary>
+      <TipsScreen />
+    </ErrorBoundary>
+  );
 }
 </file>
 
@@ -1670,8 +1832,8 @@ export async function POST(req: NextRequest) {
 </file>
 
 <file path="src/app/globals.css">
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
 
 @theme {
   --font-sans: "Lexend", ui-sans-serif, system-ui, sans-serif;
@@ -1741,6 +1903,7 @@ export async function POST(req: NextRequest) {
 }
 
 @layer components {
+
   /* Soft blue drop shadow — used on hero cards and primary elements */
   .toy-shadow {
     box-shadow: 0 10px 30px -5px rgba(0, 96, 172, 0.15);
@@ -1774,6 +1937,84 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>{children}</body>
     </html>
   );
+}
+</file>
+
+<file path="src/components/feedback/error-boundary.tsx">
+'use client';
+
+import React, { Component, type ReactNode } from 'react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+}
+
+/**
+ * ErrorBoundary — catches runtime / API / network failures
+ * in any child tree and shows a calm, parent-friendly UI.
+ */
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(): State {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[ErrorBoundary]', error, info);
+  }
+
+  handleRetry = () => {
+    this.setState({ hasError: false });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      if (this.props.fallback) return this.props.fallback;
+
+      return (
+        <div
+          role="alert"
+          aria-live="polite"
+          className="flex flex-col items-center justify-center gap-5 py-16 px-6 text-center max-w-md mx-auto"
+        >
+          <div className="w-16 h-16 flex items-center justify-center rounded-full bg-error-container">
+            <AlertCircle className="w-8 h-8 text-on-error-container" aria-hidden="true" />
+          </div>
+
+          <h2 className="text-xl font-bold text-on-surface">
+            Sedang ada gangguan koneksi
+          </h2>
+
+          <p className="text-sm text-on-surface-variant leading-relaxed">
+            Kami akan mencoba menyimpan data secara lokal. Silakan muat ulang.
+          </p>
+
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={this.handleRetry}
+            className="gap-2"
+          >
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
+            Coba Lagi
+          </Button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 </file>
 
@@ -3350,6 +3591,120 @@ export function SectionHeading({
 }
 </file>
 
+<file path="src/components/ui/skeletons.tsx">
+/**
+ * Reusable skeleton loaders matching the exact shape of
+ * Progress Cards, Tip Cards, and Worksheet Cards.
+ * Use inside <Suspense fallback={<...Skeleton />} /> blocks.
+ */
+
+/* ── Progress Card Skeleton ────────────────────────────────────────────────── */
+export function ProgressCardSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 bg-surface-container rounded-card p-5 animate-pulse">
+      <div className="flex justify-between items-center">
+        <div className="h-4 w-28 bg-surface-container-high rounded" />
+        <div className="h-4 w-10 bg-surface-container-high rounded" />
+      </div>
+      <div className="w-full h-3 bg-surface-container-high rounded-pill" />
+      <div className="flex items-center gap-1.5 mt-1">
+        <div className="h-3 w-3 bg-surface-container-high rounded-full" />
+        <div className="h-3 w-20 bg-surface-container-high rounded" />
+      </div>
+    </div>
+  );
+}
+
+export function ProgressGridSkeleton() {
+  return (
+    <section className="flex flex-col gap-4 animate-pulse" aria-hidden="true">
+      <div className="flex items-center justify-between mb-2">
+        <div className="h-8 w-40 bg-surface-container-high rounded" />
+        <div className="h-5 w-24 bg-surface-container-high rounded" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => (
+          <ProgressCardSkeleton key={i} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── Tip Card Skeleton ─────────────────────────────────────────────────────── */
+export function TipCardSkeleton() {
+  return (
+    <section className="animate-pulse" aria-hidden="true">
+      <div className="h-32 sm:h-28 rounded-card bg-surface-container" />
+    </section>
+  );
+}
+
+/* ── Worksheet Card Skeleton ───────────────────────────────────────────────── */
+export function WorksheetCardSkeleton() {
+  return (
+    <div className="bg-surface-container rounded-card p-5 animate-pulse">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="w-12 h-12 rounded-xl bg-surface-container-high shrink-0" />
+        <div className="flex-1 flex flex-col gap-2">
+          <div className="h-5 w-3/4 bg-surface-container-high rounded" />
+          <div className="h-3 w-full bg-surface-container-high rounded" />
+        </div>
+      </div>
+      <div className="h-10 w-full bg-surface-container-high rounded-card" />
+    </div>
+  );
+}
+
+export function WorksheetGridSkeleton() {
+  return (
+    <section className="flex flex-col gap-6 animate-pulse" aria-hidden="true">
+      <div className="flex items-center gap-4 pt-4">
+        <div className="w-14 h-14 bg-surface-container-high rounded-2xl" />
+        <div className="flex flex-col gap-2">
+          <div className="h-6 w-44 bg-surface-container-high rounded" />
+          <div className="h-4 w-72 bg-surface-container-high rounded" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        {[1, 2, 3, 4].map((i) => (
+          <WorksheetCardSkeleton key={i} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── Full-page Skeleton (assessment-like) ──────────────────────────────────── */
+export function AssessmentSkeleton() {
+  return (
+    <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto animate-pulse" aria-hidden="true">
+      <div className="flex flex-col items-center gap-3 w-full pt-4">
+        <div className="w-16 h-16 bg-surface-container-high rounded-2xl" />
+        <div className="flex items-center justify-between w-full">
+          <div className="h-7 w-52 bg-surface-container-high rounded" />
+          <div className="h-6 w-20 bg-surface-container-high rounded-full" />
+        </div>
+        <div className="w-full h-3 bg-surface-container-high rounded-pill" />
+      </div>
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="w-full bg-surface-container rounded-2xl p-5">
+          <div className="flex items-start gap-3 mb-5">
+            <div className="w-10 h-10 bg-surface-container-high rounded-full shrink-0" />
+            <div className="h-5 w-full bg-surface-container-high rounded" />
+          </div>
+          <div className="flex gap-2">
+            {[1, 2, 3, 4].map((j) => (
+              <div key={j} className="h-10 flex-1 bg-surface-container-high rounded-xl" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+</file>
+
 <file path="src/components/ui/skill-progess-bar.tsx">
 import React from 'react';
 import { motion } from 'framer-motion';
@@ -3909,8 +4264,7 @@ import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { AssessmentGroup } from '@/components/ui/assessment-option';
 import { useAssessment } from '../hooks/use-assessment';
-import { TOTAL_QUESTIONS } from '@/data/questions';
-import { iconMap } from '@/lib/icon-map';
+import { getIconFromName } from '@/lib/icon-mapper';
 
 const LIKERT_LEGEND = [
   { code: 'SS', label: 'Sangat Setuju',      score: '(4)', color: 'text-tertiary' },
@@ -3924,8 +4278,10 @@ export function AssessmentScreen() {
     answers,
     status,
     error,
+    message,
     page,
     totalPages,
+    totalQuestions,
     questionsOnPage,
     answeredOnPage,
     totalAnswered,
@@ -3951,7 +4307,7 @@ export function AssessmentScreen() {
             Asesmen Montessori
           </h1>
           <span className="bg-secondary-container text-on-secondary-container font-bold text-sm px-4 py-1.5 rounded-full">
-            {totalAnswered} dari {TOTAL_QUESTIONS}
+            {totalAnswered} dari {totalQuestions}
           </span>
         </div>
         <div className="w-full" aria-live="polite" aria-label={`Progres: ${progress}%`}>
@@ -3975,7 +4331,7 @@ export function AssessmentScreen() {
 
       <div className="flex flex-col gap-4 w-full">
         {questionsOnPage.map((question) => {
-          const Icon = iconMap[ question.iconName ] || ClipboardCheck;
+          const Icon = getIconFromName(question.iconName);
           return (
             <div
               key={question.id}
@@ -4007,9 +4363,19 @@ export function AssessmentScreen() {
         })}
       </div>
 
+      {message && (
+        <div
+          aria-live="polite"
+          className="flex items-center gap-3 w-full p-4 rounded-2xl bg-secondary-container text-on-secondary-container"
+        >
+          <p className="text-sm font-medium">{message}</p>
+        </div>
+      )}
+
       {error && (
         <div
           role="alert"
+          aria-live="polite"
           className="flex items-center gap-3 w-full p-4 rounded-2xl bg-error-container text-on-error-container"
         >
           <AlertCircle className="w-5 h-5 shrink-0" aria-hidden="true" />
@@ -4081,7 +4447,7 @@ import type {
 import { useSound } from "@/hooks/use-sound";
 
 export type AssessmentStatus =
-  | "idle" | "in-progress" | "submitting" | "done" | "error";
+  | "idle" | "in-progress" | "submitting" | "analyzing" | "done" | "error";
 
 export function useAssessment() {
   const router = useRouter();
@@ -4090,6 +4456,7 @@ export function useAssessment() {
   const [answers, setAnswers] = useState<AssessmentAnswers>({});
   const [status, setStatus] = useState<AssessmentStatus>("idle");
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     getQuestions()
@@ -4154,10 +4521,15 @@ export function useAssessment() {
   const submitAssessment = useCallback(async () => {
     try {
       play("SUCCESS");
-      setStatus("submitting");
+      setStatus("analyzing");
+      setMessage("Analyzing your child's progress... this usually takes a moment.");
       setError(null);
 
       const token = localStorage.getItem("token");
+
+      const stringAnswers = Object.fromEntries(
+        Object.entries(answers).map(([k, v]) => [String(k), v])
+      );
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/assess`,
@@ -4168,25 +4540,27 @@ export function useAssessment() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            answers,
+            answers: stringAnswers,
           }),
         },
       );
 
       const result = await response.json();
 
-      if (!response.ok) {
+      if (!response.ok || result.success === false) {
         throw new Error(result.message || "Assessment failed");
       }
       setStatus("done");
+      setMessage(null);
 
-      localStorage.setItem("latestAssessment", JSON.stringify(result.data));
+      sessionStorage.setItem("assessment_result", JSON.stringify(result.data));
 
       router.push("/results");
     } catch (err: any) {
       console.error(err);
       setStatus("error");
-      setError(err.message || "Something went wrong");
+      setMessage(null);
+      setError("We couldn't save your answers. Your internet might be unstable. Please try again.");
     }
   }, [answers, play, router]);
 
@@ -4201,14 +4575,16 @@ export function useAssessment() {
     answers,
     status,
     error,
+    message,
     page,
     totalPages,
+    totalQuestions,
     questionsOnPage,
     answeredOnPage,
     totalAnswered,
     progress,
     isLastPage,
-    isSubmitting: status === "submitting",
+    isSubmitting: status === "submitting" || status === "analyzing",
 
     answer,
     nextPage,
@@ -4226,77 +4602,51 @@ import { Button } from '@/components/ui/button';
 
 export function DashboardHero() {
   return (
-    <section 
+    <section
       aria-label="Welcome section"
       className="
         relative w-full overflow-hidden
-        rounded-card
-        bg-[linear-gradient(135deg,var(--color-primary)_0%,var(--color-primary-container)_100%)]
-        shadow-medium
+        rounded-[28px]
+        bg-primary
+        shadow-[0_8px_32px_rgba(0,93,167,0.18)]
       "
     >
-      <div className="
-        relative flex flex-col md:flex-row
-        max-h-[320px] lg:max-h-[420px]
-      ">
-        {/* Content */}
-        <div className="
-          relative z-10
-          flex flex-col justify-center
-          p-6 sm:p-8 lg:p-12
-          flex-1
-        ">
-          <div className="max-w-xl">
-            <span className="
-              inline-block
-              text-sm font-semibold text-white/90
-              mb-2
-            ">
-              Hai, Bunda Budi 👋
-            </span>
+      {/* decorative blobs */}
+      <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-[#004883] opacity-40" />
+      <div className="pointer-events-none absolute -bottom-8 left-1/3 h-28 w-28 rounded-full bg-secondary opacity-20" />
 
-            <h1 className="
-              text-3xl sm:text-4xl lg:text-5xl
-              leading-[1.1] font-black text-white
-              tracking-tight mb-3
-            ">
+      <div className="relative flex flex-col md:flex-row max-h-[320px] lg:max-h-[420px]">
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col justify-center p-6 sm:p-8 lg:p-12 flex-1">
+          <div className="max-w-xl">
+
+            {/* greeting chip */}
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 backdrop-blur-sm">
+              <span className="text-sm font-bold text-white/90">Hai, Bunda Budi 👋</span>
+            </div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl leading-[1.1] font-black text-white tracking-tight mb-3">
               Waktunya<br />Bermain & Belajar!
             </h1>
 
-            <p className="
-              text-white/85
-              text-sm sm:text-base
-              leading-relaxed
-              max-w-lg mb-6
-            ">
+            <p className="text-white/85 text-sm sm:text-base leading-relaxed max-w-lg mb-6">
               Pantau perkembangan motorik, kognitif, dan aktivitas harian anak melalui asesmen interaktif.
             </p>
 
-            <div>
-              <Button
-                variant="secondary"
-                size="lg"
-                className="
-                  rounded-button
-                  font-bold px-6
-                  shadow-soft
-                "
-                asChild
-              >
-                <Link href="/assessment">
-                  Mulai Asesmen
-                </Link>
-              </Button>
-            </div>
+            <Button
+              variant="secondary"
+              size="lg"
+              className="rounded-[18px] font-black px-8 shadow-[0_5px_0_0_#e8c426]"
+              asChild
+            >
+              <Link href="/assessment">Mulai Asesmen</Link>
+            </Button>
           </div>
         </div>
 
         {/* Illustration */}
-        <div className="
-          relative hidden md:block
-          w-[40%] lg:w-[45%]
-          min-h-full overflow-hidden
-        ">
+        <div className="relative hidden md:block w-[40%] lg:w-[45%] min-h-full overflow-hidden">
           <Image
             src="/images/children_edukatif.jpg"
             alt="Anak sedang bermain"
@@ -4314,61 +4664,152 @@ export function DashboardHero() {
 
 <file path="src/features/dashboard/components/dashboard-progress.tsx">
 import Link from 'next/link';
-import { ChevronRight, History as HistoryIcon } from 'lucide-react';
+import { ChevronRight, History as HistoryIcon, AlertCircle, ClipboardCheck } from 'lucide-react';
 import { SkillProgressBar } from '@/components/ui/skill-progress-bar';
+import { Button } from '@/components/ui/button';
+import { HistoryResult } from '@/types';
 
-export function DashboardProgress() {
+function scoreToStatusConfig(score: number): 'excellent' | 'warning' | 'low' | 'new' {
+  if (score >= 80) return 'excellent';
+  if (score >= 50) return 'warning';
+  if (score > 0) return 'low';
+  return 'new';
+}
+
+function getRecommendation(skill: string, score: number): string {
+  if (score >= 80) return 'Pertahankan aktivitas fisik!';
+  if (score >= 50) return 'Bagus, terus tingkatkan dengan latihan rutin.';
+  if (score > 0) return 'Coba lebih sering melatih area ini hari ini.';
+  return 'Mulai aktivitas untuk area ini.';
+}
+
+export async function DashboardProgress() {
+  let history: HistoryResult[] = [];
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/results/history?limit=1`, {
+      cache: 'no-store',
+    });
+    if (res.ok) {
+      const json = await res.json();
+      history = json.data || [];
+    }
+  } catch (err) {
+    // suppress errors to avoid raw JSON in UX
+  }
+
+  if (history.length === 0) {
+    return (
+      <section aria-labelledby="progress-heading" className="flex flex-col gap-4">
+
+        {/* section header */}
+        <div className="flex items-center justify-between">
+          <h2
+            id="progress-heading"
+            className="flex items-center gap-2 text-xl font-black text-on-surface"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-container">
+              <HistoryIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+            </div>
+            Progress Anak
+          </h2>
+        </div>
+
+        {/* empty state card */}
+        <div className="flex flex-col items-center justify-center gap-5 rounded-[22px] border-2 border-dashed border-primary-container bg-surface-container-lowest p-8 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-secondary shadow-[0_4px_0_0_#e8c426]">
+            <ClipboardCheck className="h-8 w-8 text-on-surface" aria-hidden="true" />
+          </div>
+          <div>
+            <p className="text-base font-bold text-on-surface">Belum ada asesmen</p>
+            <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">
+              Mulai asesmen pertama si Kecil dan pantau perkembangannya! 🌱
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            className="rounded-[18px] font-black px-8"
+            asChild
+          >
+            <Link href="/assessment">Mulai Asesmen</Link>
+          </Button>
+        </div>
+      </section>
+    );
+  }
+
+  const latest = history[0];
+  const motorik = latest.skillsData?.motorik ?? 0;
+  const bahasa = latest.skillsData?.bahasa ?? 0;
+  const sosial = latest.skillsData?.sosial ?? 0;
+
   const progressData = [
-    { label: 'Motorik Kasar', value: 85, status: 'excellent', recommendation: 'Pertahankan aktivitas fisik!' },
-    { label: 'Motorik Halus', value: 45, status: 'low', recommendation: 'Coba main puzzle hari ini.' },
-    { label: 'Keseimbangan',  value: 60, status: 'warning', recommendation: 'Latihan berdiri satu kaki.' },
-    { label: 'Kognitif',      value: 0,  status: 'new', recommendation: 'Mulai modul pertama.' },
-  ] as const;
+    { label: 'Motorik', value: motorik, status: scoreToStatusConfig(motorik), recommendation: getRecommendation('Motorik', motorik) },
+    { label: 'Bahasa & Komunikasi', value: bahasa, status: scoreToStatusConfig(bahasa), recommendation: getRecommendation('Bahasa', bahasa) },
+    { label: 'Sosial & Emosional', value: sosial, status: scoreToStatusConfig(sosial), recommendation: getRecommendation('Sosial', sosial) },
+  ];
 
   return (
     <section aria-labelledby="progress-heading" className="flex flex-col gap-4">
-      <div className="flex items-center justify-between mb-2">
+
+      {/* section header */}
+      <div className="flex items-center justify-between">
         <h2
           id="progress-heading"
-          className="flex items-center gap-2 text-xl font-bold text-on-surface"
+          className="flex items-center gap-2 text-xl font-black text-on-surface"
         >
-          <HistoryIcon className="w-6 h-6 text-primary" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-container">
+            <HistoryIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+          </div>
           Progress Anak
         </h2>
-
         <Link
-          href="/results"
-          className="text-sm font-semibold text-primary flex items-center gap-1 hover:underline"
+          href="/results/history"
+          className="flex items-center gap-1 text-sm font-bold text-primary hover:underline"
         >
-          Lihat Detail
-          <ChevronRight className="w-4 h-4" />
+          Lihat Riwayat
+          <ChevronRight className="h-4 w-4" aria-hidden="true" />
         </Link>
       </div>
 
-      <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-4 px-4 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:overflow-visible sm:snap-none sm:mx-0 sm:px-0">
+      {/* skill cards */}
+      <div className="
+        flex overflow-x-auto snap-x snap-mandatory gap-3 pb-2 -mx-4 px-4
+        sm:grid sm:grid-cols-2 lg:grid-cols-3
+        sm:overflow-visible sm:snap-none sm:mx-0 sm:px-0
+      ">
         {progressData.map((item) => (
           <div
             key={item.label}
             className="
-              flex flex-col gap-4
-              min-w-[280px] sm:min-w-0
-              snap-center
-              bg-card p-5 rounded-card
-              shadow-soft border border-outline-variant/30
+              flex min-w-[260px] sm:min-w-0 snap-center flex-col gap-4
+              rounded-[20px] border border-outline-variant/30
+              bg-white p-5
+              shadow-[0_4px_16px_rgba(0,93,167,0.07)]
             "
           >
-            <SkillProgressBar 
-              label={item.label} 
-              value={item.value} 
-              status={item.status as any} 
-            />
-            
-            <div className="mt-auto pt-3 border-t border-outline-variant/20">
-              <p className="text-xs text-on-surface-variant line-clamp-2">
-                <span className="font-semibold text-on-surface">Saran:</span> {item.recommendation}
+            <SkillProgressBar label={item.label} value={item.value} status={item.status} />
+            <div className="mt-auto border-t border-outline-variant/20 pt-3">
+              <p className="line-clamp-2 text-xs text-on-surface-variant">
+                <span className="font-bold text-on-surface">Saran: </span>
+                {item.recommendation}
               </p>
             </div>
           </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export function DashboardProgressSkeleton() {
+  return (
+    <section className="flex flex-col gap-4 animate-pulse" aria-hidden="true">
+      <div className="flex items-center justify-between">
+        <div className="h-8 w-40 rounded-xl bg-surface-container-high" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-40 rounded-[20px] bg-surface-container-high" />
         ))}
       </div>
     </section>
@@ -4382,60 +4823,80 @@ import { Button } from '@/components/ui/button';
 
 export function DashboardRecommendation() {
   return (
-    <section aria-labelledby="recommendation-heading" className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+    <section
+      aria-labelledby="recommendation-heading"
+      className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch"
+    >
       <h2 id="recommendation-heading" className="sr-only">Rekomendasi Aktivitas</h2>
-      
-      {/* Lihat Panduan */}
+
+      {/* ── Lihat Panduan ───────────────────────────────────────────────────── */}
       <div className="
-        flex flex-col h-full bg-card-featured rounded-card 
-        border border-primary/20 shadow-soft p-6
-        transition-all hover:shadow-medium
+        relative flex flex-col h-full overflow-hidden
+        rounded-[22px] border border-primary/20
+        bg-white p-8
+        shadow-[0_4px_16px_rgba(0,93,167,0.07)]
+        transition-all hover:shadow-[0_8px_24px_rgba(0,93,167,0.12)]
       ">
-        <div className="inline-flex self-start px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-pill mb-4">
-          Baru: Modul Montessori
+        {/* decorative top-right blob */}
+        <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary-container opacity-40" />
+
+        {/* badge */}
+        <div className="relative z-10 mb-4 inline-flex self-start items-center gap-1 rounded-full bg-primary-container px-3 py-1">
+          <span className="text-xs font-black text-primary">✨ Baru: Modul Montessori</span>
         </div>
-        
-        <div className="flex flex-col items-center text-center gap-4 flex-1">
-          <div className="w-14 h-14 flex items-center justify-center rounded-pill bg-primary-fixed shrink-0">
+
+        <div className="relative z-10 flex flex-col items-center text-center gap-4 flex-1">
+          <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-primary-container shadow-[0_4px_0_0_#d4e3ff] shrink-0">
             <span className="text-2xl" aria-hidden="true">⭐</span>
           </div>
-          
           <div>
-            <h3 className="text-xl font-bold text-on-surface">Panduan Perkembangan</h3>
-            <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
+            <h3 className="text-lg font-black text-on-surface">Panduan Perkembangan</h3>
+            <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
               Pelajari indikator utama pertumbuhan anak usia 2–6 tahun dalam format yang mudah dipahami.
             </p>
           </div>
         </div>
 
-        <div className="mt-6">
-          <Button variant="outline" className="w-full rounded-button" asChild>
+        <div className="relative z-10 mt-5">
+          <Button
+            variant="outline"
+            className="w-full rounded-[18px] border-2 border-primary font-extrabold text-primary hover:bg-primary-container"
+            asChild
+          >
             <Link href="/tips">Lihat Panduan</Link>
           </Button>
         </div>
       </div>
 
-      {/* Download Worksheet */}
+      {/* ── Unduh Hasil PDF ─────────────────────────────────────────────────── */}
       <div className="
-        flex flex-col h-full bg-surface-container-low rounded-card 
-        border border-secondary/20 shadow-soft p-6
-        transition-all hover:shadow-medium
+        relative flex flex-col h-full overflow-hidden
+        rounded-[22px] border border-secondary/30
+        bg-[#FFFDF0] p-8
+        shadow-[0_4px_16px_rgba(232,196,38,0.10)]
+        transition-all hover:shadow-[0_8px_24px_rgba(232,196,38,0.18)]
       ">
-        <div className="flex flex-col items-center text-center gap-4 flex-1 mt-2">
-          <div className="w-14 h-14 flex items-center justify-center rounded-pill bg-secondary-container">
+        {/* decorative blob */}
+        <div className="pointer-events-none absolute -left-6 -top-6 h-24 w-24 rounded-full bg-secondary-container opacity-50" />
+
+        <div className="relative z-10 flex flex-col items-center text-center gap-5 flex-1 mt-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-secondary shadow-[0_4px_0_0_#e8c426] shrink-0">
             <span className="text-2xl" aria-hidden="true">📄</span>
           </div>
-
           <div>
-            <h3 className="text-xl font-bold text-on-surface">Unduh Hasil PDF</h3>
-            <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
+            <h3 className="text-lg font-black text-on-surface">Unduh Hasil PDF</h3>
+            <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
               Dapatkan worksheet aktivitas dan rangkuman perkembangan anak yang siap dicetak untuk digunakan di rumah.
             </p>
           </div>
         </div>
 
-        <div className="mt-6">
-          <Button variant="secondary" className="w-full rounded-button bg-secondary text-on-secondary" asChild>
+        <div className="relative z-10 mt-6">
+          <Button
+            variant="primary"
+            className="w-full rounded-[18px] font-black bg-primary text-white shadow-[0_5px_0_0_#004883] hover:translate-y-[2px] active:shadow-[0_2px_0_0_#004883]"
+            asChild
+          >
             <Link href="/files">Unduh PDF ⬇️</Link>
           </Button>
         </div>
@@ -4461,40 +4922,79 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 import Link from 'next/link';
 import { Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { dailyTip } from '@/data/recommendations';
+import { Recommendation } from '@/types';
 
-export function DashboardTip() {
+export async function DashboardTip() {
+  let tip: Recommendation | null = null;
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tips`, { cache: 'no-store' });
+    if (res.ok) {
+      const json = await res.json();
+      const tips: Recommendation[] = json.data || [];
+      tip = tips.find(t => t.isMain) || tips[0] || null;
+    }
+  } catch (err) {
+    // suppress errors to avoid raw JSON in UX
+  }
+
+  // shared inner layout — same for both filled and empty states
+  const TipCard = ({ title, body }: { title?: string; body: string }) => (
+    <div className="
+      relative overflow-hidden rounded-[22px]
+      bg-tertiary
+      p-7 sm:p-8
+      shadow-[0_6px_0_0_#00531d]
+    ">
+      {/* decorative blobs */}
+      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#00531d] opacity-30" />
+      <div className="pointer-events-none absolute -bottom-6 left-1/4 h-20 w-20 rounded-full bg-tertiary-light opacity-10" />
+
+      <div className="relative z-10 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+
+        {/* icon badge */}
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-white/20 backdrop-blur-sm">
+          <Lightbulb className="h-6 w-6 text-white" aria-hidden="true" />
+        </div>
+
+        <div className="flex-1">
+          {title && (
+            <h3 className="mb-1 text-lg font-black text-white">{title}</h3>
+          )}
+          <p className="text-sm sm:text-base leading-relaxed font-medium text-white/90">
+            {body}
+          </p>
+        </div>
+
+        <Button
+          variant="outline"
+          className="shrink-0 rounded-[16px] border-2 border-white/30 bg-white/10 font-bold text-white backdrop-blur-sm hover:bg-white/20"
+          asChild
+        >
+          <Link href="/tips">Lihat Tips Lainnya</Link>
+        </Button>
+      </div>
+    </div>
+  );
+
+  if (!tip) {
+    return (
+      <section aria-label="Daily tip">
+        <TipCard body="Tips harian akan muncul di sini setelah asesmen si Kecil selesai. 🌟" />
+      </section>
+    );
+  }
+
   return (
     <section aria-label="Daily tip">
-      <div className="
-        relative overflow-hidden rounded-card
-        bg-[linear-gradient(135deg,var(--color-tertiary)_0%,var(--color-tertiary-container)_100%)]
-        p-6 sm:p-8
-        shadow-soft
-      ">
-        <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center relative z-10">
-          <div className="w-12 h-12 rounded-pill bg-white/20 flex items-center justify-center shrink-0">
-            <Lightbulb className="w-6 h-6 text-white" />
-          </div>
+      <TipCard title={tip.title} body={tip.description} />
+    </section>
+  );
+}
 
-          <div className="flex-1">
-            <h3 className="text-lg font-bold text-white mb-1">
-              {dailyTip.title || 'Tips Hari Ini'}
-            </h3>
-            <p className="text-white/90 text-sm sm:text-base leading-relaxed">
-              {dailyTip.body || 'Ajak anak bermain balok susun untuk melatih motorik halus dan kreativitas mereka.'}
-            </p>
-          </div>
-
-          <Button
-            variant="outline"
-            className="shrink-0 bg-white/10 text-white border-white/20 hover:bg-white/20 rounded-button"
-            asChild
-          >
-            <Link href="/tips">Lihat Tips Lainnya</Link>
-          </Button>
-        </div>
-      </div>
+export function DashboardTipSkeleton() {
+  return (
+    <section className="animate-pulse" aria-hidden="true">
+      <div className="h-32 sm:h-28 rounded-[22px] bg-surface-container-high" />
     </section>
   );
 }
@@ -4532,6 +5032,7 @@ import { Button } from '@/components/ui/button';
 import { BadgePill } from '@/components/ui/badge';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { getFiles } from '@/actions/file-actions';
+import { getIconFromName } from '@/lib/icon-mapper';
 
 /**
  * FilesScreen — Server Component.
@@ -4556,9 +5057,9 @@ export async function FilesScreen() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        {worksheets.map((ws) => {
-          const Icon = ws.icon as any;
-          const isPaid = ws.variant === 'paid';
+        {worksheets.map((ws: any) => {
+          const Icon = getIconFromName(ws.iconName);
+          const isPaid = ws.variant?.toLowerCase() === 'paid';
 
           return (
             <KidCard
@@ -4647,45 +5148,81 @@ import { Card, KidCard } from '@/components/ui/card';
 import { BadgePill } from '@/components/ui/badge';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { SkillProgressBar } from '@/components/ui/skill-progess-bar';
-import { defaultSkillResults } from '@/data/recommendations';
-import type { SkillResult } from '@/types';
+import type { HistoryResult, SkillResult } from '@/types';
 
-interface ScoringResult {
-  overallScore: number;
-  category: string;
-  focusSummary: string;
-  focusAreas: string[];
-  skills: SkillResult[];
+function scoreToStatus(score: number) {
+  if (score >= 80) return 'Bagus';
+  if (score >= 50) return 'Cukup';
+  return 'Perlu Latihan';
 }
 
-/**
- * ResultsScreen — reads assessment result from sessionStorage
- * (written by useAssessment on successful submit).
- * Falls back to static defaultSkillResults for demo/preview.
- */
+function getBarColor(status: string) {
+  if (status === 'Bagus') return 'text-tertiary';
+  if (status === 'Cukup') return 'text-secondary';
+  return 'text-error';
+}
+
 export function ResultsScreen() {
-  const [result, setResult] = useState<ScoringResult | null>(null);
+  const [result, setResult] = useState<HistoryResult | null>(null);
 
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem('assessment_result');
       if (raw) setResult(JSON.parse(raw));
     } catch {
-      // Corrupt data — just show defaults
+      // Corrupt data
     }
   }, []);
 
-  const overallScore = result?.overallScore ?? 70;
-  const category     = result?.category     ?? 'Cukup';
-  const focusSummary = result?.focusSummary ?? 'Perlu peningkatan pada ketelitian dan koordinasi tangan';
-  const focusAreas   = result?.focusAreas   ?? ['Ketelitian', 'Koordinasi'];
-  const skills       = result?.skills?.length
-    ? result.skills.map((s) => ({
-        ...s,
-        color: 'bg-surface-container',
-        barColor: s.status === 'Bagus' ? 'text-tertiary' : s.status === 'Cukup' ? 'text-secondary' : 'text-error',
-      }))
-    : defaultSkillResults;
+  if (!result) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-secondary-container">
+          <AlertCircle className="w-8 h-8 text-on-secondary-container" aria-hidden="true" />
+        </div>
+        <h2 className="text-xl font-bold text-on-surface">No assessment yet</h2>
+        <p className="text-on-surface-variant">It looks like you haven't completed an assessment for your child.</p>
+        <Button variant="primary" asChild>
+          <Link href="/assessment">Start Assessment</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const overallScore = result.overallScore ?? 0;
+  const category     = result.categoryResult ?? 'Unknown';
+  const focusSummary = result.focusSummary ?? '';
+  const focusAreas   = result.focusAreas && result.focusAreas.length > 0 
+    ? result.focusAreas 
+    : [];
+
+  const motorikScore = result.skillsData?.motorik ?? 0;
+  const bahasaScore = result.skillsData?.bahasa ?? 0;
+  const sosialScore = result.skillsData?.sosial ?? 0;
+
+  const skills: SkillResult[] = [
+    {
+      label: "Motorik",
+      score: motorikScore,
+      status: scoreToStatus(motorikScore) as any,
+      color: 'bg-surface-container',
+      barColor: getBarColor(scoreToStatus(motorikScore))
+    },
+    {
+      label: "Bahasa & Komunikasi",
+      score: bahasaScore,
+      status: scoreToStatus(bahasaScore) as any,
+      color: 'bg-surface-container',
+      barColor: getBarColor(scoreToStatus(bahasaScore))
+    },
+    {
+      label: "Sosial & Emosional",
+      score: sosialScore,
+      status: scoreToStatus(sosialScore) as any,
+      color: 'bg-surface-container',
+      barColor: getBarColor(scoreToStatus(sosialScore))
+    }
+  ];
 
   return (
     <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto">
@@ -4737,9 +5274,13 @@ export function ResultsScreen() {
             &ldquo;{focusSummary}&rdquo;
           </p>
           <div className="flex flex-wrap gap-2">
-            {focusAreas.map((area) => (
-              <BadgePill key={area} color="neutral">{area}</BadgePill>
-            ))}
+            {focusAreas.length > 0 ? (
+              focusAreas.map((area) => (
+                <BadgePill key={area} color="neutral">{area}</BadgePill>
+              ))
+            ) : (
+              <p className="text-sm text-on-surface-variant">Keep exploring daily activities!</p>
+            )}
           </div>
         </Card>
       </div>
@@ -4779,125 +5320,142 @@ export function ResultsScreen() {
 </file>
 
 <file path="src/features/tips/components/tips-screen.tsx">
+'use client';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Lightbulb } from 'lucide-react';
 import { Card, KidCard } from '@/components/ui/card';
 import { BadgePill } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { dailyTip } from '@/data/recommendations';
-import { getTips } from '@/actions/tip-actions';
+import { getIconFromName } from '@/lib/icon-mapper';
+import type { Recommendation } from '@/types';
 
-/**
- * TipsScreen — Server Component (no client state needed).
- * Extracted from the Tips screen in App.tsx.
- */
-export async function TipsScreen() {
-  const recommendations = await getTips();
-  const mainRec = recommendations.find((r) => r.isMain);
-  const sideRecs = recommendations.filter((r) => !r.isMain);
+export function TipsScreen() {
+  const [tips, setTips] = useState<Recommendation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
+
+  useEffect(() => {
+    async function fetchTips() {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tips`, {
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setTips(json.data ?? []);
+        }
+      } catch {
+        // ignore errors, will show empty state
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchTips();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="animate-pulse p-6 bg-surface-container-low rounded-card">
+        <div className="h-40 bg-surface-container-high rounded-card" />
+      </section>
+    );
+  }
+
+  const mainRec = tips.find((r) => r.isMain) ?? null;
+  const sideRecs = tips.filter((r) => !r.isMain);
+  const displayedSide = showAll ? sideRecs : sideRecs.slice(0, 3);
+
+  if (!mainRec && sideRecs.length === 0) {
+    return (
+      <section
+        aria-label="Daily tip"
+        className="p-6 bg-surface-container-low rounded-card text-center"
+      >
+        <p className="text-on-surface-variant">
+          We're preparing personalized tips for your child. Check back after their next assessment.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl mx-auto">
-
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* Header */}
       <div className="flex items-center gap-4 pt-4">
         <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-tertiary-fixed">
-          <Lightbulb className="w-7 h-7 text-on-tertiary-fixed-variant" aria-hidden="true" />
+          <Lightbulb
+            className="w-7 h-7 text-on-tertiary-fixed-variant"
+            aria-hidden="true"
+          />
         </div>
         <div>
-          <BadgePill color="secondary" className="mb-1">Rekomendasi Hari Ini</BadgePill>
+          <BadgePill color="secondary" className="mb-1">
+            Rekomendasi Hari Ini
+          </BadgePill>
           <h1 className="text-2xl font-black italic text-on-surface">
             Petualangan Belajarmu!
           </h1>
-          <p className="text-sm text-on-surface-variant mt-0.5">
-            Berdasarkan hasil asesmen kemarin, berikut adalah aktivitas seru untuk melatih motorik halus si kecil.
-          </p>
         </div>
       </div>
 
-      {/* ── Main + side grid ───────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] gap-4 items-start">
-
-        {/* Main recommendation card */}
-        {mainRec && (() => {
-          const Icon = mainRec.icon as any;
-          return (
-            <KidCard accent="primary" variant="featured" badge="Paling Disarankan">
-              <div className="flex items-center gap-3 mb-2">
-                {Icon && <Icon className="w-8 h-8 text-on-surface-variant" aria-hidden="true" />}
-              </div>
-              <h2 className="text-2xl font-black italic text-on-surface mb-2">
-                {mainRec.title}
-              </h2>
-              <p className="text-on-surface-variant text-sm mb-4">
-                {mainRec.description}
-              </p>
-              <div className="flex gap-2 mb-6">
-                <BadgePill color="neutral">⏱ {mainRec.duration}</BadgePill>
-                <BadgePill color="primary">🤸 {mainRec.category}</BadgePill>
-              </div>
-              <Button variant="primary" size="lg" className="w-full">
-                Mulai Aktivitas
-              </Button>
-            </KidCard>
-          );
-        })()}
-
-        {/* Side recommendation cards */}
-        <div className="flex flex-col gap-3">
-          {sideRecs.map((rec) => {
-            const Icon = rec.icon as any;
-            return (
-              <Card
-                key={rec.id}
-                className="flex items-start gap-3 p-4 hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-container shrink-0">
-                  {Icon && <Icon className="w-5 h-5 text-on-surface-variant" aria-hidden="true" />}
-                </div>
-                <div>
-                  <h3 className="font-black italic text-on-surface text-sm mb-0.5">
-                    {rec.title}
-                  </h3>
-                  <p className="text-xs text-on-surface-variant leading-snug">
-                    {rec.description}
-                  </p>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ── Tips Orang Tua ─────────────────────────────────────────────────── */}
-      <Card className="border border-dashed border-outline-variant bg-surface-container-low">
-        <div className="flex items-center gap-2 mb-3">
-          <Lightbulb className="w-5 h-5 text-primary" aria-hidden="true" />
-          <h2 className="text-sm font-black uppercase tracking-widest text-primary">
-            Tips Orang Tua
+      {/* Main recommendation */}
+      {mainRec && (
+        <KidCard accent="primary" variant="featured" badge="Paling Disarankan">
+          {getIconFromName(mainRec.iconName) &&
+            React.createElement(getIconFromName(mainRec.iconName), {
+              className: 'w-8 h-8 text-on-surface-variant',
+              'aria-hidden': true,
+            })}
+          <h2 className="text-2xl font-black italic text-on-surface mb-2">
+            {mainRec.title}
           </h2>
-        </div>
-        <p className="text-sm text-on-surface-variant leading-relaxed">
-          Pujilah setiap usaha si kecil, bukan hanya hasil akhirnya. Jika mereka kesulitan
-          menggunting, bantu dengan memegang kertasnya agar lebih stabil. Pastikan pencahayaan
-          cukup agar mata mereka tidak cepat lelah saat mewarnai pola kecil.
-        </p>
-      </Card>
+          <p className="text-on-surface-variant text-sm mb-4">
+            {mainRec.description}
+          </p>
+          <div className="flex gap-2 mb-6">
+            <BadgePill color="neutral">⏱ {mainRec.duration}</BadgePill>
+            <BadgePill color="primary">🤸 {mainRec.category}</BadgePill>
+          </div>
+          <Button variant="primary" size="lg" className="w-full">
+            Mulai Aktivitas
+          </Button>
+        </KidCard>
+      )}
 
-      {/* ── Daily tip banner ───────────────────────────────────────────────── */}
-      <div className="flex items-center gap-4 p-5 rounded-2xl bg-tertiary text-white">
-        <div className="w-12 h-12 flex items-center justify-center rounded-full bg-white/20 shrink-0">
-          <Lightbulb className="w-6 h-6" aria-hidden="true" />
-        </div>
-        <div>
-          <p className="font-black">{dailyTip.title}</p>
-          <p className="text-sm text-white/80 mt-0.5">{dailyTip.body}</p>
-        </div>
+      {/* Side recommendations */}
+      <div className="flex flex-col gap-3">
+        {displayedSide.map((rec) => (
+          <Card
+            key={rec.id}
+            className="flex items-start gap-3 p-4 hover:shadow-md transition-shadow cursor-pointer"
+          >
+            {getIconFromName(rec.iconName) &&
+              React.createElement(getIconFromName(rec.iconName), {
+                className: 'w-5 h-5 text-on-surface-variant',
+                'aria-hidden': true,
+              })}
+            <div>
+              <h3 className="font-black italic text-on-surface text-sm mb-0.5">
+                {rec.title}
+              </h3>
+              <p className="text-xs text-on-surface-variant leading-snug">
+                {rec.description}
+              </p>
+            </div>
+          </Card>
+        ))}
+        {sideRecs.length > 3 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAll(!showAll)}
+            className="self-start"
+          >
+            {showAll ? 'Lihat Lebih Sedikit' : 'Lihat Lainnya'}
+          </Button>
+        )}
       </div>
-
-      <footer className="text-center text-xs text-on-surface-variant pb-4">
-        © 2026 SkillPath Kids. Didesain dengan penuh kasih sayang.
-      </footer>
     </div>
   );
 }
@@ -5214,15 +5772,15 @@ export async function apiClient<T>(
     }
   );
 
-  const data = await response.json();
+  const responseData = await response.json();
 
-  if (!response.ok) {
+  if (!response.ok || responseData.success === false) {
     throw new Error(
-      data.message || "API Error"
+      responseData.message || "API Error"
     );
   }
 
-  return data;
+  return responseData.data;
 }
 </file>
 
@@ -5435,6 +5993,57 @@ export const iconMap: Record<
   Music,
   ClipboardCheck,
 };
+</file>
+
+<file path="src/lib/icon-mapper.ts">
+import {
+  Pencil,
+  Shapes,
+  Scissors,
+  Lightbulb,
+  FileText,
+  Home,
+  Star,
+  Palette,
+  Brush,
+  BookOpen,
+  Hand,
+  Eye,
+  MessageCircle,
+  Users,
+  Brain,
+  Activity,
+  Circle,
+  Calculator,
+  ClipboardCheck,
+  LucideIcon
+} from 'lucide-react';
+
+const iconMap: Record<string, LucideIcon> = {
+  Pencil,
+  Shapes,
+  Scissors,
+  Lightbulb,
+  FileText,
+  Home,
+  Star,
+  Palette,
+  Brush,
+  BookOpen,
+  Hand,
+  Eye,
+  MessageCircle,
+  Users,
+  Brain,
+  Activity,
+  Circle,
+  Calculator,
+};
+
+export function getIconFromName(name: string | null): LucideIcon {
+  if (!name) return ClipboardCheck;
+  return iconMap[name] || ClipboardCheck;
+}
 </file>
 
 <file path="src/lib/services/file-service.ts">
@@ -5800,10 +6409,9 @@ export type SkillCategory =
   | 'Sensorial';
 
 export interface AssessmentQuestion {
-  iconName: any;
   id: number;
   text: string;
-  icon: LucideIcon;
+  iconName: string;
   category: SkillCategory | string;
   /** Tailwind bg class for the question's icon pill */
   color: string;
@@ -5862,7 +6470,7 @@ export interface Recommendation {
   id: string;
   title: string;
   description: string;
-  icon: LucideIcon;
+  iconName: string;
   duration: string;       // e.g. "15 Menit"
   category: string;       // e.g. "Motorik Halus"
   isMain?: boolean;       // The featured card on the Tips screen
@@ -5870,13 +6478,13 @@ export interface Recommendation {
 
 // ─── Worksheets / Files ───────────────────────────────────────────────────────
 
-export type WorksheetVariant = 'paid' | 'free';
+export type WorksheetVariant = 'FREE' | 'PAID' | 'free' | 'paid';
 
 export interface Worksheet {
   id: string;
   title: string;
   description: string;
-  icon: LucideIcon;
+  iconName: string;
   variant: WorksheetVariant;
   badge?: string;         // e.g. "PRODUK UTAMA", "PALING DICARI"
   accent: 'primary' | 'secondary' | 'tertiary';
@@ -5903,6 +6511,20 @@ export interface UserProfile {
   email: string;
   role: UserRole;
   avatarUrl?: string;
+}
+
+export interface HistoryResult {
+  id: string | number;
+  overallScore: number;
+  categoryResult: string;
+  focusSummary: string;
+  focusAreas: string[];
+  skillsData: {
+    motorik: number;
+    bahasa: number;
+    sosial: number;
+  };
+  createdAt: string;
 }
 </file>
 

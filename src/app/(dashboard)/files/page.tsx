@@ -8,6 +8,8 @@ export const metadata: Metadata = {
   title: 'Koleksi Worksheet — SkillPath Kids',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function FilesPage() {
   return (
     <ErrorBoundary>

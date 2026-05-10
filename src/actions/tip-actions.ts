@@ -1,4 +1,5 @@
 "use server";
+import type { Recommendation } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -12,11 +13,14 @@ export async function getTips() {
 
   const data = await response.json();
 
-  return data.data;
+  return (data.data || []).map((tip: any) => ({
+    ...tip,
+    icon: tip.icon || tip.iconName,
+  }));
 }
 
 export async function createTip(
-  payload: any,
+  payload: Partial<Recommendation>,
   token: string
 ) {
   const response = await fetch(
@@ -36,8 +40,8 @@ export async function createTip(
 }
 
 export async function updateTip(
-  id: number,
-  payload: any,
+  id: string | number,
+  payload: Partial<Recommendation>,
   token: string
 ) {
   const response = await fetch(
@@ -57,7 +61,7 @@ export async function updateTip(
 }
 
 export async function deleteTip(
-  id: number,
+  id: string | number,
   token: string
 ) {
   const response = await fetch(

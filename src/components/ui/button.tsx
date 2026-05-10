@@ -35,6 +35,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       size = 'md',
       loading,
       asChild,
+      icon: Icon,
       className,
       children,
       ...props
@@ -55,6 +56,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+        {!loading && Icon && <Icon className="w-4 h-4" aria-hidden="true" />}
         <Slottable>{children}</Slottable>
       </Component>
     );

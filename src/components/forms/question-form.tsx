@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { createQuestion, updateQuestion } from '@/actions/question-actions';
+import { getToken } from '@/lib/auth';
 import type { AssessmentQuestion } from '@/types';
 
 interface QuestionFormProps {
@@ -17,19 +18,10 @@ export function QuestionForm({ initialData, onSuccess, onCancel }: QuestionFormP
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // If initialData.icon is an object/function, we try to extract its name or default to 'Home'
-  // In a real app, you'd want to store string names in the DB instead of component references.
-  let defaultIconStr = 'Home';
-  if (typeof initialData?.icon === 'string') {
-    defaultIconStr = initialData.icon;
-  } else if (initialData?.icon?.displayName) {
-    defaultIconStr = initialData.icon.displayName;
-  }
-
   const [formData, setFormData] = useState({
     text: initialData?.text || '',
     category: initialData?.category || 'Motorik Halus',
-    icon: defaultIconStr,
+    icon: initialData?.icon || 'Home',
     color: initialData?.color || 'bg-primary-container',
   });
 
@@ -42,10 +34,13 @@ export function QuestionForm({ initialData, onSuccess, onCancel }: QuestionFormP
     setLoading(true);
     setError(null);
     try {
+      const token = getToken();
+      if (!token) throw new Error('Anda harus login terlebih dahulu');
+
       if (initialData?.id) {
-        await updateQuestion(initialData.id, formData as any);
+        await updateQuestion(initialData.id, formData as any, token);
       } else {
-        await createQuestion(formData as any);
+        await createQuestion(formData as any, token);
       }
       if (onSuccess) onSuccess();
       router.refresh();

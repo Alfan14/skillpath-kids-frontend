@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { createTip, updateTip } from '@/actions/tip-actions';
+import { getToken } from '@/lib/auth';
 import type { Recommendation } from '@/types';
 
 interface TipFormProps {
@@ -17,22 +18,12 @@ export function TipForm({ initialData, onSuccess, onCancel }: TipFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Default to a string or extract from component
-  let defaultIconStr = 'Lightbulb';
-  if (typeof initialData?.icon === 'string') {
-    defaultIconStr = initialData.icon;
-  } else if (initialData?.icon?.displayName) {
-    defaultIconStr = initialData.icon.displayName;
-  } else if (initialData?.icon) {
-    defaultIconStr = 'Star'; // fallback
-  }
-
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
     category: initialData?.category || 'Motorik Halus',
     duration: initialData?.duration || '15 Menit',
-    icon: defaultIconStr,
+    icon: initialData?.icon || 'Lightbulb',
     isMain: initialData?.isMain || false,
   });
 
@@ -46,10 +37,13 @@ export function TipForm({ initialData, onSuccess, onCancel }: TipFormProps) {
     setLoading(true);
     setError(null);
     try {
+      const token = getToken();
+      if (!token) throw new Error('Anda harus login terlebih dahulu');
+
       if (initialData?.id) {
-        await updateTip(initialData.id, formData as any);
+        await updateTip(initialData.id, formData as any, token);
       } else {
-        await createTip(formData as any);
+        await createTip(formData as any, token);
       }
       if (onSuccess) onSuccess();
       router.refresh();

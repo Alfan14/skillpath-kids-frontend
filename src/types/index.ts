@@ -1,5 +1,3 @@
-import type { LucideIcon } from 'lucide-react';
-
 // ─── Navigation ───────────────────────────────────────────────────────────────
 
 export type Page =
@@ -15,8 +13,8 @@ export type Page =
 export interface NavItem {
   id: Page;
   label: string;
-  icon: LucideIcon;
-  href: string; // Next.js route path
+  icon: string;   // icon name resolved via getIcon() in client components
+  href: string;   // Next.js route path
 }
 
 // ─── Assessment ───────────────────────────────────────────────────────────────
@@ -40,7 +38,7 @@ export type SkillCategory =
 export interface AssessmentQuestion {
   id: number;
   text: string;
-  iconName: string;
+  icon: string;
   category: SkillCategory | string;
   /** Tailwind bg class for the question's icon pill */
   color: string;
@@ -72,21 +70,14 @@ export interface OverallResult {
 }
 
 // ─── Badges ───────────────────────────────────────────────────────────────────
-export type BadgeIcon =
-  | 'star'
-  | 'fileText'
-  | 'award'
-  | 'trophy'
-  | 'lightbulb'
-  | 'rocket'
-  | 'flame';
+
 
 
 export interface Badge {
   id: string;
   title: string;
   description: string;
-  icon: BadgeIcon;
+  icon: string;
   unlocked: boolean;
   date?: string;          // e.g. "30 Apr 2026" — only when unlocked
   /** Tailwind bg class for the unlocked card background tint */
@@ -99,7 +90,7 @@ export interface Recommendation {
   id: string;
   title: string;
   description: string;
-  iconName: string;
+  icon: string;
   duration: string;       // e.g. "15 Menit"
   category: string;       // e.g. "Motorik Halus"
   isMain?: boolean;       // The featured card on the Tips screen
@@ -113,7 +104,7 @@ export interface Worksheet {
   id: string;
   title: string;
   description: string;
-  iconName: string;
+  icon: string;
   variant: WorksheetVariant;
   badge?: string;         // e.g. "PRODUK UTAMA", "PALING DICARI"
   accent: 'primary' | 'secondary' | 'tertiary';

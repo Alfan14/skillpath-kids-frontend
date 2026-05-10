@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode} from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -18,6 +18,8 @@ interface LayoutProps {
   children: ReactNode;
 }
 
+export const dynamic = 'force-dynamic';
+
 export default function TeacherLayout({
   children,
 }: LayoutProps) {
@@ -33,7 +35,7 @@ export default function TeacherLayout({
       return;
     }
 
-    if ( user.role !== 'TEACHER') {
+    if (user.role !== 'TEACHER') {
       router.push('/');
       return;
     }

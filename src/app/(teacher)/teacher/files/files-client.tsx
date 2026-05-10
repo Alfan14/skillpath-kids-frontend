@@ -8,6 +8,7 @@ import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { FileForm } from '@/components/forms/file-form';
 import { deleteFile } from '@/actions/file-actions';
 import { useRouter } from 'next/navigation';
+import { getToken } from '@/lib/auth';
 import type { Worksheet } from '@/types';
 
 export function FilesClient({ files }: { files: Worksheet[] }) {
@@ -38,7 +39,8 @@ export function FilesClient({ files }: { files: Worksheet[] }) {
     if (!fileToDelete) return;
     setIsDeleting(true);
     try {
-      await deleteFile(fileToDelete.id);
+      const token = getToken();
+      await deleteFile(Number(fileToDelete.id), token || '');
       setIsDeleteModalOpen(false);
       setFileToDelete(null);
       router.refresh();

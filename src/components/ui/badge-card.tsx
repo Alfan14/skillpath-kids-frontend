@@ -4,21 +4,8 @@ import React from 'react';
 import { motion, Variants } from 'framer-motion'; 
 import type { Badge } from '@/types';
 
-import {
-  CheckCircle2,
-  Lock,
-  Trophy,
-  Star,
-  Medal,
-  type LucideIcon,
-  FileText,
-  Award,
-  Lightbulb,
-  Rocket,
-  Flame,
-} from 'lucide-react';
-
-
+import { getIcon } from '@/lib/icon-map';
+import { CheckCircle2, Lock } from 'lucide-react';
 
 export interface BadgeCardProps {
   badge: Badge;
@@ -29,17 +16,7 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({
   badge, 
   animateOnMount = true 
 }) => {
-  const iconMap: Record<Badge['icon'], LucideIcon> = {
-    star: Star,
-    fileText: FileText,
-    award: Award,
-    trophy: Trophy,
-    lightbulb: Lightbulb,
-    rocket: Rocket,
-    flame: Flame,
-  };
-
-  const Icon = iconMap[badge.icon];
+  const Icon = getIcon(badge.icon);
   
   const cardAriaLabel = `${badge.title} — ${badge.unlocked && badge.date ? badge.date : 'Belum terkunci'}`;
 

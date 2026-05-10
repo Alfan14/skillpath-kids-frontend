@@ -3,60 +3,80 @@ import { Button } from '@/components/ui/button';
 
 export function DashboardRecommendation() {
   return (
-    <section aria-labelledby="recommendation-heading" className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+    <section
+      aria-labelledby="recommendation-heading"
+      className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch"
+    >
       <h2 id="recommendation-heading" className="sr-only">Rekomendasi Aktivitas</h2>
-      
-      {/* Lihat Panduan */}
+
+      {/* ── Lihat Panduan ───────────────────────────────────────────────────── */}
       <div className="
-        flex flex-col h-full bg-card-featured rounded-card 
-        border border-primary/20 shadow-soft p-6
-        transition-all hover:shadow-medium
+        relative flex flex-col h-full overflow-hidden
+        rounded-[22px] border border-primary/20
+        bg-white p-8
+        shadow-[0_4px_16px_rgba(0,93,167,0.07)]
+        transition-all hover:shadow-[0_8px_24px_rgba(0,93,167,0.12)]
       ">
-        <div className="inline-flex self-start px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-pill mb-4">
-          Baru: Modul Montessori
+        {/* decorative top-right blob */}
+        <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary-container opacity-40" />
+
+        {/* badge */}
+        <div className="relative z-10 mb-4 inline-flex self-start items-center gap-1 rounded-full bg-primary-container px-3 py-1">
+          <span className="text-xs font-black text-primary">✨ Baru: Modul Montessori</span>
         </div>
-        
-        <div className="flex flex-col items-center text-center gap-4 flex-1">
-          <div className="w-14 h-14 flex items-center justify-center rounded-pill bg-primary-fixed shrink-0">
+
+        <div className="relative z-10 flex flex-col items-center text-center gap-4 flex-1">
+          <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-primary-container shadow-[0_4px_0_0_#d4e3ff] shrink-0">
             <span className="text-2xl" aria-hidden="true">⭐</span>
           </div>
-          
           <div>
-            <h3 className="text-xl font-bold text-on-surface">Panduan Perkembangan</h3>
-            <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
+            <h3 className="text-lg font-black text-on-surface">Panduan Perkembangan</h3>
+            <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
               Pelajari indikator utama pertumbuhan anak usia 2–6 tahun dalam format yang mudah dipahami.
             </p>
           </div>
         </div>
 
-        <div className="mt-6">
-          <Button variant="outline" className="w-full rounded-button" asChild>
+        <div className="relative z-10 mt-5">
+          <Button
+            variant="outline"
+            className="w-full rounded-[18px] border-2 border-primary font-extrabold text-primary hover:bg-primary-container"
+            asChild
+          >
             <Link href="/tips">Lihat Panduan</Link>
           </Button>
         </div>
       </div>
 
-      {/* Download Worksheet */}
+      {/* ── Unduh Hasil PDF ─────────────────────────────────────────────────── */}
       <div className="
-        flex flex-col h-full bg-surface-container-low rounded-card 
-        border border-secondary/20 shadow-soft p-6
-        transition-all hover:shadow-medium
+        relative flex flex-col h-full overflow-hidden
+        rounded-[22px] border border-secondary/30
+        bg-[#FFFDF0] p-8
+        shadow-[0_4px_16px_rgba(232,196,38,0.10)]
+        transition-all hover:shadow-[0_8px_24px_rgba(232,196,38,0.18)]
       ">
-        <div className="flex flex-col items-center text-center gap-4 flex-1 mt-2">
-          <div className="w-14 h-14 flex items-center justify-center rounded-pill bg-secondary-container">
+        {/* decorative blob */}
+        <div className="pointer-events-none absolute -left-6 -top-6 h-24 w-24 rounded-full bg-secondary-container opacity-50" />
+
+        <div className="relative z-10 flex flex-col items-center text-center gap-5 flex-1 mt-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-[18px] bg-secondary shadow-[0_4px_0_0_#e8c426] shrink-0">
             <span className="text-2xl" aria-hidden="true">📄</span>
           </div>
-
           <div>
-            <h3 className="text-xl font-bold text-on-surface">Unduh Hasil PDF</h3>
-            <p className="text-sm text-on-surface-variant mt-2 leading-relaxed">
+            <h3 className="text-lg font-black text-on-surface">Unduh Hasil PDF</h3>
+            <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
               Dapatkan worksheet aktivitas dan rangkuman perkembangan anak yang siap dicetak untuk digunakan di rumah.
             </p>
           </div>
         </div>
 
-        <div className="mt-6">
-          <Button variant="secondary" className="w-full rounded-button bg-secondary text-on-secondary" asChild>
+        <div className="relative z-10 mt-6">
+          <Button
+            variant="primary"
+            className="w-full rounded-[18px] font-black bg-primary text-white shadow-[0_5px_0_0_#004883] hover:translate-y-[2px] active:shadow-[0_2px_0_0_#004883]"
+            asChild
+          >
             <Link href="/files">Unduh PDF ⬇️</Link>
           </Button>
         </div>

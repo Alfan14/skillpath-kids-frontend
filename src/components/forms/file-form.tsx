@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { createFile, updateFile } from '@/actions/file-actions';
+import { getToken } from '@/lib/auth';
 import type { Worksheet } from '@/types';
 
 interface FileFormProps {
@@ -17,16 +18,6 @@ export function FileForm({ initialData, onSuccess, onCancel }: FileFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Default to a string or extract from component
-  let defaultIconStr = 'FileText';
-  if (typeof initialData?.icon === 'string') {
-    defaultIconStr = initialData.icon;
-  } else if (initialData?.icon?.displayName) {
-    defaultIconStr = initialData.icon.displayName;
-  } else if (initialData?.icon) {
-    defaultIconStr = 'Shapes'; // fallback
-  }
-
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -34,7 +25,7 @@ export function FileForm({ initialData, onSuccess, onCancel }: FileFormProps) {
     variant: initialData?.variant || 'free',
     accent: initialData?.accent || 'primary',
     badge: initialData?.badge || '',
-    icon: defaultIconStr,
+    icon: initialData?.icon || 'FileText',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -46,10 +37,13 @@ export function FileForm({ initialData, onSuccess, onCancel }: FileFormProps) {
     setLoading(true);
     setError(null);
     try {
+      const token = getToken();
+      if (!token) throw new Error('Anda harus login terlebih dahulu');
+
       if (initialData?.id) {
-        await updateFile(initialData.id, formData as any);
+        await updateFile(initialData.id, formData as any, token);
       } else {
-        await createFile(formData as any);
+        await createFile(formData as any, token);
       }
       if (onSuccess) onSuccess();
       router.refresh();

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 export default function TeacherDashboardPage() {
   return (
     <div className="flex flex-col gap-6">
@@ -5,7 +7,7 @@ export default function TeacherDashboardPage() {
       <p className="text-on-surface-variant">
         Ini adalah tampilan simulasi untuk guru. Anda dapat mengelola kelas dan memantau perkembangan murid dari sini.
       </p>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Placeholder cards */}
         <div className="bg-white p-6 rounded-card shadow-soft border border-outline-variant/30">

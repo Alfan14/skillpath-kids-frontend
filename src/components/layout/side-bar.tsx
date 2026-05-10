@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { navItems } from '@/data/nav';
 import { cn } from '@/lib/utils';
+import { getIcon } from '@/lib/icon-map';
 
 export function SideBar() {
   const pathname = usePathname();
@@ -12,7 +13,7 @@ export function SideBar() {
     <aside className="hidden md:flex flex-col w-64 border-r border-outline-variant/30 bg-surface-container-lowest h-screen fixed left-0 top-0 pt-24 pb-6 px-4 z-40">
       <nav aria-label="Desktop navigation" className="flex flex-col gap-2 flex-1">
         {navItems.map((item) => {
-          const Icon = item.icon;
+          const Icon = getIcon(item.icon);
           const isActive = pathname === item.href;
 
           return (

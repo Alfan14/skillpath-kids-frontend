@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   title: 'Tips & Rekomendasi — SkillPath Kids',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function TipsPage() {
   return (
     <ErrorBoundary>

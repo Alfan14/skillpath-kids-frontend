@@ -5,6 +5,8 @@ export const metadata: Metadata = {
   title: 'Koleksi Lencana — SkillPath Kids',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default function AchievementsPage() {
   return <AchievementsScreen />;
 }

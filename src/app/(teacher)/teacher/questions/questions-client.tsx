@@ -8,6 +8,7 @@ import { Plus, Edit2, Trash2, X } from 'lucide-react';
 import { QuestionForm } from '@/components/forms/question-form';
 import { deleteQuestion } from '@/actions/question-actions';
 import { useRouter } from 'next/navigation';
+import { getToken } from '@/lib/auth';
 import type { AssessmentQuestion } from '@/types';
 
 export function QuestionsClient({ questions }: { questions: AssessmentQuestion[] }) {
@@ -38,7 +39,8 @@ export function QuestionsClient({ questions }: { questions: AssessmentQuestion[]
     if (!questionToDelete) return;
     setIsDeleting(true);
     try {
-      await deleteQuestion(questionToDelete.id);
+      const token = getToken();
+      await deleteQuestion(questionToDelete.id, token || '');
       setIsDeleteModalOpen(false);
       setQuestionToDelete(null);
       router.refresh();

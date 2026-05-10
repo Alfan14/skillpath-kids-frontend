@@ -1,9 +1,16 @@
 {
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/assess/route": "app/api/assess/route.js",
   "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(dashboard)/page": "app/(dashboard)/page.js",
+  "/(auth)/signup/page": "app/(auth)/signup/page.js",
   "/(dashboard)/achievements/page": "app/(dashboard)/achievements/page.js",
-  "/(teacher)/teacher/questions/page": "app/(teacher)/teacher/questions/page.js",
+  "/(dashboard)/assessment/page": "app/(dashboard)/assessment/page.js",
+  "/(dashboard)/files/page": "app/(dashboard)/files/page.js",
+  "/(dashboard)/results/page": "app/(dashboard)/results/page.js",
+  "/(dashboard)/tips/page": "app/(dashboard)/tips/page.js",
+  "/(dashboard)/page": "app/(dashboard)/page.js",
+  "/(teacher)/teacher/files/page": "app/(teacher)/teacher/files/page.js",
   "/(teacher)/teacher/dashboard/page": "app/(teacher)/teacher/dashboard/page.js",
-  "/(teacher)/teacher/tips/page": "app/(teacher)/teacher/tips/page.js",
-  "/(teacher)/teacher/files/page": "app/(teacher)/teacher/files/page.js"
+  "/(teacher)/teacher/questions/page": "app/(teacher)/teacher/questions/page.js",
+  "/(teacher)/teacher/tips/page": "app/(teacher)/teacher/tips/page.js"
 }

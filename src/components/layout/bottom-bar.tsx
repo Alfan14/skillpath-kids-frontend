@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { navItems } from '@/data/nav';
 import { cn } from '@/lib/utils';
+import { getIcon } from '@/lib/icon-map';
 
 /**
  * BottomNav — mobile-only tab bar shown on dashboard pages.
@@ -25,7 +26,7 @@ export function BottomBar() {
     >
       <ul className="flex items-center justify-around h-16 px-2" role="list">
         {navItems.map((item) => {
-          const Icon = item.icon;
+          const Icon = getIcon(item.icon);
           const isActive = pathname === item.href;
 
           return (

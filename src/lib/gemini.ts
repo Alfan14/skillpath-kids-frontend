@@ -10,12 +10,20 @@ import type { AssessmentAnswers } from '@/types';
 import { assessmentQuestions } from '@/data/questions';
 import { LIKERT_SCORE } from '@/types';
 
-if (!process.env.GEMINI_API_KEY) {
-  throw new Error('Missing GEMINI_API_KEY environment variable. Add it to .env.local');
-}
+let genai: GoogleGenerativeAI | null = null;
+let model: any = null;
 
-const genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+function getModel() {
+  if (model) return model;
+  
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('Missing GEMINI_API_KEY environment variable. Add it to .env.local');
+  }
+
+  genai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  model = genai.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  return model;
+}
 
 export interface ScoringResult {
   overallScore: number;         // 0–100
@@ -62,7 +70,7 @@ Berikan analisis dalam format JSON berikut (HANYA JSON, tanpa teks tambahan):
 }
 `.trim();
 
-  const result = await model.generateContent(prompt);
+  const result = await getModel().generateContent(prompt);
   const text = result.response.text();
 
   // Strip any accidental markdown fences before parsing
