@@ -1,10 +1,9 @@
 'use client';
 
 import { AppShell } from '@/components/layout/app-shell';
-import { ReactNode, useEffect, useState} from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession } from '@/lib/auth';
-import Link from 'next/link';
 
 interface LayoutProps {
   children: ReactNode;
@@ -25,6 +24,16 @@ export default function DashboardLayout({
       return;
     }
 
+    if (user.role === 'ADMINISTRATOR') {
+      router.push('/administrator/dashboard');
+      return;
+    }
+
+    if (user.role === 'TEACHER') {
+      router.push('/teacher/dashboard');
+      return;
+    }
+
     setSession(user);
     setLoading(false);
   }, [router]);
@@ -37,21 +46,8 @@ export default function DashboardLayout({
     );
   }
 
-  const isTeacher = session.role === 'TEACHER';
-
   return (
     <AppShell>
-      {isTeacher && (
-        <div className="bg-secondary-container text-on-secondary-container p-3 text-center text-xs font-bold rounded-card mb-6 shadow-soft">
-          Mode Guru Aktif — Anda sedang melihat dashboard versi Orang Tua.
-          <Link
-            href="/teacher/dashboard"
-            className="underline text-primary ml-1"
-          >
-            Kembali ke Dashboard Guru
-          </Link>
-        </div>
-      )}
       {children}
     </AppShell>
   );

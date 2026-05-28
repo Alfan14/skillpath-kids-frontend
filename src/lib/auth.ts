@@ -4,12 +4,46 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: "PARENT" | "TEACHER";
+  role: "PARENT" | "STUDENT" | "TEACHER" | "ADMINISTRATOR";
 }
 
 export interface LoginResponse {
   token: string;
   user: User;
+}
+
+export async function register(
+  name: string,
+  email: string,
+  password: string,
+  role: User["role"] = "PARENT"
+): Promise<User> {
+  const response = await fetch(
+    `${API_URL}/auth/register`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        name,
+        email,
+        password,
+        role,
+      }),
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Registration failed"
+    );
+  }
+
+  return data.data;
 }
 
 export async function login(
@@ -70,8 +104,18 @@ export function getSession() {
     return null;
   }
 
-  const user = localStorage.getItem("user");
-  if (!user) return null;
+  const userStr = localStorage.getItem("user");
+  if (!userStr) return null;
 
-  return JSON.parse(user);
+  try {
+    const user = JSON.parse(userStr);
+    if (!user || !['PARENT', 'STUDENT', 'TEACHER', 'ADMINISTRATOR'].includes(user.role)) {
+      throw new Error('Invalid role');
+    }
+    return user;
+  } catch (err) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    return null;
+  }
 }

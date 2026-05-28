@@ -14,7 +14,19 @@ const LIKERT_LEGEND = [
   { code: 'STS', label: 'Sangat Tidak Setuju', score: '(1)', chipBg: 'bg-error-container', chipText: 'text-on-error-container' },
 ];
 
-export function AssessmentScreen() {
+interface AssessmentScreenProps {
+  level?: 'CHILD' | 'TEACHER';
+  resultPath?: string;
+  title?: string;
+  subtitle?: string;
+}
+
+export function AssessmentScreen({
+  level = 'CHILD',
+  resultPath = '/results',
+  title = 'Asesmen Montessori',
+  subtitle = 'Yuk, ceritakan tentang si Kecil! 💕',
+}: AssessmentScreenProps = {}) {
   const {
     answers,
     status,
@@ -33,7 +45,7 @@ export function AssessmentScreen() {
     nextPage,
     prevPage,
     submitAssessment,
-  } = useAssessment();
+  } = useAssessment({ level, resultPath });
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
@@ -53,10 +65,10 @@ export function AssessmentScreen() {
 
           <div className="flex flex-col">
             <h1 className="font-black text-xl leading-tight text-white tracking-wide uppercase italic">
-              Asesmen Montessori
+              {title}
             </h1>
             <p className="mt-0.5 text-[11px] font-bold text-primary-container">
-              Yuk, ceritakan tentang si Kecil! 💕
+              {subtitle}
             </p>
           </div>
 
@@ -215,7 +227,7 @@ export function AssessmentScreen() {
           <Button
             variant="primary"
             size="lg"
-            onClick={submitAssessment}
+            onClick={() => submitAssessment()}
             disabled={!answeredOnPage || isSubmitting}
             loading={isSubmitting}
             className="flex-1 rounded-[18px] font-black"

@@ -42,6 +42,7 @@ export interface AssessmentQuestion {
   category: SkillCategory | string;
   /** Tailwind bg class for the question's icon pill */
   color: string;
+  level?: 'CHILD' | 'TEACHER';
 }
 
 /** One answer keyed by question id */
@@ -112,6 +113,36 @@ export interface Worksheet {
   url: string;
 }
 
+export interface WorksheetProduct {
+  id: number | string;
+  slug: string;
+  title: string;
+  description: string;
+  shortDescription?: string | null;
+  category: string;
+  subCategory?: string | null;
+  price: number;
+  discountPrice?: number | null;
+  discountPercent?: number | null;
+  variant: WorksheetVariant;
+  url?: string | null;
+  mainImageUrl?: string | null;
+  galleryImages?: string[] | unknown;
+  rating: number;
+  reviewCount: number;
+  soldCount: number;
+  badges?: string[] | unknown;
+  features?: string[] | unknown;
+  specifications?: Record<string, string> | unknown;
+  shippingInfo?: Record<string, string> | string | unknown;
+  isBestSeller: boolean;
+  isPromo: boolean;
+  isPublished: boolean;
+  accentColor?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 // ─── Child Profile (future real auth) ────────────────────────────────────────
 
 export interface ChildProfile {
@@ -123,7 +154,7 @@ export interface ChildProfile {
 
 // ─── RBAC / Auth ─────────────────────────────────────────────────────────────
 
-export type UserRole = 'parent' | 'teacher';
+export type UserRole = 'PARENT' | 'STUDENT' | 'TEACHER' | 'ADMINISTRATOR';
 
 export interface UserProfile {
   id: string;

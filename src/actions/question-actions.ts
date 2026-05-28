@@ -4,6 +4,8 @@ import type { AssessmentQuestion } from "@/types";
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL;
 
+export type QuestionLevel = "CHILD" | "TEACHER" | "ALL";
+
 function mapQuestion(
   question: any
 ) {
@@ -23,17 +25,35 @@ function mapQuestion(
     color:
       question.colorClass,
 
+    level:
+      question.level,
+
     createdAt:
       question.createdAt,
   };
 }
 
-export async function getQuestions() {
+export async function getQuestions(
+  level: QuestionLevel = "CHILD",
+  token?: string
+) {
   try {
+    const params = new URLSearchParams();
+
+    if (level && level !== "ALL") {
+      params.set("level", level);
+    }
+
+    const headers: HeadersInit = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(
-      `${API_URL}/questions`,
+      `${API_URL}/questions?${params.toString()}`,
       {
         cache: "no-store",
+        headers,
       }
     );
 

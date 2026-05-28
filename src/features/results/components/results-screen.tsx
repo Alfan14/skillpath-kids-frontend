@@ -22,7 +22,19 @@ function getBarColor(status: string) {
   return 'text-error';
 }
 
-export function ResultsScreen() {
+interface ResultsScreenProps {
+  assessmentPath?: string;
+  recommendationsPath?: string;
+  title?: string;
+  subtitle?: string;
+}
+
+export function ResultsScreen({
+  assessmentPath = '/assessment',
+  recommendationsPath = '/tips',
+  title = 'Hasil Motorik Anak',
+  subtitle = 'Mari lihat perkembangan si kecil hari ini.',
+}: ResultsScreenProps = {}) {
   const [result, setResult] = useState<HistoryResult | null>(null);
 
   useEffect(() => {
@@ -43,7 +55,7 @@ export function ResultsScreen() {
         <h2 className="text-xl font-bold text-on-surface">No assessment yet</h2>
         <p className="text-on-surface-variant">It looks like you haven't completed an assessment for your child.</p>
         <Button variant="primary" asChild>
-          <Link href="/assessment">Start Assessment</Link>
+          <Link href={assessmentPath}>Start Assessment</Link>
         </Button>
       </div>
     );
@@ -96,9 +108,9 @@ export function ResultsScreen() {
           ✓ Asesmen Selesai!
         </BadgePill>
         <h1 className="text-3xl font-black italic text-primary">
-          Hasil Motorik Anak
+          {title}
         </h1>
-        <p className="text-on-surface-variant">Mari lihat perkembangan si kecil hari ini.</p>
+        <p className="text-on-surface-variant">{subtitle}</p>
       </div>
 
       {/* ── Score cards row ────────────────────────────────────────────────── */}
@@ -163,7 +175,7 @@ export function ResultsScreen() {
 
       <div className="flex flex-col gap-3 w-full">
         <Button variant="primary" size="lg" className="w-full" asChild>
-          <Link href="/tips">Lanjut ke Rekomendasi →</Link>
+          <Link href={recommendationsPath}>Lanjut ke Rekomendasi →</Link>
         </Button>
         <Button variant="ghost" size="md" className="w-full text-primary font-bold">
           Unduh Hasil PDF

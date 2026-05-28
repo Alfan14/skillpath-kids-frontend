@@ -4,21 +4,31 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { register, type User as AuthUser } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<AuthUser['role']>('PARENT');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    // TODO: replace with real auth (NextAuth / Supabase signUp)
-    await new Promise((r) => setTimeout(r, 800));
-    setLoading(false);
-    window.location.href = '/';
+    try {
+      setLoading(true);
+      setError(null);
+      await register(name, email, password, role);
+      router.push('/login');
+    } catch (err: any) {
+      setError(err.message || 'Registrasi gagal');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -34,6 +44,7 @@ export default function SignupPage() {
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-[0_10px_30px_rgba(0,96,172,0.08)] border border-surface-container-highest flex flex-col gap-4">
+          {error && <div className="p-3 bg-error-container text-error rounded-xl text-sm font-bold text-center">{error}</div>}
           <form onSubmit={handleSignup} className="flex flex-col gap-4" noValidate>
 
             {/* Name */}
@@ -51,6 +62,22 @@ export default function SignupPage() {
                              focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
                 />
               </div>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="role" className="text-sm font-bold text-on-surface">Daftar Sebagai</label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value as AuthUser['role'])}
+                className="w-full px-4 py-3 rounded-xl border border-surface-container-highest
+                           bg-surface-container-low text-on-surface text-sm font-medium
+                           focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+              >
+                <option value="PARENT">Parent</option>
+                <option value="STUDENT">Student</option>
+                <option value="TEACHER">Teacher</option>
+              </select>
             </div>
 
             {/* Email */}

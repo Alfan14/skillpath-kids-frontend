@@ -31,15 +31,16 @@ export default function LoginPage() {
 
       console.log(result);
 
-      if (
-        result.user.role ===
-        "TEACHER"
-      ) {
-        router.push(
-          "/teacher/questions"
-        );
-      } else {
+      if (result.user.role === "ADMINISTRATOR") {
+        router.push("/administrator/dashboard");
+      } else if (result.user.role === "TEACHER") {
+        router.push("/teacher/dashboard");
+      } else if (result.user.role === "PARENT" || result.user.role === "STUDENT") {
         router.push("/");
+      } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        throw new Error("Role tidak valid atau tidak didukung.");
       }
     } catch (error: any) {
       console.error(error);

@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getQuestions } from "@/actions/question-actions";
+import { getSession } from "@/lib/auth";
 
 import type {
   AssessmentAnswers,
@@ -15,7 +16,15 @@ import { useSound } from "@/hooks/use-sound";
 export type AssessmentStatus =
   | "idle" | "in-progress" | "submitting" | "analyzing" | "done" | "error";
 
-export function useAssessment() {
+interface UseAssessmentOptions {
+  level?: "CHILD" | "TEACHER";
+  resultPath?: string;
+}
+
+export function useAssessment({
+  level = "CHILD",
+  resultPath = "/results",
+}: UseAssessmentOptions = {}) {
   const router = useRouter();
   const { play } = useSound();
   const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
@@ -25,14 +34,31 @@ export function useAssessment() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    getQuestions()
+    let token = null;
+    try {
+      token = localStorage.getItem("token");
+    } catch {
+      // ignore
+    }
+
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    getQuestions(level, token)
       .then((data) => {
         setQuestions(data as unknown as AssessmentQuestion[]);
       })
       .catch((err) => {
         console.error("Failed to load questions:", err);
+        if (err.message?.includes("401")) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          router.push("/login");
+        }
       });
-  }, []);
+  }, [level, router]);
 
   const totalQuestions = questions.length;
   const QUESTIONS_PER_PAGE = 3;
@@ -84,7 +110,7 @@ export function useAssessment() {
     });
   }, [play]);
 
-  const submitAssessment = useCallback(async () => {
+  const submitAssessment = useCallback(async (childProfileId?: string) => {
     try {
       play("SUCCESS");
       setStatus("analyzing");
@@ -92,10 +118,25 @@ export function useAssessment() {
       setError(null);
 
       const token = localStorage.getItem("token");
+      const user = getSession();
+      const role = user?.role;
+
+      if (!role) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        router.push("/login");
+        return;
+      }
 
       const stringAnswers = Object.fromEntries(
         Object.entries(answers).map(([k, v]) => [String(k), v])
       );
+
+      const payload: any = { answers: stringAnswers };
+
+      if (role === "PARENT" && childProfileId) {
+        payload.childProfileId = childProfileId;
+      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/assess`,
@@ -105,15 +146,25 @@ export function useAssessment() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            answers: stringAnswers,
-          }),
+          body: JSON.stringify(payload),
         },
       );
 
       const result = await response.json();
 
       if (!response.ok || result.success === false) {
+        if (response.status === 401) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          router.push("/login");
+          return;
+        }
+        if (response.status === 400) {
+          throw new Error(result.message || "Validasi gagal");
+        }
+        if (response.status === 403) {
+          throw new Error("Akses tidak diizinkan");
+        }
         throw new Error(result.message || "Assessment failed");
       }
       setStatus("done");
@@ -121,14 +172,14 @@ export function useAssessment() {
 
       sessionStorage.setItem("assessment_result", JSON.stringify(result.data));
 
-      router.push("/results");
+      router.push(resultPath);
     } catch (err: any) {
       console.error(err);
       setStatus("error");
       setMessage(null);
-      setError("We couldn't save your answers. Your internet might be unstable. Please try again.");
+      setError(err.message || "We couldn't save your answers. Your internet might be unstable. Please try again.");
     }
-  }, [answers, play, router]);
+  }, [answers, play, resultPath, router]);
 
   const reset = useCallback(() => {
     setAnswers({});
