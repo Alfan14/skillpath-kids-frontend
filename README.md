@@ -42,8 +42,6 @@ The UI follows a **guided‑companion** philosophy: progressive disclosure, skel
 
 ### Installation
 ```bash
-# Clone the repo (already done in your workspace)
-cd "d:/TIYAN/UNIPMA/Side Jobs/Skill Paths/skillpath-kids/frontend"
 # Install dependencies
 npm install
 ```
