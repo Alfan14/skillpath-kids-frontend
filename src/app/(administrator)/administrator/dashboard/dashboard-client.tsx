@@ -12,6 +12,16 @@ import {
   FileText,
   Clock,
   ShieldAlert,
+  UsersRound,
+  HeartHandshake,
+  GraduationCap,
+  Presentation,
+  ShieldCheck,
+  ClipboardCheck,
+  CircleHelp,
+  Baby,
+  BookOpenCheck,
+  Files,
 } from 'lucide-react';
 import { getAdminOverview } from '@/actions/admin-actions';
 import { getToken, logout } from '@/lib/auth';
@@ -86,17 +96,83 @@ export function DashboardClient() {
   if (!data) return null;
 
   const STATS = [
-    { label: 'Total Users', value: data.totalUsers ?? 0, icon: Users, bg: 'bg-primary-container', text: 'text-primary' },
-    { label: 'Parents', value: data.totalParents ?? 0, icon: Users, bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
-    { label: 'Students', value: data.totalStudents ?? 0, icon: Users, bg: 'bg-tertiary-container', text: 'text-tertiary' },
-    { label: 'Teachers', value: data.totalTeachers ?? 0, icon: Users, bg: 'bg-primary-container', text: 'text-primary' },
-    { label: 'Administrators', value: data.totalAdministrators ?? 0, icon: ShieldAlert, bg: 'bg-error-container', text: 'text-error' },
-    { label: 'Total Assessments', value: data.totalAssessments ?? 0, icon: Award, bg: 'bg-tertiary-container', text: 'text-tertiary' },
-    { label: 'Total Questions', value: data.totalQuestions ?? 0, icon: ClipboardList, bg: 'bg-primary-container', text: 'text-primary' },
-    { label: 'Child Questions', value: data.totalChildQuestions ?? 0, icon: BookOpen, bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
-    { label: 'Teacher Questions', value: data.totalTeacherQuestions ?? 0, icon: BookOpen, bg: 'bg-tertiary-container', text: 'text-tertiary' },
-    { label: 'Total Tips', value: data.totalTips ?? 0, icon: Lightbulb, bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
-    { label: 'Total Files', value: data.totalFiles ?? 0, icon: FileText, bg: 'bg-primary-container', text: 'text-primary' },
+    {
+      label: 'Total Users',
+      value: data.totalUsers ?? 0,
+      icon: UsersRound,
+      bg: 'bg-[#005da7]',
+      text: 'text-[#d4e3ff]',
+    },
+    {
+      label: 'Parents',
+      value: data.totalParents ?? 0,
+      icon: HeartHandshake,
+      bg: 'bg-[#fdd73b]',
+      text: 'text-[#0f1d24]',
+    },
+    {
+      label: 'Students',
+      value: data.totalStudents ?? 0,
+      icon: GraduationCap,
+      bg: 'bg-[#006b28]',
+      text: 'text-[#96f89f]',
+    },
+    {
+      label: 'Teachers',
+      value: data.totalTeachers ?? 0,
+      icon: Presentation,
+      bg: 'bg-[#005da7]',
+      text: 'text-[#d4e3ff]',
+    },
+    {
+      label: 'Administrators',
+      value: data.totalAdministrators ?? 0,
+      icon: ShieldCheck,
+      bg: 'bg-red-100',
+      text: 'text-red-700',
+    },
+    {
+      label: 'Total Assessments',
+      value: data.totalAssessments ?? 0,
+      icon: ClipboardCheck,
+      bg: 'bg-[#006b28]',
+      text: 'text-[#96f89f]',
+    },
+    {
+      label: 'Total Questions',
+      value: data.totalQuestions ?? 0,
+      icon: CircleHelp,
+      bg: 'bg-[#005da7]',
+      text: 'text-[#d4e3ff]',
+    },
+    {
+      label: 'Child Questions',
+      value: data.totalChildQuestions ?? 0,
+      icon: Baby,
+      bg: 'bg-[#fdd73b]',
+      text: 'text-[#0f1d24]',
+    },
+    {
+      label: 'Teacher Questions',
+      value: data.totalTeacherQuestions ?? 0,
+      icon: BookOpenCheck,
+      bg: 'bg-[#006b28]',
+      text: 'text-[#96f89f]',
+    },
+    {
+      label: 'Total Tips',
+      value: data.totalTips ?? 0,
+      icon: Lightbulb,
+      bg: 'bg-[#fdd73b]',
+      text: 'text-[#0f1d24]',
+    },
+    {
+      label: 'Total Files',
+      value: data.totalFiles ?? 0,
+      icon: Files,
+      bg: 'bg-[#005da7]',
+      text: 'text-[#d4e3ff]',
+    },
   ];
 
   const avgScore = data.averageOverallScore != null ? `${Math.round(data.averageOverallScore)}%` : '-';
@@ -122,7 +198,7 @@ export function DashboardClient() {
           </div>
           <div className="flex gap-2 shrink-0">
             <div className="flex flex-col items-center justify-center rounded-[18px] bg-white/15 backdrop-blur-sm px-5 py-3 text-center">
-              <span className="text-2xl font-black text-secondary leading-none">{avgScore}</span>
+              <span className="text-2xl font-black text-white/90 leading-none">{avgScore}</span>
               <span className="text-[10px] font-bold text-white/80 mt-0.5">Rata-rata Skor</span>
             </div>
             <div className="flex flex-col items-center justify-center rounded-[18px] bg-white/15 backdrop-blur-sm px-5 py-3 text-center min-w-[120px]">

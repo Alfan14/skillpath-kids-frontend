@@ -85,21 +85,6 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/files/page.js"
-    ],
-    "/(dashboard)/assessment/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/assessment/page.js"
-    ],
-    "/(dashboard)/results/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/results/page.js"
-    ],
-    "/(dashboard)/achievements/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/achievements/page.js"
     ]
   }
 }

@@ -15,8 +15,8 @@ import type { AssessmentQuestion } from '@/types';
 
 // ── Category → color mapping (fallback palette) ───────────────────────────────
 const CATEGORY_COLOR: Record<string, { bg: string; fg: string; swatch: string }> = {
-  'Motorik Halus':  { bg: 'bg-primary-container',   fg: 'text-primary',                swatch: '#d4e3ff' },
-  'Motorik Kasar':  { bg: 'bg-tertiary-container',  fg: 'text-tertiary',               swatch: '#96f89f' },
+  'Motorik Halus':  { bg: 'bg-[#d4e3ff]',           fg: 'text-[#004883]',             swatch: '#d4e3ff',},
+  'Motorik Kasar':  { bg: 'bg-[#96f89f]',           fg: 'text-[#00531d]',             swatch: '#96f89f',},
   'Keseimbangan':   { bg: 'bg-[#fff3e0]',           fg: 'text-[#c2410c]',             swatch: '#fff3e0' },
   'Kognitif':       { bg: 'bg-[#f3e8ff]',           fg: 'text-[#6d28d9]',             swatch: '#f3e8ff' },
   'Sensorial':      { bg: 'bg-[#fce7f3]',           fg: 'text-[#be185d]',             swatch: '#fce7f3' },
@@ -200,10 +200,10 @@ export function QuestionsClient() {
       {/* ── Stat bar ─────────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { icon: Hash,          label: 'Total Pertanyaan', value: questions.length,          bg: 'bg-primary-container',   fg: 'text-primary'  },
-          { icon: CheckCircle2,  label: 'Aktif',            value: questions.length,          bg: 'bg-tertiary-container',  fg: 'text-tertiary' },
-          { icon: Clock,         label: 'Terakhir Diperbarui', value: lastUpdated,            bg: 'bg-secondary-container', fg: 'text-on-secondary-container' },
-          { icon: Filter,        label: 'Filter',           value: filterCategory,            bg: 'bg-surface-container',   fg: 'text-on-surface-variant' },
+          {  icon: Hash,         label: 'Total Pertanyaan',     value: questions.length,        bg: 'bg-[#d4e3ff]',           fg: 'text-[#004883]', },
+          {  icon: CheckCircle2, label: 'Aktif',                value: questions.length,        bg: 'bg-[#96f89f]',           fg: 'text-[#00531d]',},        
+          { icon: Clock,         label: 'Terakhir Diperbarui',  value: lastUpdated,             bg: 'bg-secondary-container', fg: 'text-on-secondary-container' },
+          { icon: Filter,        label: 'Filter',                value: filterCategory,         bg: 'bg-surface-container',   fg: 'text-on-surface-variant' },
         ].map(({ icon: Icon, label, value, bg, fg }) => (
           <div
             key={label}
@@ -257,8 +257,8 @@ export function QuestionsClient() {
               className={[
                 'rounded-full px-4 py-1.5 text-xs font-black transition-all border-2',
                 isActive
-                  ? 'bg-secondary text-white border-secondary shadow-[0_3px_0_0_#9a6b00]'
-                  : 'bg-white text-on-surface-variant border-outline-variant/40 hover:border-secondary/30',
+                ? 'bg-[#fdd73b] text-[#0f1d24] border-[#e8c426] shadow-[0_3px_0_0_#e8c426]'
+                : 'bg-white text-[#414751] border-[#e0f0fa] hover:border-[#fdd73b] hover:text-[#0f1d24]',
               ].join(' ')}
             >
               {lvl === 'Semua' ? 'Semua Level' : lvl}
@@ -320,7 +320,7 @@ export function QuestionsClient() {
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-black ${catStyle.bg} ${catStyle.fg}`}>
                         {q.category}
                       </span>
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-black ${q.level === 'TEACHER' ? 'bg-secondary-container text-on-secondary-container' : 'bg-tertiary-container text-tertiary'}`}>
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-black ${ q.level === 'TEACHER' ? 'bg-[#ffe173] text-[#0f1d24]' : 'bg-[#96f89f] text-[#00531d]' }`}>
                         {q.level || 'CHILD'}
                       </span>
                     </div>

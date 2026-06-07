@@ -5,10 +5,10 @@ import { ClipboardCheck, Filter, ShieldAlert, ChevronLeft, ChevronRight, X, Aler
 import { getAdminAssessments } from '@/actions/admin-actions';
 import { getToken, logout } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import type { AdminAssessmentsResponse } from '@/actions/admin-actions';
+import type { AdminAssessmentsData } from '@/actions/admin-actions';
 import { Button } from '@/components/ui/button';
 
-type AssessmentItem = AdminAssessmentsResponse['data']['assessments'][number];
+type AssessmentItem = AdminAssessmentsData['assessments'][number];
 
 function safeParse(data: any): any {
   if (!data) return null;
@@ -23,7 +23,7 @@ function safeParse(data: any): any {
 export function AssessmentsClient() {
   const router = useRouter();
   
-  const [data, setData] = useState<AdminAssessmentsResponse['data'] | null>(null);
+  const [data, setData] = useState<AdminAssessmentsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,7 +54,7 @@ export function AssessmentsClient() {
         { role, categoryResult, page, limit },
         token
       );
-      setData(response.data);
+      setData(response);
     } catch (err: any) {
       if (err.message.includes('401') || err.message.toLowerCase().includes('sesi') || err.message.toLowerCase().includes('unauthorized')) {
         logout();
@@ -87,18 +87,33 @@ export function AssessmentsClient() {
     return 'bg-surface-container text-on-surface-variant';
   };
 
-  const assessments = data?.assessments ?? [];
-  const pagination = data?.pagination ?? {
+  const defaultPagination = {
     page: 1,
     limit,
     total: 0,
     totalPages: 0,
   };
+  const assessments = data?.assessments ?? [];
+  const pagination = data?.pagination ?? defaultPagination;
 
   const getAssessmentUserName = (item: any) => item.userName ?? item.user?.name ?? '-';
   const getAssessmentUserEmail = (item: any) => item.userEmail ?? item.user?.email ?? '-';
   const getAssessmentUserRole = (item: any) => item.userRole ?? item.user?.role ?? '-';
-  const getAssessmentChildName = (item: any) => item.childName ?? item.childProfile?.name ?? null;
+  const getAssessmentChildName = (item: any) => item.childName ?? item.childProfile?.name ?? '-';
+  const getAssessmentScore = (item: any) => Number(item.overallScore ?? 0);
+
+  const formatDate = (value?: string) => {
+    if (!value) return '-';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
 
   return (
     <div className="flex flex-col gap-6 relative">
@@ -184,6 +199,7 @@ export function AssessmentsClient() {
                     const userEmail = getAssessmentUserEmail(item);
                     const userRole = getAssessmentUserRole(item);
                     const childName = getAssessmentChildName(item);
+                    const overallScore = getAssessmentScore(item);
 
                     return (
                       <tr key={item.id} className="hover:bg-surface-container-lowest transition-colors">
@@ -200,17 +216,17 @@ export function AssessmentsClient() {
                         </td>
 
                         <td className="px-5 py-3">
-                          {childName ? (
+                          {childName !== '-' ? (
                             <div className="flex flex-col">
                               <span className="font-bold text-on-surface text-[12px]">{childName}</span>
                             </div>
                           ) : (
-                            <span className="text-[11px] text-on-surface-variant italic">N/A</span>
+                            <span className="text-[11px] text-on-surface-variant italic">-</span>
                           )}
                         </td>
 
                         <td className="px-5 py-3 text-center font-black text-[15px] text-on-surface">
-                          {Math.round(Number(item.overallScore ?? 0))}
+                          {Math.round(overallScore)}
                         </td>
 
                         <td className="px-5 py-3">
@@ -220,13 +236,7 @@ export function AssessmentsClient() {
                         </td>
 
                         <td className="px-5 py-3 text-on-surface-variant text-[11px] whitespace-nowrap">
-                          {item.createdAt
-                            ? new Date(item.createdAt).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              })
-                            : '-'}
+                          {formatDate(item.createdAt)}
                         </td>
 
                         <td className="px-5 py-3 text-right">
@@ -248,16 +258,16 @@ export function AssessmentsClient() {
           </div>
           
           {/* Pagination */}
-          {data && data.pagination.totalPages > 1 && (
+          {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-outline-variant/20 bg-surface-container-lowest">
               <span className="text-xs text-on-surface-variant font-medium">
-                Halaman {data.pagination.page} dari {data.pagination.totalPages}
+                Halaman {pagination.page} dari {pagination.totalPages}
               </span>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   className="rounded-xl px-3 py-1.5 h-auto text-xs"
-                  disabled={data.pagination.page <= 1 || loading}
+                  disabled={pagination.page <= 1 || loading}
                   onClick={() => setPage(p => p - 1)}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -265,7 +275,7 @@ export function AssessmentsClient() {
                 <Button
                   variant="outline"
                   className="rounded-xl px-3 py-1.5 h-auto text-xs"
-                  disabled={data.pagination.page >= data.pagination.totalPages || loading}
+                  disabled={pagination.page >= pagination.totalPages || loading}
                   onClick={() => setPage(p => p + 1)}
                 >
                   <ChevronRight className="h-4 w-4" />
@@ -294,7 +304,7 @@ export function AssessmentsClient() {
               <div className="flex flex-col gap-5">
                 <div className="flex items-center gap-4">
                   <div className={`flex h-14 w-14 items-center justify-center rounded-[16px] text-2xl font-black ${getCategoryColor(selectedAssessment.categoryResult)}`}>
-                    {Math.round(selectedAssessment.overallScore)}
+                    {Math.round(getAssessmentScore(selectedAssessment))}
                   </div>
                   <div>
                     <h3 className="font-black text-on-surface">
@@ -317,7 +327,8 @@ export function AssessmentsClient() {
                   <h4 className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Area Fokus</h4>
                   {(() => {
                     const parsedFocus = safeParse(selectedAssessment.focusAreas);
-                    if (!parsedFocus || !Array.isArray(parsedFocus) || parsedFocus.length === 0) {
+                    const focusAreas = Array.isArray(parsedFocus) ? parsedFocus : [];
+                    if (focusAreas.length === 0) {
                       return (
                         <div className="flex items-center gap-2 p-3 rounded-xl bg-surface-container-lowest text-on-surface-variant text-sm">
                           <AlertTriangle className="h-4 w-4" /> Data detail area fokus belum tersedia.
@@ -326,7 +337,7 @@ export function AssessmentsClient() {
                     }
                     return (
                       <div className="flex flex-wrap gap-2">
-                        {parsedFocus.map((f: string, i: number) => (
+                        {focusAreas.map((f: string, i: number) => (
                           <span key={i} className="px-3 py-1 bg-secondary-container text-on-secondary-container rounded-lg text-xs font-bold">
                             {f}
                           </span>
@@ -341,7 +352,8 @@ export function AssessmentsClient() {
                   <h4 className="text-xs font-black uppercase tracking-wide text-on-surface-variant">Data Keterampilan</h4>
                   {(() => {
                     const parsedSkills = safeParse(selectedAssessment.skillsData);
-                    if (!parsedSkills || typeof parsedSkills !== 'object' || Object.keys(parsedSkills).length === 0) {
+                    const skillsData = parsedSkills && typeof parsedSkills === 'object' ? parsedSkills : {};
+                    if (Object.keys(skillsData).length === 0) {
                       return (
                         <div className="flex items-center gap-2 p-3 rounded-xl bg-surface-container-lowest text-on-surface-variant text-sm">
                           <AlertTriangle className="h-4 w-4" /> Data detail keterampilan belum tersedia.
@@ -350,7 +362,7 @@ export function AssessmentsClient() {
                     }
                     return (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {Object.entries(parsedSkills).map(([skill, data]: [string, any], i: number) => (
+                        {Object.entries(skillsData).map(([skill, data]: [string, any], i: number) => (
                           <div key={i} className="p-3 border border-outline-variant/30 rounded-xl bg-surface-container-lowest flex items-center justify-between">
                             <span className="text-sm font-bold text-on-surface truncate pr-2">{skill}</span>
                             <span className={`text-xs font-black px-2 py-1 rounded-md ${

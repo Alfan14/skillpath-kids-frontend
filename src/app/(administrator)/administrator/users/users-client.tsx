@@ -5,13 +5,13 @@ import { Users, Search, Filter, ShieldAlert, ChevronLeft, ChevronRight, User } f
 import { getAdminUsers } from '@/actions/admin-actions';
 import { getToken, logout } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import type { AdminUsersResponse } from '@/actions/admin-actions';
+import type { AdminUsersData } from '@/actions/admin-actions';
 import { Button } from '@/components/ui/button';
 
 export function UsersClient() {
   const router = useRouter();
   
-  const [data, setData] = useState<AdminUsersResponse['data'] | null>(null);
+  const [data, setData] = useState<AdminUsersData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +50,7 @@ export function UsersClient() {
         { role, search: debouncedSearch, page, limit },
         token
       );
-      setData(response.data);
+      setData(response);
     } catch (err: any) {
       if (err.message.includes('401') || err.message.toLowerCase().includes('sesi') || err.message.toLowerCase().includes('unauthorized')) {
         logout();
@@ -71,17 +71,31 @@ export function UsersClient() {
 
   const roleColors: Record<string, string> = {
     ADMINISTRATOR: 'bg-error-container text-error',
-    TEACHER: 'bg-primary-container text-primary',
+    TEACHER: 'bg-primary-container text-on-primary-container',
     PARENT: 'bg-secondary-container text-on-secondary-container',
-    STUDENT: 'bg-tertiary-container text-tertiary',
+    STUDENT: 'bg-tertiary-container text-on-tertiary-container',
   };
 
-  const users = data?.users ?? [];
-  const pagination = data?.pagination ?? {
+  const defaultPagination = {
     page: 1,
     limit,
     total: 0,
     totalPages: 0,
+  };
+  const users = data?.users ?? [];
+  const pagination = data?.pagination ?? defaultPagination;
+
+  const formatDate = (value?: string) => {
+    if (!value) return '-';
+
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '-';
+
+    return date.toLocaleDateString('id-ID', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   return (
@@ -179,13 +193,7 @@ export function UsersClient() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-on-surface-variant text-[12px]">
-                        {user.createdAt
-                          ? new Date(user.createdAt).toLocaleDateString('id-ID', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })
-                          : '-'}
+                        {formatDate(user.createdAt)}
                       </td>
                     </tr>
                   ))
@@ -195,16 +203,16 @@ export function UsersClient() {
           </div>
           
           {/* Pagination */}
-          {data && data.pagination.totalPages > 1 && (
+          {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-outline-variant/20 bg-surface-container-lowest">
               <span className="text-xs text-on-surface-variant font-medium">
-                Halaman {data.pagination.page} dari {data.pagination.totalPages}
+                Halaman {pagination.page} dari {pagination.totalPages}
               </span>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   className="rounded-xl px-3 py-1.5 h-auto text-xs"
-                  disabled={data.pagination.page <= 1 || loading}
+                  disabled={pagination.page <= 1 || loading}
                   onClick={() => setPage(p => p - 1)}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -212,7 +220,7 @@ export function UsersClient() {
                 <Button
                   variant="outline"
                   className="rounded-xl px-3 py-1.5 h-auto text-xs"
-                  disabled={data.pagination.page >= data.pagination.totalPages || loading}
+                  disabled={pagination.page >= pagination.totalPages || loading}
                   onClick={() => setPage(p => p + 1)}
                 >
                   <ChevronRight className="h-4 w-4" />

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BadgePill } from '@/components/ui/badge';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { FileText, Plus, Edit2, Trash2, X } from 'lucide-react';
 import { FileForm } from '@/components/forms/file-form';
 import { deleteFile } from '@/actions/file-actions';
 import { useRouter } from 'next/navigation';
@@ -52,26 +52,6 @@ export function FilesClient({ files }: { files: Worksheet[] }) {
     }
   };
 
-  if (isFormOpen) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-primary">
-            {editingFile ? 'Edit Worksheet' : 'Tambah Worksheet Baru'}
-          </h2>
-          <Button variant="ghost" onClick={() => setIsFormOpen(false)}>
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
-        <FileForm 
-          initialData={editingFile} 
-          onSuccess={() => setIsFormOpen(false)}
-          onCancel={() => setIsFormOpen(false)}
-        />
-      </Card>
-    );
-  }
-
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -117,6 +97,44 @@ export function FilesClient({ files }: { files: Worksheet[] }) {
           ))
         )}
       </div>
+
+      {isFormOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="relative flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-[24px] bg-white shadow-[0_24px_64px_rgba(0,0,0,0.18)]">
+            <div className="shrink-0 flex items-start justify-between gap-3 border-b border-outline-variant/20 bg-white px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-primary-container shadow-[0_4px_0_0_#d4e3ff]">
+                  <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-on-surface">
+                    {editingFile ? 'Edit File' : 'Tambah File'}
+                  </h2>
+                  <p className="text-[11px] text-on-surface-variant">
+                    Kelola materi worksheet dan file pembelajaran.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFormOpen(false)}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-outline-variant/40 text-on-surface-variant transition-colors hover:bg-surface-container-low"
+                aria-label="Tutup form"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+              <FileForm
+                initialData={editingFile}
+                onSuccess={() => setIsFormOpen(false)}
+                onCancel={() => setIsFormOpen(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {isDeleteModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">

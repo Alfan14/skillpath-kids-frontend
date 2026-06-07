@@ -40,15 +40,69 @@ export const ICON_OPTIONS: { value: string; label: string; Icon: React.ElementTy
   { value: 'BarChart3',    label: 'BarChart3',    Icon: BarChart3    },
 ];
 
-export const COLOR_OPTIONS: { value: string; label: string; bg: string; fg: string; swatch: string }[] = [
-  { value: 'bg-primary-container',   label: 'Primary Blue',   bg: 'bg-primary-container',   fg: 'text-primary',                swatch: '#d4e3ff' },
-  { value: 'bg-tertiary-container',  label: 'Soft Green',     bg: 'bg-tertiary-container',  fg: 'text-tertiary',               swatch: '#96f89f' },
-  { value: 'bg-secondary-container', label: 'Soft Yellow',    bg: 'bg-secondary-container', fg: 'text-on-secondary-container', swatch: '#ffe173' },
-  { value: 'bg-error-container',     label: 'Soft Red',       bg: 'bg-error-container',     fg: 'text-error',                  swatch: '#ffd6d6' },
-  { value: 'bg-[#f3e8ff]',           label: 'Soft Purple',    bg: 'bg-[#f3e8ff]',           fg: 'text-[#6d28d9]',             swatch: '#f3e8ff' },
-  { value: 'bg-[#fff3e0]',           label: 'Soft Orange',    bg: 'bg-[#fff3e0]',           fg: 'text-[#c2410c]',             swatch: '#fff3e0' },
-  { value: 'bg-[#fce7f3]',           label: 'Soft Pink',      bg: 'bg-[#fce7f3]',           fg: 'text-[#be185d]',             swatch: '#fce7f3' },
-  { value: 'bg-surface-container',   label: 'Neutral Gray',   bg: 'bg-surface-container',   fg: 'text-on-surface-variant',    swatch: '#e0f0fa' },
+export const COLOR_OPTIONS: {
+  value: string;
+  label: string;
+  bg: string;
+  fg: string;
+  swatch: string;
+}[] = [
+  {
+    value: 'bg-[#d4e3ff]',
+    label: 'Primary Blue',
+    bg: 'bg-[#d4e3ff]',
+    fg: 'text-[#004883]',
+    swatch: '#d4e3ff',
+  },
+  {
+    value: 'bg-[#96f89f]',
+    label: 'Soft Green',
+    bg: 'bg-[#96f89f]',
+    fg: 'text-[#00531d]',
+    swatch: '#96f89f',
+  },
+  {
+    value: 'bg-[#ffe173]',
+    label: 'Soft Yellow',
+    bg: 'bg-[#ffe173]',
+    fg: 'text-[#0f1d24]',
+    swatch: '#ffe173',
+  },
+  {
+    value: 'bg-[#ffd6d6]',
+    label: 'Soft Red',
+    bg: 'bg-[#ffd6d6]',
+    fg: 'text-[#b91c1c]',
+    swatch: '#ffd6d6',
+  },
+  {
+    value: 'bg-[#f3e8ff]',
+    label: 'Soft Purple',
+    bg: 'bg-[#f3e8ff]',
+    fg: 'text-[#6d28d9]',
+    swatch: '#f3e8ff',
+  },
+  {
+    value: 'bg-[#fff3e0]',
+    label: 'Soft Orange',
+    bg: 'bg-[#fff3e0]',
+    fg: 'text-[#c2410c]',
+    swatch: '#fff3e0',
+  },
+  {
+    value: 'bg-[#fce7f3]',
+    label: 'Soft Pink',
+    bg: 'bg-[#fce7f3]',
+    fg: 'text-[#be185d]',
+    swatch: '#fce7f3',
+  },
+  {
+    value: 'bg-[#e0f0fa]',
+    label: 'Neutral Gray',
+    bg: 'bg-[#e0f0fa]',
+    fg: 'text-[#414751]',
+    swatch: '#e0f0fa',
+  },
 ];
 
 export const CATEGORY_OPTIONS = [

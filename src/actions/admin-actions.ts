@@ -26,7 +26,7 @@ export interface AdminUsersResponse {
   success: boolean;
   message: string;
   data: {
-    users: Array<{
+    data: Array<{
       id: string;
       name: string;
       email: string;
@@ -42,19 +42,30 @@ export interface AdminUsersResponse {
   };
 }
 
+export interface AdminUsersData {
+  users: AdminUsersResponse['data']['data'];
+  pagination: AdminUsersResponse['data']['pagination'];
+}
+
 export interface AdminAssessmentsResponse {
   success: boolean;
   message: string;
   data: {
-    assessments: Array<{
+    data: Array<{
       id: string;
-      overallScore: number;
+      userId?: string;
+      userName?: string | null;
+      userEmail?: string | null;
+      userRole?: string | null;
+      childProfileId?: string | null;
+      childName?: string | null;
+      overallScore: number | string | null;
       categoryResult: string;
-      focusSummary: string;
+      focusSummary: string | null;
       focusAreas: any;
       skillsData: any;
       createdAt: string;
-      user: {
+      user?: {
         id: string;
         name: string;
         email: string;
@@ -72,6 +83,11 @@ export interface AdminAssessmentsResponse {
       totalPages: number;
     };
   };
+}
+
+export interface AdminAssessmentsData {
+  assessments: AdminAssessmentsResponse['data']['data'];
+  pagination: AdminAssessmentsResponse['data']['pagination'];
 }
 
 export async function getAdminOverview(token: string): Promise<AdminOverviewResponse> {
@@ -92,7 +108,7 @@ export async function getAdminOverview(token: string): Promise<AdminOverviewResp
 export async function getAdminUsers(
   params: { role?: string; search?: string; page?: number; limit?: number },
   token: string
-): Promise<AdminUsersResponse> {
+): Promise<AdminUsersData> {
   const searchParams = new URLSearchParams();
   if (params.role && params.role !== 'Semua') searchParams.set('role', params.role);
   if (params.search) searchParams.set('search', params.search);
@@ -106,17 +122,26 @@ export async function getAdminUsers(
     cache: 'no-store',
   });
 
-  const data = await response.json();
+  const data: AdminUsersResponse = await response.json();
   if (!response.ok) {
     throw new Error(data.message || 'Gagal mengambil data users');
   }
-  return data;
+
+  return {
+    users: data.data?.data ?? [],
+    pagination: data.data?.pagination ?? {
+      page: 1,
+      limit: params.limit ?? 10,
+      total: 0,
+      totalPages: 0,
+    },
+  };
 }
 
 export async function getAdminAssessments(
   params: { role?: string; categoryResult?: string; page?: number; limit?: number },
   token: string
-): Promise<AdminAssessmentsResponse> {
+): Promise<AdminAssessmentsData> {
   const searchParams = new URLSearchParams();
   if (params.role && params.role !== 'Semua') searchParams.set('role', params.role);
   if (params.categoryResult && params.categoryResult !== 'Semua') searchParams.set('categoryResult', params.categoryResult);
@@ -130,9 +155,18 @@ export async function getAdminAssessments(
     cache: 'no-store',
   });
 
-  const data = await response.json();
+  const data: AdminAssessmentsResponse = await response.json();
   if (!response.ok) {
     throw new Error(data.message || 'Gagal mengambil data assessments');
   }
-  return data;
+
+  return {
+    assessments: data.data?.data ?? [],
+    pagination: data.data?.pagination ?? {
+      page: 1,
+      limit: params.limit ?? 10,
+      total: 0,
+      totalPages: 0,
+    },
+  };
 }
