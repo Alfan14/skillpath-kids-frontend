@@ -1,8 +1,17 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ChevronRight, History as HistoryIcon, AlertCircle, ClipboardCheck } from 'lucide-react';
 import { SkillProgressBar } from '@/components/ui/skill-progress-bar';
 import { Button } from '@/components/ui/button';
-import { HistoryResult } from '@/types';
+import {
+  getParentResults,
+  ParentResultsError,
+  type ParentResult,
+} from '@/actions/parent-actions';
+import { getSession, getToken, logout } from '@/lib/auth';
+import { safeParseObject } from '@/lib/result-parsers';
 
 function scoreToStatusConfig(score: number): 'excellent' | 'warning' | 'low' | 'new' {
   if (score >= 80) return 'excellent';
@@ -18,21 +27,107 @@ function getRecommendation(skill: string, score: number): string {
   return 'Mulai aktivitas untuk area ini.';
 }
 
-export async function DashboardProgress() {
-  let history: HistoryResult[] = [];
+function readStoredResult(): ParentResult | null {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/results/history?limit=1`, {
-      cache: 'no-store',
-    });
-    if (res.ok) {
-      const json = await res.json();
-      history = json.data || [];
+    const raw = sessionStorage.getItem('assessment_result');
+    return raw ? (JSON.parse(raw) as ParentResult) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function DashboardProgress() {
+  const [latestResult, setLatestResult] = useState<ParentResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function fetchLatestResult() {
+      setLoading(true);
+      setError(null);
+
+      const token = getToken();
+      if (!token) {
+        if (active) {
+          setLatestResult(null);
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await getParentResults({ page: 1, limit: 1 }, token);
+        if (!active) return;
+
+        setLatestResult(response.data.results[0] ?? null);
+      } catch (err) {
+        if (!active) return;
+
+        const session = getSession();
+        const storedResult = readStoredResult();
+
+        if (err instanceof ParentResultsError && err.status === 401) {
+          logout();
+          return;
+        }
+
+        if (err instanceof ParentResultsError && err.status === 403) {
+          if (session?.role === 'STUDENT') {
+            setLatestResult(storedResult);
+            setError(null);
+          } else {
+            setLatestResult(null);
+            setError('Akses ditolak. Anda tidak memiliki izin untuk melihat hasil asesmen.');
+          }
+          return;
+        }
+
+        setLatestResult(storedResult);
+        if (!storedResult) {
+          setError('Gagal memuat progress asesmen.');
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
     }
-  } catch (err) {
-    // suppress errors to avoid raw JSON in UX
+
+    fetchLatestResult();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (loading) {
+    return <DashboardProgressSkeleton />;
   }
 
-  if (history.length === 0) {
+  if (error && !latestResult) {
+    return (
+      <section aria-labelledby="progress-heading" className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <h2
+            id="progress-heading"
+            className="flex items-center gap-2 text-xl font-black text-on-surface"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-container">
+              <HistoryIcon className="h-4 w-4 text-primary" aria-hidden="true" />
+            </div>
+            Progress Anak
+          </h2>
+        </div>
+
+        <div className="flex flex-col items-center justify-center gap-3 rounded-[22px] border-2 border-dashed border-error/30 bg-white p-8 text-center">
+          <AlertCircle className="h-10 w-10 text-error" aria-hidden="true" />
+          <p className="text-base font-bold text-on-surface">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!latestResult) {
     return (
       <section aria-labelledby="progress-heading" className="flex flex-col gap-4">
 
@@ -51,8 +146,8 @@ export async function DashboardProgress() {
 
         {/* empty state card */}
         <div className="flex flex-col items-center justify-center gap-5 rounded-[22px] border-2 border-dashed border-primary-container bg-surface-container-lowest p-8 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-secondary shadow-[0_4px_0_0_#e8c426]">
-            <ClipboardCheck className="h-8 w-8 text-on-surface" aria-hidden="true" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-[#ffe173] shadow-[0_4px_0_0_rgba(15,29,36,0.12)]">
+            <ClipboardCheck className="h-8 w-8 text-[#0f1d24]" aria-hidden="true" />
           </div>
           <div>
             <p className="text-base font-bold text-on-surface">Belum ada asesmen</p>
@@ -72,10 +167,10 @@ export async function DashboardProgress() {
     );
   }
 
-  const latest = history[0];
-  const motorik = latest.skillsData?.motorik ?? 0;
-  const bahasa = latest.skillsData?.bahasa ?? 0;
-  const sosial = latest.skillsData?.sosial ?? 0;
+  const skillsData = safeParseObject(latestResult.skillsData);
+  const motorik = skillsData.motorik ?? skillsData.motorikKasar ?? 0;
+  const bahasa = skillsData.bahasa ?? 0;
+  const sosial = skillsData.sosial ?? 0;
 
   const progressData = [
     { label: 'Motorik', value: motorik, status: scoreToStatusConfig(motorik), recommendation: getRecommendation('Motorik', motorik) },

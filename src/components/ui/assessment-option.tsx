@@ -7,15 +7,17 @@ export interface AssessmentOptionProps {
   value: LikertValue;
   selected: boolean;
   onSelect: (val: LikertValue) => void;
+  variant?: 'default' | 'teacher';
   'aria-label': string;
   tabIndex?: number;
   onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
+  'data-value'?: LikertValue;
   // A forwardRef would be ideal here if the parent needs direct DOM access,
   // but we can also use a callback ref or let the parent query the DOM.
 }
 
 export const AssessmentOption = React.forwardRef<HTMLButtonElement, AssessmentOptionProps>(
-  ({ value, selected, onSelect, 'aria-label': ariaLabel, tabIndex = -1, onKeyDown }, ref) => {
+  ({ value, selected, onSelect, 'aria-label': ariaLabel, tabIndex = -1, onKeyDown, 'data-value': dataValue }, ref) => {
     
     // Map values to display labels (you can adjust these or pass them as children)
     const displayLabels: Record<LikertValue, string> = {
@@ -28,9 +30,26 @@ export const AssessmentOption = React.forwardRef<HTMLButtonElement, AssessmentOp
     // Use similar squishy-press mechanics from your BigTouchButton
     const baseStyles = 'relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl font-bold text-lg transition-all duration-150 select-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:ring-offset-2';
     
-    const unselectedStyles = 'bg-white border-2 border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300 shadow-[0_4px_0_rgba(0,0,0,0.05)] active:shadow-[0_2px_0_rgba(0,0,0,0.05)] active:translate-y-[2px]';
-    
-    const selectedStyles = 'bg-blue-600 border-2 border-blue-600 text-white shadow-[0_4px_0_rgba(37,99,235,0.3)] active:shadow-[0_2px_0_rgba(37,99,235,0.3)] active:translate-y-[2px]';
+    const answerStyles: Record<LikertValue, { unselected: string; selected: string }> = {
+      SS: {
+        unselected: 'border-2 border-[#96f89f] bg-[#96f89f] text-[#00531d] shadow-[0_4px_0_rgba(0,83,29,0.18)] hover:bg-[#83ee8e]',
+        selected: 'border-2 border-[#00531d] bg-[#96f89f] text-[#00531d] shadow-[0_4px_0_rgba(0,83,29,0.22)] ring-4 ring-[#96f89f]/35',
+      },
+      S: {
+        unselected: 'border-2 border-[#d4e3ff] bg-[#d4e3ff] text-[#004883] shadow-[0_4px_0_rgba(0,72,131,0.16)] hover:bg-[#c4d9ff]',
+        selected: 'border-2 border-[#004883] bg-[#d4e3ff] text-[#004883] shadow-[0_4px_0_rgba(0,72,131,0.22)] ring-4 ring-[#d4e3ff]/60',
+      },
+      TS: {
+        unselected: 'border-2 border-[#ffe173] bg-[#ffe173] text-[#0f1d24] shadow-[0_4px_0_rgba(15,29,36,0.14)] hover:bg-[#ffd84d]',
+        selected: 'border-2 border-[#0f1d24] bg-[#ffe173] text-[#0f1d24] shadow-[0_4px_0_rgba(15,29,36,0.2)] ring-4 ring-[#ffe173]/45',
+      },
+      STS: {
+        unselected: 'border-2 border-error/30 bg-error-container text-on-error-container shadow-[0_4px_0_rgba(147,0,10,0.14)] hover:bg-error-container/90',
+        selected: 'border-2 border-error bg-error-container text-on-error-container shadow-[0_4px_0_rgba(147,0,10,0.2)] ring-4 ring-error/20',
+      },
+    };
+
+    const optionStyles = selected ? answerStyles[value].selected : answerStyles[value].unselected;
 
     return (
       <button
@@ -40,9 +59,10 @@ export const AssessmentOption = React.forwardRef<HTMLButtonElement, AssessmentOp
         aria-checked={selected}
         aria-label={ariaLabel}
         tabIndex={tabIndex} // -1 for unselected, 0 for selected (roving tabindex)
+        data-value={dataValue}
         onClick={() => onSelect(value)}
         onKeyDown={onKeyDown}
-        className={`${baseStyles} ${selected ? selectedStyles : unselectedStyles}`}
+        className={`${baseStyles} ${optionStyles}`}
       >
         {displayLabels[value]}
       </button>
@@ -59,6 +79,7 @@ interface AssessmentGroupProps {
   questionText: string;
   selectedValue: LikertValue | null;
   onChange: (val: LikertValue) => void;
+  variant?: 'default' | 'teacher';
 }
 
 export const AssessmentGroup: React.FC<AssessmentGroupProps> = ({
@@ -66,6 +87,7 @@ export const AssessmentGroup: React.FC<AssessmentGroupProps> = ({
   questionText,
   selectedValue,
   onChange,
+  variant = 'default',
 }) => {
   const options: { value: LikertValue; label: string }[] = [
     { value: 'SS', label: 'Sangat Setuju, nilai 4' },
@@ -135,6 +157,7 @@ export const AssessmentGroup: React.FC<AssessmentGroupProps> = ({
               value={opt.value}
               selected={isSelected}
               onSelect={onChange}
+              variant={variant}
               aria-label={opt.label}
               tabIndex={isFocusable ? 0 : -1}
               data-value={opt.value} // Used for the querySelector focus shift

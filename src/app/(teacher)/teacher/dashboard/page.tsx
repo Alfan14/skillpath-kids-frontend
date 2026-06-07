@@ -19,13 +19,10 @@ export default function TeacherDashboardPage() {
             <h1 className="text-2xl font-black italic leading-tight md:text-4xl">
               Evaluasi kompetensi guru dengan bank soal advanced.
             </h1>
-            <p className="mt-3 text-sm font-medium text-primary-container md:text-base">
-              Modul ini memakai flow mirip parent/student, tetapi pertanyaan difilter ke level TEACHER.
-            </p>
           </div>
           <Link
             href="/teacher/assessment"
-            className="inline-flex items-center justify-center gap-2 rounded-[18px] bg-secondary px-5 py-3 text-sm font-black text-on-surface shadow-[0_5px_0_0_#e8c426]"
+            className="inline-flex items-center justify-center gap-2 rounded-[18px] border border-[#e8c426] bg-[#ffe173] px-5 py-3 text-sm font-black text-[#0f1d24] shadow-[0_5px_0_0_#d9b739] transition-colors hover:bg-[#ffd84d]"
           >
             Mulai Assessment
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -35,8 +32,8 @@ export default function TeacherDashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-3">
         {[
-          { label: 'Level Soal', value: 'Teacher', icon: ClipboardCheck, bg: 'bg-primary-container', text: 'text-primary' },
-          { label: 'Fokus', value: 'Professional', icon: Sparkles, bg: 'bg-tertiary-container', text: 'text-tertiary' },
+          { label: 'Level Soal', value: 'Teacher', icon: ClipboardCheck, bg: 'bg-[#96f89f]', text: 'text-[#00531d]' },
+          { label: 'Fokus Soal', value: 'Professional', icon: Sparkles, bg: 'bg-[#ffe173]', text: 'text-[#0f1d24]' },
           { label: 'Hasil', value: 'Riwayat pribadi', icon: BarChart3, bg: 'bg-secondary-container', text: 'text-on-secondary-container' },
         ].map(({ label, value, icon: Icon, bg, text }) => (
           <div key={label} className="rounded-[18px] border border-outline-variant/30 bg-white p-5">

@@ -21,41 +21,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(auth)/login/page.js"
     ],
-    "/(administrator)/administrator/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(administrator)/administrator/layout.js"
-    ],
-    "/(administrator)/administrator/dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(administrator)/administrator/dashboard/page.js"
-    ],
-    "/(administrator)/administrator/users/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(administrator)/administrator/users/page.js"
-    ],
-    "/(administrator)/administrator/assessments/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(administrator)/administrator/assessments/page.js"
-    ],
-    "/(administrator)/administrator/questions/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(administrator)/administrator/questions/page.js"
-    ],
-    "/(administrator)/administrator/tips/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(administrator)/administrator/tips/page.js"
-    ],
-    "/(administrator)/administrator/files/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(administrator)/administrator/files/page.js"
-    ],
     "/(teacher)/teacher/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -66,15 +31,30 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(teacher)/teacher/dashboard/page.js"
     ],
-    "/(teacher)/teacher/assessment/page": [
+    "/(teacher)/teacher/tips/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(teacher)/teacher/assessment/page.js"
+      "static/chunks/app/(teacher)/teacher/tips/page.js"
     ],
-    "/(teacher)/teacher/results/page": [
+    "/(shop)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(teacher)/teacher/results/page.js"
+      "static/chunks/app/(shop)/layout.js"
+    ],
+    "/(shop)/worksheets/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(shop)/worksheets/page.js"
+    ],
+    "/(dashboard)/assessment/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/assessment/page.js"
+    ],
+    "/(dashboard)/results/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/results/page.js"
     ],
     "/(dashboard)/tips/page": [
       "static/chunks/webpack.js",
@@ -85,6 +65,11 @@
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/files/page.js"
+    ],
+    "/(dashboard)/achievements/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/achievements/page.js"
     ]
   }
 }

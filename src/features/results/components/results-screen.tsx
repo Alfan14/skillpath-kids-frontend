@@ -2,13 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Trophy, AlertCircle, LineChart } from 'lucide-react';
+import { Trophy, AlertCircle, LineChart, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, KidCard } from '@/components/ui/card';
 import { BadgePill } from '@/components/ui/badge';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { SkillProgressBar } from '@/components/ui/skill-progress-bar';
-import type { HistoryResult, SkillResult } from '@/types';
+import {
+  getParentResults,
+  ParentResultsError,
+  type ParentResult,
+} from '@/actions/parent-actions';
+import { getSession, getToken, logout } from '@/lib/auth';
+import { formatSkillLabel, safeParseArray, safeParseObject } from '@/lib/result-parsers';
 
 function scoreToStatus(score: number): 'excellent' | 'warning' | 'low' {
   if (score >= 80) return 'excellent';
@@ -16,10 +22,18 @@ function scoreToStatus(score: number): 'excellent' | 'warning' | 'low' {
   return 'low';
 }
 
-function getBarColor(status: string) {
-  if (status === 'Bagus') return 'text-tertiary';
-  if (status === 'Cukup') return 'text-secondary';
-  return 'text-error';
+function getScore(value: ParentResult['overallScore']) {
+  const score = Number(value ?? 0);
+  return Number.isFinite(score) ? Math.round(score) : 0;
+}
+
+function readStoredResult(): ParentResult | null {
+  try {
+    const raw = sessionStorage.getItem('assessment_result');
+    return raw ? (JSON.parse(raw) as ParentResult) : null;
+  } catch {
+    return null;
+  }
 }
 
 interface ResultsScreenProps {
@@ -35,16 +49,78 @@ export function ResultsScreen({
   title = 'Hasil Motorik Anak',
   subtitle = 'Mari lihat perkembangan si kecil hari ini.',
 }: ResultsScreenProps = {}) {
-  const [result, setResult] = useState<HistoryResult | null>(null);
+  const [result, setResult] = useState<ParentResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem('assessment_result');
-      if (raw) setResult(JSON.parse(raw));
-    } catch {
-      // Corrupt data
+    let active = true;
+
+    async function fetchLatestResult() {
+      setLoading(true);
+      setError(null);
+
+      const storedResult = readStoredResult();
+      const token = getToken();
+
+      if (!token) {
+        if (active) {
+          setResult(storedResult);
+          setLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await getParentResults({ page: 1, limit: 1 }, token);
+        if (!active) return;
+
+        setResult(response.data.results[0] ?? storedResult);
+      } catch (err) {
+        if (!active) return;
+
+        const session = getSession();
+
+        if (err instanceof ParentResultsError && err.status === 401) {
+          logout();
+          return;
+        }
+
+        if (err instanceof ParentResultsError && err.status === 403) {
+          if (session?.role === 'STUDENT') {
+            setResult(storedResult);
+            setError(null);
+          } else {
+            setResult(null);
+            setError('Akses ditolak. Anda tidak memiliki izin untuk melihat hasil asesmen.');
+          }
+          return;
+        }
+
+        setResult(storedResult);
+        if (!storedResult) {
+          setError('Gagal memuat hasil asesmen terbaru.');
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
     }
+
+    fetchLatestResult();
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        <p className="text-sm font-bold text-on-surface-variant">Memuat hasil asesmen...</p>
+      </div>
+    );
+  }
 
   if (!result) {
     return (
@@ -52,8 +128,10 @@ export function ResultsScreen({
         <div className="w-16 h-16 flex items-center justify-center rounded-full bg-secondary-container">
           <AlertCircle className="w-8 h-8 text-on-secondary-container" aria-hidden="true" />
         </div>
-        <h2 className="text-xl font-bold text-on-surface">No assessment yet</h2>
-        <p className="text-on-surface-variant">It looks like you haven't completed an assessment for your child.</p>
+        <h2 className="text-xl font-bold text-on-surface">Belum ada asesmen.</h2>
+        <p className="text-on-surface-variant">
+          {error ?? "It looks like you haven't completed an assessment for your child."}
+        </p>
         <Button variant="primary" asChild>
           <Link href={assessmentPath}>Start Assessment</Link>
         </Button>
@@ -61,40 +139,11 @@ export function ResultsScreen({
     );
   }
 
-  const overallScore = result.overallScore ?? 0;
+  const overallScore = getScore(result.overallScore);
   const category     = result.categoryResult ?? 'Unknown';
   const focusSummary = result.focusSummary ?? '';
-  const focusAreas   = result.focusAreas && result.focusAreas.length > 0 
-    ? result.focusAreas 
-    : [];
-
-  const motorikScore = result.skillsData?.motorik ?? 0;
-  const bahasaScore = result.skillsData?.bahasa ?? 0;
-  const sosialScore = result.skillsData?.sosial ?? 0;
-
-  const skills: SkillResult[] = [
-    {
-      label: "Motorik",
-      score: motorikScore,
-      status: scoreToStatus(motorikScore) as any,
-      color: 'bg-surface-container',
-      barColor: getBarColor(scoreToStatus(motorikScore))
-    },
-    {
-      label: "Bahasa & Komunikasi",
-      score: bahasaScore,
-      status: scoreToStatus(bahasaScore) as any,
-      color: 'bg-surface-container',
-      barColor: getBarColor(scoreToStatus(bahasaScore))
-    },
-    {
-      label: "Sosial & Emosional",
-      score: sosialScore,
-      status: scoreToStatus(sosialScore) as any,
-      color: 'bg-surface-container',
-      barColor: getBarColor(scoreToStatus(sosialScore))
-    }
-  ];
+  const focusAreas = safeParseArray(result.focusAreas);
+  const skillEntries = Object.entries(safeParseObject(result.skillsData));
 
   return (
     <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto">
@@ -163,14 +212,18 @@ export function ResultsScreen({
           <LineChart className="w-5 h-5 text-primary" aria-hidden="true" />
           Rincian Keterampilan
         </h2>
-        {skills.map((skill) => (
-          <SkillProgressBar
-            key={skill.label}
-            label={skill.label}
-            value={skill.score}
-            status={scoreToStatus(skill.score)}
-          />
-        ))}
+        {skillEntries.length > 0 ? (
+          skillEntries.map(([skill, score]) => (
+            <SkillProgressBar
+              key={skill}
+              label={formatSkillLabel(skill)}
+              value={Math.round(score)}
+              status={scoreToStatus(score)}
+            />
+          ))
+        ) : (
+          <p className="text-sm text-on-surface-variant">Data keterampilan belum tersedia.</p>
+        )}
       </Card>
 
       <div className="flex flex-col gap-3 w-full">

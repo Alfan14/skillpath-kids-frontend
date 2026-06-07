@@ -15,7 +15,7 @@ export function DashboardHero() {
     >
       {/* decorative blobs */}
       <div className="pointer-events-none absolute -right-10 -top-10 h-44 w-44 rounded-full bg-[#004883] opacity-40" />
-      <div className="pointer-events-none absolute -bottom-8 left-1/3 h-28 w-28 rounded-full bg-secondary opacity-20" />
+      <div className="pointer-events-none absolute -bottom-8 left-1/3 h-28 w-28 rounded-full bg-[#ffe173] opacity-60" />
 
       <div className="relative flex flex-col md:flex-row max-h-[320px] lg:max-h-[420px]">
 
@@ -39,7 +39,7 @@ export function DashboardHero() {
             <Button
               variant="secondary"
               size="lg"
-              className="rounded-[18px] font-black px-8 shadow-[0_5px_0_0_#e8c426]"
+              className="rounded-[18px] font-black px-8 shadow-[0_5px_0_0_rgba(15,29,36,0.12)]"
               asChild
             >
               <Link href="/assessment">Mulai Asesmen</Link>

@@ -7,10 +7,17 @@ import { AssessmentGroup } from '@/components/ui/assessment-option';
 import { useAssessment } from '../hooks/use-assessment';
 import { getIcon } from '@/lib/icon-map';
 
-const LIKERT_LEGEND = [
-  { code: 'SS', label: 'Sangat Setuju', score: '(4)', chipBg: 'bg-tertiary-container', chipText: 'text-on-tertiary-container' },
-  { code: 'S', label: 'Setuju', score: '(3)', chipBg: 'bg-primary-container', chipText: 'text-on-primary-container' },
-  { code: 'TS', label: 'Tidak Setuju', score: '(2)', chipBg: 'bg-secondary-container', chipText: 'text-on-secondary-container' },
+const DEFAULT_LIKERT_LEGEND = [
+  { code: 'SS', label: 'Sangat Setuju', score: '(4)', chipBg: 'bg-[#96f89f]', chipText: 'text-[#00531d]' },
+  { code: 'S', label: 'Setuju', score: '(3)', chipBg: 'bg-[#d4e3ff]', chipText: 'text-[#004883]' },
+  { code: 'TS', label: 'Tidak Setuju', score: '(2)', chipBg: 'bg-[#ffe173]', chipText: 'text-[#0f1d24]' },
+  { code: 'STS', label: 'Sangat Tidak Setuju', score: '(1)', chipBg: 'bg-error-container', chipText: 'text-on-error-container' },
+];
+
+const TEACHER_LIKERT_LEGEND = [
+  { code: 'SS', label: 'Sangat Setuju', score: '(4)', chipBg: 'bg-[#96f89f]', chipText: 'text-[#00531d]' },
+  { code: 'S', label: 'Setuju', score: '(3)', chipBg: 'bg-[#d4e3ff]', chipText: 'text-[#004883]' },
+  { code: 'TS', label: 'Tidak Setuju', score: '(2)', chipBg: 'bg-[#ffe173]', chipText: 'text-[#0f1d24]' },
   { code: 'STS', label: 'Sangat Tidak Setuju', score: '(1)', chipBg: 'bg-error-container', chipText: 'text-on-error-container' },
 ];
 
@@ -46,6 +53,8 @@ export function AssessmentScreen({
     prevPage,
     submitAssessment,
   } = useAssessment({ level, resultPath });
+  const isTeacher = level === 'TEACHER';
+  const likertLegend = isTeacher ? TEACHER_LIKERT_LEGEND : DEFAULT_LIKERT_LEGEND;
 
   return (
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
@@ -59,8 +68,8 @@ export function AssessmentScreen({
         {/* top row */}
         <div className="relative z-10 mb-4 flex items-center gap-3">
           {/* icon badge */}
-          <div className="flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[18px] bg-secondary shadow-[0_4px_0_0_#e8c426]">
-            <ClipboardCheck className="h-7 w-7 text-on-surface" aria-hidden="true" />
+          <div className={`flex h-[52px] w-[52px] shrink-0 items-center justify-center rounded-[18px] ${isTeacher ? 'bg-[#ffe173] shadow-[0_4px_0_0_#d9b739]' : 'bg-[#ffe173] shadow-[0_4px_0_0_rgba(15,29,36,0.12)]'}`}>
+            <ClipboardCheck className="h-7 w-7 text-[#0f1d24]" aria-hidden="true" />
           </div>
 
           <div className="flex flex-col">
@@ -73,9 +82,9 @@ export function AssessmentScreen({
           </div>
 
           {/* answered counter pill */}
-          <div className="ml-auto shrink-0 rounded-2xl bg-secondary px-4 py-1.5 text-center shadow-[0_4px_0_0_#e8c426]">
-            <p className="text-2xl font-black leading-none text-on-surface">{totalAnswered}</p>
-            <p className="text-[10px] font-bold text-on-surface-variant">dari {totalQuestions}</p>
+          <div className={`ml-auto shrink-0 rounded-2xl px-4 py-1.5 text-center ${isTeacher ? 'bg-[#ffe173] shadow-[0_4px_0_0_#d9b739]' : 'bg-[#ffe173] shadow-[0_4px_0_0_rgba(15,29,36,0.12)]'}`}>
+            <p className="text-2xl font-black leading-none text-[#0f1d24]">{totalAnswered}</p>
+            <p className="text-[10px] font-bold text-[#0f1d24]">dari {totalQuestions}</p>
           </div>
         </div>
 
@@ -87,12 +96,12 @@ export function AssessmentScreen({
         >
           <ProgressBar
             value={progress}
-            fillClass="bg-secondary"
+            fillClass={isTeacher ? 'bg-[#ffe173]' : 'bg-[#ffe173]'}
             heightClass="h-3.5"
             label={`Progres asesmen: ${progress}%`}
-            className="border-transparent bg-[#004883] shadow-none"
+            className={isTeacher ? 'border-transparent bg-[#d4e3ff] shadow-none' : 'border-transparent bg-[#004883] shadow-none'}
           />
-          <div className="mt-1.5 flex justify-between text-[11px] font-bold text-primary-container">
+          <div className={`mt-1.5 flex justify-between text-[11px] font-bold ${isTeacher ? 'text-[#0f1d24]' : 'text-[#004883]'}`}>
             <span>Mulai</span>
             <span>{progress}% selesai ⭐</span>
           </div>
@@ -115,7 +124,7 @@ export function AssessmentScreen({
 
       {/* ── Legend strip ─────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap gap-2 rounded-[18px] border-2 border-primary-container bg-white px-3 py-2.5">
-        {LIKERT_LEGEND.map(({ code, label, score, chipBg, chipText }) => (
+        {likertLegend.map(({ code, label, score, chipBg, chipText }) => (
           <div key={code} className="flex flex-1 basis-[40%] items-center gap-2">
             <span
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-[10px] font-black ${chipBg} ${chipText}`}
@@ -180,6 +189,7 @@ export function AssessmentScreen({
                 questionText={question.text}
                 selectedValue={answers[question.id] ?? null}
                 onChange={(val) => answer(question.id, val)}
+                variant={isTeacher ? 'teacher' : 'default'}
               />
             </div>
           );
