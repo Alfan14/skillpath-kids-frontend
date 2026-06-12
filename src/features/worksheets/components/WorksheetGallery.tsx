@@ -1,6 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
+
+import { APP_IMAGES } from '@/lib/assets';
 import { cn } from '@/lib/utils';
 import { parseGalleryImages } from '@/features/worksheets/utils/worksheet-parsers';
 
@@ -12,60 +15,74 @@ interface WorksheetGalleryProps {
   isPromo: boolean;
 }
 
-export function WorksheetGallery({ mainImage, galleryImages, title, isBestSeller, isPromo }: WorksheetGalleryProps) {
+export function WorksheetGallery({
+  mainImage,
+  galleryImages,
+  title,
+  isBestSeller,
+  isPromo,
+}: WorksheetGalleryProps) {
   const parsedGallery = parseGalleryImages(galleryImages);
-  
-  // Gather all available images. Main image first, then gallery images.
   const allImages = [];
   if (mainImage) allImages.push(mainImage);
-  allImages.push(...parsedGallery.filter(img => img !== mainImage));
+  allImages.push(...parsedGallery.filter((img) => img !== mainImage));
 
-  const [activeImage, setActiveImage] = useState<string | null>(allImages.length > 0 ? allImages[0] : null);
+  const [activeImage, setActiveImage] = useState<string | null>(
+    allImages.length > 0 ? allImages[0] : null
+  );
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Main Image */}
-      <div className="relative aspect-square w-full rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-hidden flex items-center justify-center">
+      <div className="relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-2xl border border-[#d4e3ff] bg-[#d4e3ff]/45">
         {activeImage ? (
-          <img 
-            src={activeImage} 
-            alt={title} 
-            className="w-full h-full object-cover"
+          <img
+            src={activeImage}
+            alt={title}
+            className="h-full w-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-primary/5 text-primary text-6xl">
-            📄
+          <div className="flex h-full w-full items-center justify-center p-8">
+            <Image
+              src={APP_IMAGES.worksheetLibrary}
+              alt="Ilustrasi worksheet"
+              width={320}
+              height={260}
+              className="h-auto w-full max-w-[260px]"
+            />
           </div>
         )}
-        
-        {/* Badges */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2">
+
+        <div className="absolute left-4 top-4 flex flex-col gap-2">
           {isBestSeller && (
-            <span className="bg-secondary-container text-on-secondary-container text-xs font-bold px-3 py-1 rounded-md shadow-sm uppercase tracking-wider">
-              ⭐ Best Seller
+            <span className="rounded-md bg-[#f3e8ff] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#6b21a8] shadow-sm">
+              Best Seller
             </span>
           )}
           {isPromo && (
-            <span className="bg-error text-white text-xs font-bold px-3 py-1 rounded-md shadow-sm uppercase tracking-wider">
+            <span className="rounded-md bg-[#ffd6d6] px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#ba1a1a] shadow-sm">
               Promo Spesial
             </span>
           )}
         </div>
       </div>
 
-      {/* Thumbnails */}
       {allImages.length > 1 && (
         <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
           {allImages.map((img, idx) => (
             <button
-              key={idx}
+              key={img}
+              type="button"
               onClick={() => setActiveImage(img)}
               className={cn(
-                "w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all",
-                activeImage === img ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
+                'h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border-2 transition-all',
+                activeImage === img ? 'border-[#004883]' : 'border-transparent opacity-70 hover:opacity-100'
               )}
             >
-              <img src={img} alt={`${title} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+              <img
+                src={img}
+                alt={`${title} thumbnail ${idx + 1}`}
+                className="h-full w-full object-cover"
+              />
             </button>
           ))}
         </div>

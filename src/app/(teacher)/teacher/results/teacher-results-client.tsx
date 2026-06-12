@@ -1,17 +1,26 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import {
   AlertTriangle,
   BarChart3,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  CheckCircle2,
   ClipboardCheck,
+  Eye,
+  GraduationCap,
   Loader2,
+  MessageCircle,
   RefreshCw,
   ShieldAlert,
+  Sparkles,
+  Target,
   User,
+  Users,
 } from 'lucide-react';
 
 import {
@@ -21,6 +30,7 @@ import {
   type TeacherResult,
 } from '@/actions/teacher-actions';
 import { Button } from '@/components/ui/button';
+import { APP_IMAGES } from '@/lib/assets';
 import { getToken, logout } from '@/lib/auth';
 
 const fallbackPagination: Pagination = {
@@ -104,14 +114,48 @@ function getCategoryColor(category?: string | null) {
   return 'bg-surface-container text-on-surface-variant';
 }
 
+function getScoreColor(score: number) {
+  if (score >= 85) return 'bg-[#96f89f] text-[#00531d]';
+  if (score >= 70) return 'bg-[#ffe173] text-[#0f1d24]';
+  return 'bg-[#ffd6d6] text-[#ba1a1a]';
+}
+
+function normalizeScore(score: number) {
+  return Math.min(100, Math.max(0, Math.round(score)));
+}
+
 function getSkillLabel(key: string) {
   const labels: Record<string, string> = {
     bahasa: 'Bahasa',
     sosial: 'Sosial',
     motorik: 'Motorik',
+    pedagogi: 'Pedagogi',
+    pedagogy: 'Pedagogi',
+    observasi: 'Observasi',
+    observation: 'Observasi',
+    komunikasi: 'Komunikasi',
+    communication: 'Komunikasi',
+    evaluasi: 'Evaluasi',
+    evaluation: 'Evaluasi',
+    classroom_management: 'Classroom Management',
   };
 
-  return labels[key] ?? key;
+  return labels[key] ?? key
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function getSkillIcon(skill: string) {
+  const normalized = skill.toLowerCase();
+
+  if (normalized.includes('pedagog')) return GraduationCap;
+  if (normalized.includes('observ')) return Eye;
+  if (normalized.includes('komunik') || normalized.includes('communication')) return MessageCircle;
+  if (normalized.includes('evalu')) return BarChart3;
+  if (normalized.includes('class') || normalized.includes('kelas')) return Users;
+
+  return ClipboardCheck;
 }
 
 export function TeacherResultsClient() {
@@ -165,39 +209,63 @@ export function TeacherResultsClient() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-xs font-black uppercase tracking-wide text-primary">Teacher results</p>
-          <h1 className="mt-1 text-2xl font-black text-on-surface">Hasil Assessment Guru</h1>
-          <p className="mt-1 max-w-2xl text-sm text-on-surface-variant">
-            Ringkasan hasil assessment
-          </p>
-        </div>
+      <section className="overflow-hidden rounded-[28px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="rounded-full bg-[#96f89f] px-3 py-1 text-xs font-black uppercase tracking-wide text-[#00531d]">
+                Teacher Results
+              </span>
+              <span className="rounded-full bg-[#ffe173] px-3 py-1 text-xs font-black text-[#0f1d24]">
+                Observasi Kelas
+              </span>
+            </div>
+            <h1 className="text-2xl font-black text-[#004883] sm:text-3xl">
+              Hasil Assessment Guru
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm font-semibold leading-relaxed text-[#004883]">
+              Lihat rangkuman observasi dan perkembangan berdasarkan assessment yang telah dilakukan.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              icon={RefreshCw}
+              onClick={fetchResults}
+              disabled={loading}
+              className="mt-4 border-[#004883]/30 bg-white text-[#004883]"
+            >
+              Coba Lagi
+            </Button>
+          </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          icon={RefreshCw}
-          onClick={fetchResults}
-          disabled={loading}
-        >
-          Coba Lagi
-        </Button>
-      </div>
+          <Image
+            src={APP_IMAGES.teacherResultsIllustration}
+            alt="Ilustrasi hasil assessment guru"
+            width={280}
+            height={220}
+            priority
+            className="teacher-float mx-auto h-auto w-full max-w-[190px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[240px]"
+          />
+        </div>
+      </section>
 
       {loading && !hasResults ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-[20px] border border-outline-variant/30 bg-white p-8 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-[22px] border border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d4e3ff]">
+            <Loader2 className="h-7 w-7 animate-spin text-[#004883]" aria-hidden="true" />
+          </div>
           <p className="text-sm font-bold text-on-surface-variant">Memuat hasil assessment...</p>
         </div>
       ) : error ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[20px] border border-outline-variant/30 bg-white p-8 text-center">
-          {accessDenied ? (
-            <ShieldAlert className="h-12 w-12 text-error" aria-hidden="true" />
-          ) : (
-            <AlertTriangle className="h-12 w-12 text-error" aria-hidden="true" />
-          )}
+        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border border-[#ffd6d6] bg-white p-8 text-center shadow-[0_12px_32px_rgba(186,26,26,0.06)]">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffd6d6]">
+            {accessDenied ? (
+              <ShieldAlert className="h-7 w-7 text-[#ba1a1a]" aria-hidden="true" />
+            ) : (
+              <AlertTriangle className="h-7 w-7 text-[#ba1a1a]" aria-hidden="true" />
+            )}
+          </div>
           <div>
             <h2 className="text-lg font-black text-on-surface">
               {accessDenied ? 'Akses Ditolak' : 'Gagal Memuat Data'}
@@ -211,15 +279,30 @@ export function TeacherResultsClient() {
           )}
         </div>
       ) : !hasResults ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-[20px] border border-dashed border-outline-variant bg-white p-8 text-center">
-          <ClipboardCheck className="h-12 w-12 text-on-surface-variant/40" aria-hidden="true" />
-          <h2 className="text-lg font-black text-on-surface">Belum ada hasil assessment.</h2>
-          <p className="max-w-md text-sm text-on-surface-variant">
-            Hasil akan muncul setelah assessment guru berhasil disimpan.
-          </p>
+        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+          <Image
+            src={APP_IMAGES.teacherEmptyState}
+            alt="Ilustrasi hasil assessment guru kosong"
+            width={220}
+            height={180}
+            className="h-auto w-full max-w-[180px] transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:max-w-[220px]"
+          />
+          <div className="space-y-2">
+            <h2 className="text-lg font-black text-on-surface">Belum ada hasil assessment guru</h2>
+            <p className="max-w-md text-sm text-on-surface-variant">
+              Mulai assessment untuk melihat hasil observasi perkembangan anak.
+            </p>
+          </div>
+          <Link
+            href="/teacher/assessment"
+            className="inline-flex items-center justify-center gap-2 rounded-[16px] bg-[#004883] px-5 py-3 text-sm font-black text-white shadow-[0_4px_0_0_#002f55] transition-transform hover:translate-y-[1px]"
+          >
+            <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
+            Mulai Assessment
+          </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[20px] border border-outline-variant/30 bg-white shadow-[0_4px_16px_rgba(0,93,167,0.06)]">
+        <div className="overflow-hidden rounded-[22px] border border-[#d4e3ff] bg-white shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-left text-sm">
               <thead className="bg-surface-container-lowest text-[10px] font-black uppercase tracking-wide text-on-surface-variant">
@@ -255,7 +338,7 @@ export function TeacherResultsClient() {
                         </div>
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-[14px] bg-primary text-lg font-black text-white">
+                        <span className={`inline-flex h-12 w-12 items-center justify-center rounded-[14px] text-lg font-black ${getScoreColor(score)}`}>
                           {score}
                         </span>
                       </td>
@@ -273,8 +356,9 @@ export function TeacherResultsClient() {
                             {focusAreas.map((area) => (
                               <span
                                 key={`${item.id}-${area}`}
-                                className="rounded-lg bg-secondary-container px-2 py-1 text-[11px] font-bold text-on-secondary-container"
+                                className="inline-flex items-center gap-1 rounded-lg bg-[#ffe173] px-2 py-1 text-[11px] font-bold text-[#0f1d24]"
                               >
+                                <Target className="h-3 w-3" aria-hidden="true" />
                                 {area}
                               </span>
                             ))}
@@ -285,17 +369,31 @@ export function TeacherResultsClient() {
                       </td>
                       <td className="px-5 py-4">
                         {skillEntries.length > 0 ? (
-                          <div className="flex min-w-36 flex-col gap-2">
-                            {skillEntries.map(([skill, value]) => (
-                              <div key={`${item.id}-${skill}`} className="flex items-center justify-between gap-3">
-                                <span className="text-xs font-bold capitalize text-on-surface">
-                                  {getSkillLabel(skill)}
-                                </span>
-                                <span className="rounded-md bg-surface-container px-2 py-0.5 text-xs font-black text-primary">
-                                  {Math.round(value)}
-                                </span>
-                              </div>
-                            ))}
+                          <div className="flex min-w-52 flex-col gap-3">
+                            {skillEntries.map(([skill, value]) => {
+                              const SkillIcon = getSkillIcon(skill);
+                              const normalizedScore = normalizeScore(value);
+
+                              return (
+                                <div key={`${item.id}-${skill}`} className="grid gap-1.5">
+                                  <div className="flex items-center justify-between gap-3">
+                                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-on-surface">
+                                      <SkillIcon className="h-3.5 w-3.5 text-[#004883]" aria-hidden="true" />
+                                      {getSkillLabel(skill)}
+                                    </span>
+                                    <span className="rounded-md bg-[#d4e3ff] px-2 py-0.5 text-xs font-black text-[#004883]">
+                                      {normalizedScore}
+                                    </span>
+                                  </div>
+                                  <div className="h-2 overflow-hidden rounded-full bg-[#d4e3ff]/55">
+                                    <div
+                                      className="h-full rounded-full bg-[#004883] transition-all duration-500"
+                                      style={{ width: `${normalizedScore}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         ) : (
                           <span className="text-xs italic text-on-surface-variant">Data belum tersedia.</span>
@@ -348,13 +446,30 @@ export function TeacherResultsClient() {
 
       {hasResults && (
         <div className="grid gap-3 md:grid-cols-3">
-          {results.slice(0, 3).map((item) => {
+          {results.slice(0, 3).map((item, index) => {
             const score = getScore(item.overallScore);
             return (
-              <div key={`summary-${item.id}`} className="rounded-[18px] border border-outline-variant/30 bg-white p-4">
+              <div
+                key={`summary-${item.id}`}
+                className="rounded-[18px] border border-[#d4e3ff] bg-white p-4 shadow-[0_10px_28px_rgba(0,72,131,0.06)] transition-all duration-200 hover:scale-[1.01] motion-reduce:transition-none motion-reduce:hover:scale-100"
+              >
                 <div className="mb-3 flex items-center justify-between gap-3">
-                  <BarChart3 className="h-5 w-5 text-primary" aria-hidden="true" />
-                  <span className="text-lg font-black text-on-surface">{score}</span>
+                  {index === 0 ? (
+                    <Image
+                      src={APP_IMAGES.teacherGuidanceIllustration}
+                      alt=""
+                      width={76}
+                      height={60}
+                      className="h-auto w-full max-w-[56px]"
+                    />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#d4e3ff]">
+                      <BarChart3 className="h-5 w-5 text-[#004883]" aria-hidden="true" />
+                    </div>
+                  )}
+                  <span className={`rounded-[14px] px-3 py-2 text-lg font-black ${getScoreColor(score)}`}>
+                    {score}
+                  </span>
                 </div>
                 <p className="text-xs font-black text-on-surface">{item.categoryResult ?? '-'}</p>
                 <p className="mt-1 line-clamp-2 text-xs text-on-surface-variant">

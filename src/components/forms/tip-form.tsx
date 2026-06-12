@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { createTip, updateTip } from '@/actions/tip-actions';
 import { getToken } from '@/lib/auth';
 import type { Recommendation } from '@/types';
-import { AlertTriangle, ChevronDown } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Lightbulb } from 'lucide-react';
+import { iconMap } from '@/lib/icon-map';
 
 interface TipFormProps {
   initialData?: Recommendation | null;
@@ -27,6 +28,11 @@ export function TipForm({ initialData, onSuccess, onCancel }: TipFormProps) {
     icon: initialData?.icon || 'Lightbulb',
     isMain: initialData?.isMain || false,
   });
+  const SelectedIcon = iconMap[formData.icon] ?? Lightbulb;
+  const previewTitle = formData.title.trim() || 'Judul Tip';
+  const previewDescription = formData.description.trim() || 'Deskripsi tip akan tampil di sini.';
+  const previewCategory = formData.category.trim() || 'Kategori';
+  const previewDuration = formData.duration.trim() || 'Durasi';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
@@ -115,22 +121,30 @@ export function TipForm({ initialData, onSuccess, onCancel }: TipFormProps) {
 
       <div className="flex flex-col gap-1.5">
         <label className="text-sm font-black text-on-surface">Ikon Lucide</label>
-        <div className="relative">
-          <select
-            name="icon"
-            value={formData.icon}
-            onChange={handleChange}
-            className="w-full appearance-none rounded-[14px] border-2 border-outline-variant/50 bg-surface-container-lowest px-4 py-3 pr-10 text-sm font-semibold text-on-surface outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-          >
-            <option value="Lightbulb">Lightbulb</option>
-            <option value="Star">Star</option>
-            <option value="Scissors">Scissors</option>
-            <option value="Palette">Palette</option>
-            <option value="Brush">Brush</option>
-            <option value="Shapes">Shapes</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
+        <div className="flex gap-2">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-[#ffe173]">
+            <SelectedIcon className="h-5 w-5 text-[#0f1d24]" aria-hidden="true" />
+          </div>
+          <div className="relative flex-1">
+            <select
+              name="icon"
+              value={formData.icon}
+              onChange={handleChange}
+              className="w-full appearance-none rounded-[14px] border-2 border-outline-variant/50 bg-surface-container-lowest px-4 py-3 pr-10 text-sm font-semibold text-on-surface outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            >
+              <option value="Lightbulb">Lightbulb</option>
+              <option value="Star">Star</option>
+              <option value="Scissors">Scissors</option>
+              <option value="Palette">Palette</option>
+              <option value="Brush">Brush</option>
+              <option value="Shapes">Shapes</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-on-surface-variant" />
+          </div>
         </div>
+        <p className="text-[11px] text-on-surface-variant">
+          Gunakan nama icon Lucide, contoh: Lightbulb, Sparkles, BookOpen, Puzzle, HeartHandshake.
+        </p>
       </div>
 
       <label htmlFor="isMain" className="flex cursor-pointer items-start gap-3 rounded-[16px] border-2 border-dashed border-secondary-container bg-surface-container-lowest p-4">
@@ -147,6 +161,36 @@ export function TipForm({ initialData, onSuccess, onCancel }: TipFormProps) {
           <span className="text-[11px] text-on-surface-variant">Tip ini akan diprioritaskan sebagai rekomendasi utama.</span>
         </span>
       </label>
+
+      <div className="rounded-[18px] border border-outline-variant/30 bg-white p-4 shadow-[0_4px_16px_rgba(0,93,167,0.05)]">
+        <p className="mb-3 text-xs font-black uppercase tracking-wide text-on-surface-variant">
+          Preview Tampilan
+        </p>
+        <div className="flex items-start gap-3">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] bg-[#ffe173]">
+            <SelectedIcon className="h-7 w-7 text-[#0f1d24]" aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="mb-1.5 flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-[#d4e3ff] px-2.5 py-1 text-[10px] font-black uppercase text-[#004883]">
+                {previewCategory}
+              </span>
+              <span className="rounded-full bg-[#96f89f] px-2.5 py-1 text-[10px] font-black uppercase text-[#00531d]">
+                {previewDuration}
+              </span>
+              {formData.isMain && (
+                <span className="rounded-full bg-[#ffe173] px-2.5 py-1 text-[10px] font-black uppercase text-[#0f1d24]">
+                  Rekomendasi Utama
+                </span>
+              )}
+            </div>
+            <h3 className="truncate text-sm font-black text-on-surface">{previewTitle}</h3>
+            <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-on-surface-variant">
+              {previewDescription}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="sticky bottom-0 -mx-6 -mb-5 flex justify-end gap-3 border-t border-outline-variant/20 bg-white px-6 py-4">
         {onCancel && (

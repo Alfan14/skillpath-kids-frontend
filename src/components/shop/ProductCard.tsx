@@ -1,122 +1,189 @@
 'use client';
 
-import Link from "next/link";
-import { Star, ShoppingCart } from "lucide-react";
-import { cn, formatCurrency } from "@/lib/utils";
-import type { WorksheetProduct } from "@/types";
-import { useWorksheetCart } from "@/features/worksheets/hooks/useWorksheetCart";
-import { parseBadges } from "@/features/worksheets/utils/worksheet-parsers";
+import Image from 'next/image';
+import Link from 'next/link';
+import {
+  ExternalLink,
+  FileText,
+  MessageCircle,
+  ShoppingBag,
+  Star,
+} from 'lucide-react';
+
+import {
+  createWhatsAppOrderUrl,
+  getWorksheetEffectivePrice,
+  getWorksheetWhatsAppNumber,
+  isFreeWorksheet,
+  isPaidWorksheet,
+} from '@/features/worksheets/utils/whatsapp-order';
+import { APP_IMAGES } from '@/lib/assets';
+import { formatCurrency } from '@/lib/utils';
+import type { WorksheetProduct } from '@/types';
 
 interface ProductCardProps {
   product: WorksheetProduct;
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addItem } = useWorksheetCart();
-  
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    addItem(product, 1);
-    // Could add toast here
+  const isPaid = isPaidWorksheet(product);
+  const isFree = isFreeWorksheet(product);
+  const effectivePrice = getWorksheetEffectivePrice(product);
+  const canOrderViaWhatsApp = Boolean(getWorksheetWhatsAppNumber());
+  const category = product.category || 'Materi';
+  const detailHref = `/worksheets/${product.slug}`;
+
+  const handleWhatsAppOrder = () => {
+    const productUrl = `${window.location.origin}${detailHref}`;
+    const whatsappUrl = createWhatsAppOrderUrl(product, 1, productUrl);
+
+    if (!whatsappUrl) return;
+
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
-  const isFree = product.variant?.toUpperCase() === 'FREE';
-  const badges = parseBadges(product.badges);
-
   return (
-    <Link 
-      href={`/worksheets/${product.slug}`}
-      className="group flex flex-col bg-white rounded-2xl border border-outline-variant/30 overflow-hidden hover:shadow-lg transition-all duration-300 hover:border-primary/30"
-    >
-      <div className="relative aspect-square bg-surface-container-low flex items-center justify-center overflow-hidden">
-        {product.mainImageUrl ? (
-          <img 
-            src={product.mainImageUrl} 
-            alt={product.title} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-          />
-        ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center bg-primary/5 text-primary p-6 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-3">
-              <span className="text-3xl">📄</span>
-            </div>
-          </div>
-        )}
-        
-        {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {product.isBestSeller && (
-            <span className="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
-              BEST SELLER
-            </span>
-          )}
-          {product.isPromo && (
-            <span className="bg-error text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
-              PROMO
-            </span>
-          )}
-          {isFree && (
-            <span className="bg-tertiary text-white text-[10px] font-bold px-2 py-1 rounded-md shadow-sm">
-              GRATIS
-            </span>
-          )}
-        </div>
-      </div>
-
-      <div className="p-4 flex flex-col flex-1">
-        <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-          {product.category}
-        </span>
-        
-        <h3 className="font-bold text-on-surface text-sm mb-2 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
-          {product.title}
-        </h3>
-        
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center gap-0.5 text-secondary">
-            <Star className="w-3.5 h-3.5 fill-current" />
-            <span className="text-xs font-bold">{product.rating}</span>
-          </div>
-          <span className="text-xs text-on-surface-variant/50">|</span>
-          <span className="text-[10px] text-on-surface-variant">Terjual {product.soldCount}+</span>
-        </div>
-        
-        <div className="mt-auto">
-          {isFree ? (
-            <div className="text-primary font-black text-lg mb-3">Gratis</div>
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#d4e3ff] bg-white shadow-[0_12px_32px_rgba(0,72,131,0.07)] transition-all duration-200 hover:scale-[1.01] hover:shadow-[0_16px_40px_rgba(0,72,131,0.12)] motion-reduce:transition-none motion-reduce:hover:scale-100">
+      <Link href={detailHref} className="block">
+        <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#d4e3ff]/45">
+          {product.mainImageUrl ? (
+            <img
+              src={product.mainImageUrl}
+              alt={product.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
+            />
           ) : (
-            <div className="mb-3 flex flex-col justify-end min-h-[44px]">
+            <div className="flex h-full w-full items-center justify-center p-5">
+              <Image
+                src={APP_IMAGES.worksheetLibrary}
+                alt="Ilustrasi worksheet"
+                width={220}
+                height={170}
+                className="h-auto w-full max-w-[170px] transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none"
+              />
+            </div>
+          )}
+
+          <div className="absolute left-3 top-3 flex flex-col gap-2">
+            <span className={isPaid ? 'rounded-md bg-[#ffe173] px-2 py-1 text-[10px] font-black text-[#0f1d24] shadow-sm' : 'rounded-md bg-[#96f89f] px-2 py-1 text-[10px] font-black text-[#00531d] shadow-sm'}>
+              {isPaid ? 'BERBAYAR' : 'GRATIS'}
+            </span>
+            {product.isBestSeller && (
+              <span className="rounded-md bg-[#f3e8ff] px-2 py-1 text-[10px] font-black text-[#6b21a8] shadow-sm">
+                BEST SELLER
+              </span>
+            )}
+            {product.isPromo && (
+              <span className="rounded-md bg-[#ffd6d6] px-2 py-1 text-[10px] font-black text-[#ba1a1a] shadow-sm">
+                PROMO
+              </span>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      <div className="flex flex-1 flex-col p-4">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <span className="rounded-full bg-[#d4e3ff] px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-[#004883]">
+            {category}
+          </span>
+          <div className="flex items-center gap-1 rounded-full bg-[#ffe173] px-2 py-1 text-[10px] font-black text-[#0f1d24]">
+            <Star className="h-3 w-3 fill-current" aria-hidden="true" />
+            {product.rating ?? 0}
+          </div>
+        </div>
+
+        <Link href={detailHref}>
+          <h3 className="line-clamp-2 text-sm font-black leading-tight text-on-surface transition-colors group-hover:text-[#004883]">
+            {product.title}
+          </h3>
+        </Link>
+
+        <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-on-surface-variant">
+          {product.shortDescription || product.description || 'Materi pendukung aktivitas kelas.'}
+        </p>
+
+        <div className="mt-3 flex items-center gap-2 text-[10px] font-bold text-on-surface-variant">
+          <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+          <span>Terjual {product.soldCount ?? 0}+</span>
+        </div>
+
+        <div className="mt-auto pt-4">
+          {isFree ? (
+            <div className="mb-3 text-lg font-black text-[#00531d]">Gratis</div>
+          ) : (
+            <div className="mb-3 flex min-h-[44px] flex-col justify-end">
               {product.discountPrice ? (
                 <>
                   <div className="flex items-center gap-2">
-                    <span className="bg-error/10 text-error text-[10px] font-bold px-1.5 py-0.5 rounded">
-                      {product.discountPercent}%
-                    </span>
-                    <span className="text-[10px] text-on-surface-variant line-through decoration-error/50">
+                    {product.discountPercent ? (
+                      <span className="rounded bg-[#ffd6d6] px-1.5 py-0.5 text-[10px] font-black text-[#ba1a1a]">
+                        {product.discountPercent}%
+                      </span>
+                    ) : null}
+                    <span className="text-[10px] text-on-surface-variant line-through decoration-[#ba1a1a]/50">
                       {formatCurrency(product.price)}
                     </span>
                   </div>
-                  <div className="text-error font-black text-lg">
-                    {formatCurrency(product.discountPrice)}
+                  <div className="text-lg font-black text-[#ba1a1a]">
+                    {formatCurrency(effectivePrice)}
                   </div>
                 </>
               ) : (
-                <div className="text-primary font-black text-lg">
-                  {formatCurrency(product.price)}
+                <div className="text-lg font-black text-[#004883]">
+                  {formatCurrency(effectivePrice)}
                 </div>
               )}
             </div>
           )}
-          
-          <button 
-            onClick={handleAddToCart}
-            className="w-full flex items-center justify-center gap-2 bg-primary-fixed hover:bg-primary hover:text-white text-primary font-bold py-2 px-4 rounded-xl transition-colors text-xs"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            Tambah
-          </button>
+
+          <div className="grid gap-2">
+            <Link
+              href={detailHref}
+              className="flex items-center justify-center gap-2 rounded-xl border border-[#004883]/30 px-3 py-2 text-xs font-black text-[#004883] transition-colors hover:bg-[#d4e3ff]"
+            >
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              Lihat Detail
+            </Link>
+
+            {isFree ? (
+              product.url ? (
+                <a
+                  href={product.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#004883] px-3 py-2 text-xs font-black text-white transition-colors hover:bg-[#003b6b]"
+                >
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  Buka File
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="flex w-full cursor-not-allowed items-center justify-center rounded-xl bg-surface-container px-3 py-2 text-xs font-black text-on-surface-variant"
+                >
+                  File belum tersedia
+                </button>
+              )
+            ) : (
+              <button
+                type="button"
+                onClick={handleWhatsAppOrder}
+                disabled={!canOrderViaWhatsApp}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-3 py-2 text-xs font-black text-[#00531d] transition-colors hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant"
+              >
+                {canOrderViaWhatsApp ? (
+                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <ShoppingBag className="h-4 w-4" aria-hidden="true" />
+                )}
+                {canOrderViaWhatsApp ? 'Pesan via WhatsApp' : 'Nomor WhatsApp belum dikonfigurasi'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </Link>
+    </article>
   );
 }

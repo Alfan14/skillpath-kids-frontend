@@ -84,4 +84,74 @@
   .squishy-press:active {
     @apply scale-95;
   }
+
+  @keyframes tips-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .tips-float {
+    animation: tips-float 4s ease-in-out infinite;
+  }
+
+  @keyframes files-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .files-float {
+    animation: files-float 4s ease-in-out infinite;
+  }
+
+  @keyframes badges-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .badges-float {
+    animation: badges-float 4s ease-in-out infinite;
+  }
+
+  @keyframes teacher-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .teacher-float {
+    animation: teacher-float 4s ease-in-out infinite;
+  }
+
+  @keyframes admin-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  .admin-float {
+    animation: admin-float 4s ease-in-out infinite;
+  }
 }

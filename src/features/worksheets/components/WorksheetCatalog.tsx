@@ -1,11 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { ChevronRight, FileText, RotateCcw, Star } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
+
 import { ProductCard } from '@/components/shop/ProductCard';
+import { APP_IMAGES } from '@/lib/assets';
 import type { WorksheetProduct } from '@/types';
-import { ChevronRight } from 'lucide-react';
+import {
+  formatWorksheetPrice,
+  getWorksheetEffectivePrice,
+} from '@/features/worksheets/utils/whatsapp-order';
 
 interface WorksheetCatalogProps {
   worksheets: WorksheetProduct[];
@@ -16,7 +22,7 @@ interface WorksheetCatalogProps {
 export function WorksheetCatalog({ worksheets, bestSellers, categories }: WorksheetCatalogProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   const currentCategory = searchParams.get('category') || '';
   const currentVariant = searchParams.get('variant') || '';
 
@@ -31,19 +37,26 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
     router.push(`/worksheets?${params.toString()}`);
   };
 
+  const getFilterClass = (active: boolean) => [
+    'w-full rounded-xl px-3 py-2 text-left text-sm font-bold transition-colors',
+    active
+      ? 'bg-[#d4e3ff] text-[#004883]'
+      : 'text-on-surface-variant hover:bg-[#d4e3ff]/60 hover:text-[#004883]',
+  ].join(' ');
+
   return (
-    <div className="flex flex-col md:flex-row gap-6 mt-6">
-      {/* Sidebar */}
-      <aside className="w-full md:w-64 flex-shrink-0 flex flex-col gap-6">
-        
-        {/* Category Filter */}
-        <div className="bg-white rounded-2xl p-5 border border-outline-variant/30">
-          <h3 className="font-black text-on-surface mb-4 uppercase text-xs tracking-wider">Kategori</h3>
+    <div className="mt-6 flex flex-col gap-6 md:flex-row">
+      <aside className="flex w-full flex-shrink-0 flex-col gap-6 md:w-64">
+        <div className="rounded-2xl border border-[#d4e3ff] bg-white p-5 shadow-[0_10px_28px_rgba(0,72,131,0.06)]">
+          <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-on-surface">
+            Kategori
+          </h3>
           <ul className="flex flex-col gap-2">
             <li>
               <button
+                type="button"
                 onClick={() => handleFilter('category', '')}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${!currentCategory ? 'bg-primary-fixed text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+                className={getFilterClass(!currentCategory)}
               >
                 Semua Produk
               </button>
@@ -51,8 +64,9 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
             {categories.map((cat) => (
               <li key={cat}>
                 <button
+                  type="button"
                   onClick={() => handleFilter('category', cat)}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${currentCategory === cat ? 'bg-primary-fixed text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+                  className={getFilterClass(currentCategory === cat)}
                 >
                   {cat}
                 </button>
@@ -60,101 +74,125 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
             ))}
           </ul>
         </div>
-        
-        {/* Variant Filter */}
-        <div className="bg-white rounded-2xl p-5 border border-outline-variant/30">
-          <h3 className="font-black text-on-surface mb-4 uppercase text-xs tracking-wider">Harga</h3>
+
+        <div className="rounded-2xl border border-[#d4e3ff] bg-white p-5 shadow-[0_10px_28px_rgba(0,72,131,0.06)]">
+          <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-on-surface">
+            Harga
+          </h3>
           <ul className="flex flex-col gap-2">
             <li>
               <button
+                type="button"
                 onClick={() => handleFilter('variant', '')}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${!currentVariant ? 'bg-primary-fixed text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+                className={getFilterClass(!currentVariant)}
               >
                 Semua
               </button>
             </li>
             <li>
               <button
+                type="button"
                 onClick={() => handleFilter('variant', 'FREE')}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${currentVariant === 'FREE' ? 'bg-primary-fixed text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+                className={getFilterClass(currentVariant === 'FREE')}
               >
                 Gratis
               </button>
             </li>
             <li>
               <button
+                type="button"
                 onClick={() => handleFilter('variant', 'PAID')}
-                className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-colors ${currentVariant === 'PAID' ? 'bg-primary-fixed text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+                className={getFilterClass(currentVariant === 'PAID')}
               >
-                Premium
+                Berbayar
               </button>
             </li>
           </ul>
         </div>
 
-        {/* Best Sellers (Sidebar) */}
-        <div className="bg-white rounded-2xl p-5 border border-outline-variant/30 hidden md:block">
-          <h3 className="font-black text-on-surface mb-4 uppercase text-xs tracking-wider flex items-center gap-2">
-            ⭐ Terlaris
+        <div className="hidden rounded-2xl border border-[#d4e3ff] bg-white p-5 shadow-[0_10px_28px_rgba(0,72,131,0.06)] md:block">
+          <h3 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-on-surface">
+            <Star className="h-4 w-4 fill-[#ffe173] text-[#0f1d24]" aria-hidden="true" />
+            Terlaris
           </h3>
           <div className="flex flex-col gap-4">
             {bestSellers.slice(0, 3).map((product) => (
-              <Link 
-                href={`/worksheets/${product.slug}`} 
+              <Link
+                href={`/worksheets/${product.slug}`}
                 key={product.id}
-                className="flex gap-3 group"
+                className="group flex gap-3"
               >
-                <div className="w-16 h-16 rounded-xl bg-surface-container flex-shrink-0 overflow-hidden">
+                <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-[#d4e3ff]/45">
                   {product.mainImageUrl ? (
-                    <img src={product.mainImageUrl} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <img
+                      src={product.mainImageUrl}
+                      alt={product.title}
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105 motion-reduce:transition-none"
+                    />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary text-xl">📄</div>
+                    <div className="flex h-full w-full items-center justify-center p-2">
+                      <Image
+                        src={APP_IMAGES.worksheetLibrary}
+                        alt="Ilustrasi worksheet"
+                        width={64}
+                        height={64}
+                        className="h-auto w-full"
+                      />
+                    </div>
                   )}
                 </div>
-                <div className="flex flex-col justify-center">
-                  <h4 className="text-xs font-bold text-on-surface line-clamp-2 group-hover:text-primary transition-colors">
+                <div className="flex min-w-0 flex-col justify-center">
+                  <h4 className="line-clamp-2 text-xs font-bold text-on-surface transition-colors group-hover:text-[#004883]">
                     {product.title}
                   </h4>
-                  <p className="text-[10px] text-primary font-bold mt-1">
-                    {product.discountPrice ? `Rp${product.discountPrice.toLocaleString('id-ID')}` : `Rp${product.price.toLocaleString('id-ID')}`}
+                  <p className="mt-1 text-[10px] font-bold text-[#004883]">
+                    {formatWorksheetPrice(getWorksheetEffectivePrice(product))}
                   </p>
                 </div>
               </Link>
             ))}
           </div>
         </div>
-
       </aside>
 
-      {/* Main Content */}
       <div className="flex-1">
-        {/* Breadcrumb / Status */}
-        <div className="flex items-center text-xs text-on-surface-variant mb-4">
-          <Link href="/" className="hover:text-primary">Beranda</Link>
-          <ChevronRight className="w-3 h-3 mx-1" />
+        <div className="mb-4 flex flex-wrap items-center gap-1 text-xs text-on-surface-variant">
+          <Link href="/" className="hover:text-[#004883]">Beranda</Link>
+          <ChevronRight className="h-3 w-3" aria-hidden="true" />
           <span className="font-bold text-on-surface">Worksheets</span>
-          <span className="ml-2 bg-surface-container-low px-2 py-0.5 rounded-full">
+          <span className="ml-2 rounded-full bg-[#d4e3ff] px-2 py-0.5 font-bold text-[#004883]">
             {worksheets.length} Produk
           </span>
         </div>
 
         {worksheets.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
-            {worksheets.map(product => (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {worksheets.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center bg-white border border-outline-variant/30 rounded-2xl p-12 text-center">
-            <div className="text-4xl mb-4">🔍</div>
-            <h3 className="text-lg font-bold text-on-surface mb-2">Belum ada worksheet tersedia</h3>
-            <p className="text-sm text-on-surface-variant max-w-md">
-              Maaf, kami tidak dapat menemukan produk yang sesuai dengan filter Anda. Silakan coba kata kunci atau kategori lain.
+          <div className="flex min-h-80 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+            <Image
+              src={APP_IMAGES.teacherEmptyState}
+              alt="Ilustrasi data worksheet kosong"
+              width={220}
+              height={180}
+              className="mb-4 h-auto w-full max-w-[190px] transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none"
+            />
+            <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#d4e3ff] text-[#004883]">
+              <FileText className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg font-black text-on-surface">Belum ada file tersedia</h3>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-on-surface-variant">
+              Materi dan worksheet akan muncul setelah ditambahkan oleh administrator.
             </p>
-            <button 
+            <button
+              type="button"
               onClick={() => router.push('/worksheets')}
-              className="mt-6 bg-primary text-white px-6 py-2 rounded-pill font-bold hover:bg-primary/90 transition-colors text-sm"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#004883] px-5 py-2.5 text-sm font-black text-white transition-colors hover:bg-[#003b6b]"
             >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
               Reset Filter
             </button>
           </div>

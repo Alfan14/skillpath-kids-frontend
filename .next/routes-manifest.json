@@ -102,6 +102,12 @@
       "namedRegex": "^/login(?:/)?$"
     },
     {
+      "page": "/profile",
+      "regex": "^/profile(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/profile(?:/)?$"
+    },
+    {
       "page": "/results",
       "regex": "^/results(?:/)?$",
       "routeKeys": {},

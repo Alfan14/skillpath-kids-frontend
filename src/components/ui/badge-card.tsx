@@ -1,107 +1,101 @@
 'use client';
 
 import React from 'react';
-import { motion, Variants } from 'framer-motion'; 
+import { motion, Variants } from 'framer-motion';
+import { CheckCircle2, Lock, Medal } from 'lucide-react';
 import type { Badge } from '@/types';
-
-import { getIcon } from '@/lib/icon-map';
-import { CheckCircle2, Lock } from 'lucide-react';
+import { getIcon, iconMap } from '@/lib/icon-map';
 
 export interface BadgeCardProps {
   badge: Badge;
   animateOnMount?: boolean;
 }
 
-export const BadgeCard: React.FC<BadgeCardProps> = ({ 
-  badge, 
-  animateOnMount = true 
-}) => {
-  const Icon = getIcon(badge.icon);
-  
-  const cardAriaLabel = `${badge.title} — ${badge.unlocked && badge.date ? badge.date : 'Belum terkunci'}`;
+function getBadgeIcon(iconName: string | null | undefined) {
+  if (!iconName || !iconMap[iconName]) return Medal;
+  return getIcon(iconName);
+}
 
-  // Explicitly typed as Variants
+export const BadgeCard: React.FC<BadgeCardProps> = ({
+  badge,
+  animateOnMount = true,
+}) => {
+  const Icon = getBadgeIcon(badge.icon);
+  const StatusIcon = badge.unlocked ? CheckCircle2 : Lock;
+  const cardAriaLabel = `${badge.title} - ${badge.unlocked ? 'Terbuka' : 'Terkunci'}`;
+
   const cardVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: { 
-      opacity: 1, 
+    hidden: { opacity: 0, scale: 0.96 },
+    visible: {
+      opacity: 1,
       scale: 1,
-      transition: { duration: 0.4, ease: 'easeOut' } 
-    }
+      transition: { duration: 0.28, ease: 'easeOut' },
+    },
   };
 
-  // Explicitly typed as Variants
   const floatingIconVariants: Variants = {
     animate: {
-      y: [0, -6, 0],
+      y: [0, -5, 0],
       transition: {
-        duration: 3,
+        duration: 3.4,
         repeat: Infinity,
         ease: 'easeInOut',
-      }
-    }
+      },
+    },
   };
 
   return (
-    <motion.div
-      role="article"
+    <motion.article
       aria-label={cardAriaLabel}
       aria-disabled={!badge.unlocked}
       initial={animateOnMount ? 'hidden' : 'visible'}
       animate="visible"
       variants={cardVariants}
+      whileHover={{ scale: 1.01 }}
       className={`
-        relative flex flex-col items-center p-6 rounded-2xl border-2 text-center transition-all
-        ${badge.unlocked 
-          ? 'bg-white border-blue-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]' 
-          : 'bg-gray-50 border-gray-200 grayscale-[0.8] opacity-75'
-        }
+        relative flex min-h-64 flex-col items-center rounded-2xl border-2 bg-white p-5 text-center
+        shadow-[0_12px_32px_rgba(0,72,131,0.08)] transition-all duration-200
+        ${badge.unlocked ? 'border-[#96f89f]' : 'border-[#d4e3ff]'}
       `}
     >
-      {/* Overlay Status Icon */}
-      <div className="absolute top-3 right-3">
-        {badge.unlocked ? (
-          <CheckCircle2 
-            className="w-6 h-6 text-green-500 bg-white rounded-full" 
-            aria-label="Telah diraih"
-            role="img"
-          />
-        ) : (
-          <Lock 
-            className="w-5 h-5 text-gray-400" 
-            aria-label="Terkunci"
-            role="img"
-          />
-        )}
-      </div>
-
-      {/* Floating Badge Icon */}
-      <motion.div 
-        variants={badge.unlocked ? floatingIconVariants : undefined}
-        animate={badge.unlocked ? "animate" : undefined}
+      <span
         className={`
-          flex items-center justify-center w-20 h-20 mb-4 rounded-full
-          ${badge.unlocked ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-500'}
+          absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-extrabold
+          ${badge.unlocked ? 'bg-[#96f89f] text-[#00531d]' : 'bg-[#d4e3ff] text-[#004883]'}
         `}
       >
-        <Icon className="w-10 h-10" aria-hidden="true" />
+        <StatusIcon className="h-3.5 w-3.5" aria-hidden="true" />
+        {badge.unlocked ? 'Terbuka' : 'Terkunci'}
+      </span>
+
+      <motion.div
+        variants={badge.unlocked ? floatingIconVariants : undefined}
+        animate={badge.unlocked ? 'animate' : undefined}
+        className={`
+          mb-4 mt-7 flex h-20 w-20 items-center justify-center rounded-[24px]
+          ${badge.unlocked ? 'bg-[#ffe173] text-[#0f1d24] shadow-[0_7px_0_#e8c900]' : 'bg-[#d4e3ff] text-[#004883]'}
+        `}
+      >
+        <Icon className="h-10 w-10" aria-hidden="true" />
       </motion.div>
 
-      {/* Text Content */}
-      <h3 className={`text-lg font-bold mb-1 ${badge.unlocked ? 'text-gray-900' : 'text-gray-600'}`}>
+      <h3 className="mb-2 text-base font-black text-on-surface">
         {badge.title}
       </h3>
-      
-      <p className="text-sm text-gray-500 mb-3">
+
+      <p className="mb-4 text-sm leading-relaxed text-on-surface-variant">
         {badge.description}
       </p>
 
-      {/* Date pill */}
-      {badge.unlocked && badge.date && (
-        <span className="mt-auto inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+      {badge.unlocked && badge.date ? (
+        <span className="mt-auto inline-flex items-center rounded-full bg-[#f3e8ff] px-3 py-1 text-xs font-extrabold text-[#6b21a8]">
           {badge.date}
         </span>
+      ) : (
+        <span className="mt-auto inline-flex items-center rounded-full bg-[#ffe173] px-3 py-1 text-xs font-extrabold text-[#0f1d24]">
+          Selesaikan aktivitas
+        </span>
       )}
-    </motion.div>
+    </motion.article>
   );
 };

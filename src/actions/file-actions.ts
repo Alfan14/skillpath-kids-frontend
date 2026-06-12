@@ -12,10 +12,16 @@ export async function getFiles() {
   );
 
   const data = await response.json();
+  const files = Array.isArray(data.data)
+    ? data.data
+    : Array.isArray(data.data?.data)
+      ? data.data.data
+      : [];
 
-  return (data.data || []).map((file: any) => ({
+  return files.map((file: any) => ({
     ...file,
     icon: file.icon || file.iconName,
+    accent: file.accent || file.accentColor || 'primary',
   }));
 }
 

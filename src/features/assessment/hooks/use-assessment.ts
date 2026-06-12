@@ -19,11 +19,13 @@ export type AssessmentStatus =
 interface UseAssessmentOptions {
   level?: "CHILD" | "TEACHER";
   resultPath?: string;
+  selectedCategory?: string | null;
 }
 
 export function useAssessment({
   level = "CHILD",
   resultPath = "/results",
+  selectedCategory = null,
 }: UseAssessmentOptions = {}) {
   const router = useRouter();
   const { play } = useSound();
@@ -32,8 +34,12 @@ export function useAssessment({
   const [status, setStatus] = useState<AssessmentStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+  const QUESTIONS_PER_PAGE = 3;
+  const [page, setPage] = useState(0);
 
   useEffect(() => {
+    setIsLoadingQuestions(true);
     let token = null;
     try {
       token = localStorage.getItem("token");
@@ -42,6 +48,7 @@ export function useAssessment({
     }
 
     if (!token) {
+      setIsLoadingQuestions(false);
       router.push("/login");
       return;
     }
@@ -57,15 +64,25 @@ export function useAssessment({
           localStorage.removeItem("user");
           router.push("/login");
         }
+      })
+      .finally(() => {
+        setIsLoadingQuestions(false);
       });
   }, [level, router]);
 
-  const totalQuestions = questions.length;
-  const QUESTIONS_PER_PAGE = 3;
-  const totalPages = Math.ceil(totalQuestions / QUESTIONS_PER_PAGE) || 1;
-  const [page, setPage] = useState(0);
+  const filteredQuestions =
+    selectedCategory && selectedCategory !== "__ALL__"
+      ? questions.filter((question) => (question.category?.trim() || "Umum") === selectedCategory)
+      : questions;
 
-  const questionsOnPage = questions.slice(
+  useEffect(() => {
+    setPage(0);
+  }, [selectedCategory]);
+
+  const totalQuestions = filteredQuestions.length;
+  const totalPages = Math.ceil(totalQuestions / QUESTIONS_PER_PAGE) || 1;
+
+  const questionsOnPage = filteredQuestions.slice(
     page * QUESTIONS_PER_PAGE,
     page * QUESTIONS_PER_PAGE + QUESTIONS_PER_PAGE,
   );
@@ -73,7 +90,7 @@ export function useAssessment({
   const answeredOnPage =
     questionsOnPage.length > 0 &&
     questionsOnPage.every((q) => answers[q.id] !== undefined);
-  const totalAnswered = Object.keys(answers).length;
+  const totalAnswered = filteredQuestions.filter((q) => answers[q.id] !== undefined).length;
 
   const progress =
     totalQuestions > 0 ? Math.round((totalAnswered / totalQuestions) * 100) : 0;
@@ -193,6 +210,9 @@ export function useAssessment({
     status,
     error,
     message,
+    questions,
+    filteredQuestions,
+    isLoadingQuestions,
     page,
     totalPages,
     totalQuestions,

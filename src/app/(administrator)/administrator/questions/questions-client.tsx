@@ -1,63 +1,109 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import {
+  AlertTriangle,
+  BookOpenCheck,
+  CheckCircle2,
+  ClipboardList,
+  Edit2,
+  Filter,
+  Hash,
+  HelpCircle,
+  Layers3,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Trash2,
+  X,
+} from 'lucide-react';
+
+import { deleteQuestion, getQuestions } from '@/actions/question-actions';
 import { Button } from '@/components/ui/button';
 import {
-  Plus, Edit2, Trash2, X, ClipboardList,
-  AlertTriangle, Hash, CheckCircle2, Clock, Filter, BookOpen, Users,
-} from 'lucide-react';
-import { QuestionForm, getIconByName, COLOR_OPTIONS, CATEGORY_OPTIONS } from '@/components/forms/question-form';
-import { deleteQuestion, getQuestions } from '@/actions/question-actions';
-import type { QuestionLevel } from '@/actions/question-actions';
-import { useRouter } from 'next/navigation';
+  CATEGORY_OPTIONS,
+  COLOR_OPTIONS,
+  QuestionForm,
+  getIconByName,
+} from '@/components/forms/question-form';
+import { APP_IMAGES } from '@/lib/assets';
 import { getToken } from '@/lib/auth';
 import type { AssessmentQuestion } from '@/types';
 
-// ── Category → color mapping (fallback palette) ───────────────────────────────
+type AdminQuestion = AssessmentQuestion & { createdAt?: string };
+type FilterLevel = 'Semua' | 'CHILD' | 'TEACHER';
+
 const CATEGORY_COLOR: Record<string, { bg: string; fg: string; swatch: string }> = {
-  'Motorik Halus':  { bg: 'bg-[#d4e3ff]',           fg: 'text-[#004883]',             swatch: '#d4e3ff',},
-  'Motorik Kasar':  { bg: 'bg-[#96f89f]',           fg: 'text-[#00531d]',             swatch: '#96f89f',},
-  'Keseimbangan':   { bg: 'bg-[#fff3e0]',           fg: 'text-[#c2410c]',             swatch: '#fff3e0' },
-  'Kognitif':       { bg: 'bg-[#f3e8ff]',           fg: 'text-[#6d28d9]',             swatch: '#f3e8ff' },
-  'Sensorial':      { bg: 'bg-[#fce7f3]',           fg: 'text-[#be185d]',             swatch: '#fce7f3' },
-  'Bahasa':         { bg: 'bg-secondary-container', fg: 'text-on-secondary-container', swatch: '#ffe173' },
-  'Sosial':         { bg: 'bg-error-container',     fg: 'text-error',                  swatch: '#ffd6d6' },
+  'Motorik Halus': { bg: 'bg-[#d4e3ff]', fg: 'text-[#004883]', swatch: '#d4e3ff' },
+  'Motorik Kasar': { bg: 'bg-[#96f89f]', fg: 'text-[#00531d]', swatch: '#96f89f' },
+  Keseimbangan: { bg: 'bg-[#ffddb7]', fg: 'text-[#7c2d12]', swatch: '#ffddb7' },
+  Kognitif: { bg: 'bg-[#f3e8ff]', fg: 'text-[#6b21a8]', swatch: '#f3e8ff' },
+  Sensorial: { bg: 'bg-[#ffd6d6]', fg: 'text-[#ba1a1a]', swatch: '#ffd6d6' },
+  Bahasa: { bg: 'bg-[#ffe173]', fg: 'text-[#0f1d24]', swatch: '#ffe173' },
+  Sosial: { bg: 'bg-[#ffd6d6]', fg: 'text-[#ba1a1a]', swatch: '#ffd6d6' },
+  'Asesmen Profesional': { bg: 'bg-[#d4e3ff]', fg: 'text-[#004883]', swatch: '#d4e3ff' },
+  Diferensiasi: { bg: 'bg-[#96f89f]', fg: 'text-[#00531d]', swatch: '#96f89f' },
+  Komunikasi: { bg: 'bg-[#ffe173]', fg: 'text-[#0f1d24]', swatch: '#ffe173' },
+  'Analitik Kelas': { bg: 'bg-[#f3e8ff]', fg: 'text-[#6b21a8]', swatch: '#f3e8ff' },
 };
 
 function getCategoryStyle(category: string) {
-  return CATEGORY_COLOR[category] ?? { bg: 'bg-surface-container', fg: 'text-on-surface-variant', swatch: '#e0f0fa' };
+  return CATEGORY_COLOR[category] ?? { bg: 'bg-[#e5e7eb]', fg: 'text-[#374151]', swatch: '#e5e7eb' };
+}
+
+function getLevelStyle(level: AssessmentQuestion['level'] | undefined) {
+  return level === 'TEACHER'
+    ? { bg: 'bg-[#d4e3ff]', fg: 'text-[#004883]', label: 'TEACHER' }
+    : { bg: 'bg-[#96f89f]', fg: 'text-[#00531d]', label: 'CHILD' };
 }
 
 function formatDate(dateStr?: string) {
-  if (!dateStr) return '—';
-  try {
-    return new Date(dateStr).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
-  } catch {
-    return dateStr;
-  }
+  if (!dateStr) return '-';
+
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return '-';
+
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
-// ── Props ─────────────────────────────────────────────────────────────────────
+function getQuestionColor(question: AssessmentQuestion) {
+  const categoryStyle = getCategoryStyle(question.category);
+  const colorOption = COLOR_OPTIONS.find((color) => color.value === question.color);
+
+  return {
+    bg: colorOption?.bg ?? categoryStyle.bg,
+    fg: colorOption?.fg ?? categoryStyle.fg,
+    swatch: colorOption?.swatch ?? categoryStyle.swatch,
+  };
+}
+
 export function QuestionsClient() {
   const router = useRouter();
 
-  const [questions, setQuestions] = useState<(AssessmentQuestion & { createdAt?: string })[]>([]);
+  const [questions, setQuestions] = useState<AdminQuestion[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const [isFormOpen,       setIsFormOpen]       = useState(false);
-  const [editingQuestion,  setEditingQuestion]  = useState<AssessmentQuestion | null>(null);
-  const [isDeleteModalOpen,setIsDeleteModalOpen]= useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<AssessmentQuestion | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<AssessmentQuestion | null>(null);
-  const [isDeleting,       setIsDeleting]       = useState(false);
-  const [filterCategory,   setFilterCategory]   = useState<string>('Semua');
-  const [filterLevel,      setFilterLevel]      = useState<QuestionLevel | 'Semua'>('Semua');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [filterCategory, setFilterCategory] = useState<string>('Semua');
+  const [filterLevel, setFilterLevel] = useState<FilterLevel>('Semua');
 
   const fetchQuestions = async (token: string) => {
     setFetchError(null);
+    setLoadingQuestions(true);
     try {
       const data = await getQuestions('ALL', token);
-      setQuestions(data as any);
+      setQuestions(data as AdminQuestion[]);
     } catch (err: any) {
       setFetchError(err.message || 'Gagal memuat pertanyaan');
     } finally {
@@ -75,10 +121,20 @@ export function QuestionsClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
-  // ── Handlers ─────────────────────────────────────────────────────────────────
-  const handleAddNew = () => { setEditingQuestion(null); setIsFormOpen(true); };
-  const handleEdit   = (q: AssessmentQuestion) => { setEditingQuestion(q); setIsFormOpen(true); };
-  const confirmDelete= (q: AssessmentQuestion) => { setQuestionToDelete(q); setIsDeleteModalOpen(true); };
+  const handleAddNew = () => {
+    setEditingQuestion(null);
+    setIsFormOpen(true);
+  };
+
+  const handleEdit = (question: AssessmentQuestion) => {
+    setEditingQuestion(question);
+    setIsFormOpen(true);
+  };
+
+  const confirmDelete = (question: AssessmentQuestion) => {
+    setQuestionToDelete(question);
+    setIsDeleteModalOpen(true);
+  };
 
   const handleDelete = async () => {
     if (!questionToDelete) return;
@@ -88,8 +144,7 @@ export function QuestionsClient() {
       await deleteQuestion(questionToDelete.id, token || '');
       setIsDeleteModalOpen(false);
       setQuestionToDelete(null);
-      
-      // refetch
+
       if (token) {
         await fetchQuestions(token);
       }
@@ -109,41 +164,40 @@ export function QuestionsClient() {
     }
   };
 
-  // ── Derived ──────────────────────────────────────────────────────────────────
-  const filtered = questions.filter(q => {
-    const matchCategory = filterCategory === 'Semua' || q.category === filterCategory;
-    const matchLevel = filterLevel === 'Semua' || q.level === filterLevel;
+  const filtered = questions.filter((question) => {
+    const matchCategory = filterCategory === 'Semua' || question.category === filterCategory;
+    const matchLevel = filterLevel === 'Semua' || question.level === filterLevel;
     return matchCategory && matchLevel;
   });
 
+  const childCount = questions.filter((question) => question.level !== 'TEACHER').length;
+  const teacherCount = questions.filter((question) => question.level === 'TEACHER').length;
   const lastUpdated = questions.length > 0
-    ? (() => {
-        const sorted = [...questions].sort((a: any, b: any) =>
-          new Date((b as any).createdAt || 0).getTime() - new Date((a as any).createdAt || 0).getTime()
-        );
-        return formatDate((sorted[0] as any).createdAt);
-      })()
-    : '—';
+    ? formatDate(
+        [...questions].sort((a, b) =>
+          new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+        )[0]?.createdAt
+      )
+    : '-';
+  const isFilterActive = filterCategory !== 'Semua' || filterLevel !== 'Semua';
 
-  // ── Form view ────────────────────────────────────────────────────────────────
   if (isFormOpen) {
     return (
-      // full-screen modal overlay
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-        <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-[24px] bg-white shadow-[0_24px_64px_rgba(0,0,0,0.18)]">
-
-          {/* modal header */}
-          <div className="sticky top-0 z-10 flex items-start justify-between gap-3 rounded-t-[24px] border-b border-outline-variant/20 bg-white px-6 pt-6 pb-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f1d24]/50 p-4 backdrop-blur-sm">
+        <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[24px] bg-white shadow-[0_24px_70px_rgba(15,29,36,0.24)]">
+          <div className="sticky top-0 z-10 flex items-start justify-between gap-3 rounded-t-[24px] border-b border-[#d4e3ff] bg-white px-6 pb-4 pt-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-primary-container shadow-[0_4px_0_0_#d4e3ff]">
-                <ClipboardList className="h-5 w-5 text-primary" aria-hidden="true" />
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d4e3ff]">
+                <ClipboardList className="h-5 w-5 text-[#004883]" aria-hidden="true" />
               </div>
               <div>
                 <h2 className="text-lg font-black text-on-surface">
                   {editingQuestion ? 'Edit Pertanyaan' : 'Tambah Pertanyaan Baru'}
                 </h2>
-                <p className="text-[11px] text-on-surface-variant">
-                  {editingQuestion ? 'Perbarui isi pertanyaan asesmen.' : 'Buat pertanyaan baru untuk menambah bank soal asesmen.'}
+                <p className="text-xs text-on-surface-variant">
+                  {editingQuestion
+                    ? 'Perbarui isi pertanyaan asesmen tanpa mengubah struktur payload.'
+                    : 'Buat pertanyaan baru untuk bank soal assessment CHILD atau TEACHER.'}
                 </p>
               </div>
             </div>
@@ -153,7 +207,7 @@ export function QuestionsClient() {
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-outline-variant/40 text-on-surface-variant transition-colors hover:bg-surface-container-low"
               aria-label="Tutup form"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           </div>
 
@@ -169,233 +223,218 @@ export function QuestionsClient() {
     );
   }
 
-  // ── List view ────────────────────────────────────────────────────────────────
-  if (loadingQuestions) {
+  if (loadingQuestions && questions.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-on-surface-variant font-medium">Memuat pertanyaan...</p>
+      <div className="flex flex-col gap-6">
+        <div className="h-64 animate-pulse rounded-[28px] bg-[#d4e3ff]" />
+        <div className="grid gap-3 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="h-24 animate-pulse rounded-2xl bg-white" />
+          ))}
+        </div>
+        <div className="grid gap-3">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div key={index} className="h-28 animate-pulse rounded-2xl bg-white" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col gap-6">
+      <section className="overflow-hidden rounded-[28px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <span className="rounded-full bg-[#96f89f] px-3 py-1 text-xs font-black uppercase tracking-wide text-[#00531d]">
+                Question Management
+              </span>
+              <span className="rounded-full bg-[#ffe173] px-3 py-1 text-xs font-black text-[#0f1d24]">
+                CHILD & TEACHER Level
+              </span>
+            </div>
+            <h1 className="text-3xl font-black leading-tight text-[#004883]">
+              Kelola Pertanyaan
+            </h1>
+            <p className="mt-2 max-w-xl text-sm font-semibold leading-relaxed text-[#004883]">
+              Atur soal assessment untuk anak dan guru berdasarkan level yang sesuai.
+            </p>
 
-      {/* ── Page header ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-black text-on-surface">Manajemen Pertanyaan</h1>
-          <p className="text-sm text-on-surface-variant">Kelola bank soal untuk asesmen montessori.</p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <SummaryCard icon={Hash} label="Total Pertanyaan" value={questions.length} tone="blue" />
+              <SummaryCard icon={Layers3} label="CHILD" value={childCount} tone="green" />
+              <SummaryCard icon={BookOpenCheck} label="TEACHER" value={teacherCount} tone="yellow" />
+            </div>
+          </div>
+
+          <Image
+            src={APP_IMAGES.adminQuestionsManagement}
+            alt="Ilustrasi manajemen pertanyaan administrator"
+            width={340}
+            height={270}
+            priority
+            className="admin-float mx-auto h-auto w-full max-w-[200px] shrink-0 motion-reduce:animate-none sm:max-w-[240px] lg:mx-0 lg:max-w-[320px]"
+          />
         </div>
-        <Button
-          variant="primary"
-          className="rounded-[18px] font-black shadow-[0_5px_0_0_#004883] gap-2 shrink-0"
-          onClick={handleAddNew}
-        >
-          <Plus className="h-4 w-4" />
-          Tambah Pertanyaan
-        </Button>
-      </div>
+      </section>
 
-      {/* ── Stat bar ─────────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          {  icon: Hash,         label: 'Total Pertanyaan',     value: questions.length,        bg: 'bg-[#d4e3ff]',           fg: 'text-[#004883]', },
-          {  icon: CheckCircle2, label: 'Aktif',                value: questions.length,        bg: 'bg-[#96f89f]',           fg: 'text-[#00531d]',},        
-          { icon: Clock,         label: 'Terakhir Diperbarui',  value: lastUpdated,             bg: 'bg-secondary-container', fg: 'text-on-secondary-container' },
-          { icon: Filter,        label: 'Filter',                value: filterCategory,         bg: 'bg-surface-container',   fg: 'text-on-surface-variant' },
-        ].map(({ icon: Icon, label, value, bg, fg }) => (
-          <div
-            key={label}
-            className="flex items-center gap-3 rounded-[16px] border border-outline-variant/30 bg-white px-4 py-3 shadow-[0_2px_8px_rgba(0,93,167,0.06)]"
-          >
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] ${bg}`}>
-              <Icon className={`h-4 w-4 ${fg}`} aria-hidden="true" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wide text-on-surface-variant">{label}</p>
-              <p className="truncate text-sm font-black text-on-surface">{value}</p>
-            </div>
+      <section className="grid gap-4 lg:grid-cols-[1fr_auto]">
+        <div className="rounded-2xl border border-[#d4e3ff] bg-white p-4 shadow-[0_10px_28px_rgba(0,72,131,0.06)]">
+          <div className="mb-3 flex items-center gap-2 text-sm font-black text-on-surface">
+            <Filter className="h-4 w-4 text-[#004883]" aria-hidden="true" />
+            Filter Pertanyaan
           </div>
-        ))}
-      </div>
 
-      {/* ── Category filter pills ────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2">
-        {['Semua', ...CATEGORY_OPTIONS].map((cat) => {
-          const isActive = filterCategory === cat;
-          const style = cat === 'Semua' ? null : getCategoryStyle(cat);
-          return (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setFilterCategory(cat)}
-              className={[
-                'rounded-full px-4 py-1.5 text-xs font-black transition-all border-2',
-                isActive
-                  ? cat === 'Semua'
-                    ? 'bg-primary text-white border-primary shadow-[0_3px_0_0_#004883]'
-                    : `${style!.bg} ${style!.fg} border-transparent shadow-[0_3px_0_0_rgba(0,0,0,0.1)]`
-                  : 'bg-white text-on-surface-variant border-outline-variant/40 hover:border-primary/30',
-              ].join(' ')}
-            >
-              {cat}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Level filter pills ────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2">
-        {['Semua', 'CHILD', 'TEACHER'].map((lvl) => {
-          const isActive = filterLevel === lvl;
-          return (
-            <button
-              key={lvl}
-              type="button"
-              onClick={() => setFilterLevel(lvl as QuestionLevel | 'Semua')}
-              className={[
-                'rounded-full px-4 py-1.5 text-xs font-black transition-all border-2',
-                isActive
-                ? 'bg-[#fdd73b] text-[#0f1d24] border-[#e8c426] shadow-[0_3px_0_0_#e8c426]'
-                : 'bg-white text-[#414751] border-[#e0f0fa] hover:border-[#fdd73b] hover:text-[#0f1d24]',
-              ].join(' ')}
-            >
-              {lvl === 'Semua' ? 'Semua Level' : lvl}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Question list ────────────────────────────────────────────────────── */}
-      <div className="flex flex-col gap-3">
-        {fetchError ? (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-error bg-error-container p-12 text-center">
-            <AlertTriangle className="h-8 w-8 text-error" />
-            <p className="font-black text-error">{fetchError}</p>
-            <Button variant="outline" onClick={() => fetchQuestions(getToken() || '')}>Coba Lagi</Button>
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-primary-container bg-surface-container-lowest p-12 text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-primary-container shadow-[0_4px_0_0_#d4e3ff]">
-              <ClipboardList className="h-8 w-8 text-primary" aria-hidden="true" />
-            </div>
+          <div className="flex flex-col gap-4">
             <div>
-              <p className="font-black text-on-surface">
-                {filterCategory === 'Semua' ? 'Belum ada pertanyaan' : `Tidak ada pertanyaan "${filterCategory}"`}
-              </p>
-              <p className="mt-1 text-sm text-on-surface-variant">
-                {filterCategory === 'Semua'
-                  ? 'Mulai tambah pertanyaan pertama untuk bank soal asesmen.'
-                  : 'Coba pilih kategori lain atau tambah pertanyaan baru.'}
-              </p>
-            </div>
-            <Button variant="primary" className="rounded-[14px] font-black" onClick={handleAddNew}>
-              <Plus className="h-4 w-4" /> Tambah Pertanyaan
-            </Button>
-          </div>
-        ) : (
-          filtered.map((q) => {
-            const catStyle = getCategoryStyle(q.category);
-            const colorOpt = COLOR_OPTIONS.find(c => c.value === q.color);
-            const iconBg   = colorOpt?.bg  ?? catStyle.bg;
-            const iconFg   = colorOpt?.fg  ?? catStyle.fg;
-            const Icon     = getIconByName(q.icon ?? 'Home');
-
-            return (
-              <div
-                key={q.id}
-                className="group flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-[20px] border border-outline-variant/30 bg-white px-5 py-4 shadow-[0_4px_16px_rgba(0,93,167,0.05)] transition-all hover:border-primary/30 hover:shadow-[0_6px_20px_rgba(0,93,167,0.10)]"
-              >
-                {/* icon + content */}
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  {/* icon badge */}
-                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] ${iconBg} shadow-sm`}>
-                    <Icon className={`h-6 w-6 ${iconFg}`} aria-hidden="true" />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    {/* category & level badge */}
-                    <div className="mb-1.5 flex gap-2 flex-wrap">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-black ${catStyle.bg} ${catStyle.fg}`}>
-                        {q.category}
-                      </span>
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-black ${ q.level === 'TEACHER' ? 'bg-[#ffe173] text-[#0f1d24]' : 'bg-[#96f89f] text-[#00531d]' }`}>
-                        {q.level || 'CHILD'}
-                      </span>
-                    </div>
-                    {/* question text */}
-                    <p className="text-sm font-bold text-on-surface leading-snug line-clamp-2">
-                      {q.text}
-                    </p>
-                    {/* meta */}
-                    <div className="mt-1.5 flex flex-wrap gap-3 text-[10px] text-on-surface-variant">
-                      {(q as any).createdAt && (
-                        <span className="flex items-center gap-1">
-                          📅 Dibuat {formatDate((q as any).createdAt)}
-                        </span>
-                      )}
-                      <span className="flex items-center gap-1">
-                        🕐 ID #{q.id}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* actions */}
-                <div className="flex gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleEdit(q)}
-                    className="flex items-center gap-1.5 rounded-[12px] border border-outline-variant/40 bg-white px-3 py-2 text-xs font-bold text-on-surface-variant transition-all hover:border-primary/40 hover:bg-primary-container hover:text-primary"
-                    aria-label={`Edit pertanyaan ${q.id}`}
-                  >
-                    <Edit2 className="h-3.5 w-3.5" />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => confirmDelete(q)}
-                    className="flex items-center gap-1.5 rounded-[12px] border border-error/20 bg-white px-3 py-2 text-xs font-bold text-error transition-all hover:bg-error-container"
-                    aria-label={`Hapus pertanyaan ${q.id}`}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Hapus
-                  </button>
-                </div>
+              <p className="mb-2 text-xs font-black uppercase tracking-wide text-on-surface-variant">Kategori</p>
+              <div className="flex flex-wrap gap-2">
+                {['Semua', ...CATEGORY_OPTIONS].map((category) => {
+                  const isActive = filterCategory === category;
+                  const style = category === 'Semua' ? null : getCategoryStyle(category);
+                  return (
+                    <button
+                      key={category}
+                      type="button"
+                      onClick={() => setFilterCategory(category)}
+                      className={[
+                        'rounded-full border px-3 py-1.5 text-xs font-black transition-all',
+                        isActive
+                          ? category === 'Semua'
+                            ? 'border-[#004883] bg-[#004883] text-white'
+                            : `border-transparent ${style!.bg} ${style!.fg}`
+                          : 'border-[#d4e3ff] bg-white text-on-surface-variant hover:border-[#004883] hover:text-[#004883]',
+                      ].join(' ')}
+                    >
+                      {category}
+                    </button>
+                  );
+                })}
               </div>
-            );
-          })
-        )}
-      </div>
-
-      {/* ── Delete confirmation modal ─────────────────────────────────────────── */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-[24px] bg-white p-6 shadow-[0_24px_64px_rgba(0,0,0,0.18)]">
-
-            {/* icon */}
-            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[18px] bg-error-container shadow-[0_4px_0_0_#ffd6d6]">
-              <AlertTriangle className="h-7 w-7 text-error" aria-hidden="true" />
             </div>
 
-            <h3 className="text-lg font-black text-on-surface mb-1">Hapus Pertanyaan?</h3>
-            <p className="text-sm text-on-surface-variant mb-2">
+            <div>
+              <p className="mb-2 text-xs font-black uppercase tracking-wide text-on-surface-variant">Level</p>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: 'Semua', label: 'Semua' },
+                  { value: 'CHILD', label: 'Child' },
+                  { value: 'TEACHER', label: 'Teacher' },
+                ].map((option) => {
+                  const isActive = filterLevel === option.value;
+                  return (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setFilterLevel(option.value as FilterLevel)}
+                      className={[
+                        'rounded-full border px-4 py-1.5 text-xs font-black transition-all',
+                        isActive
+                          ? option.value === 'TEACHER'
+                            ? 'border-transparent bg-[#d4e3ff] text-[#004883]'
+                            : option.value === 'CHILD'
+                              ? 'border-transparent bg-[#96f89f] text-[#00531d]'
+                              : 'border-[#004883] bg-[#004883] text-white'
+                          : 'border-[#d4e3ff] bg-white text-on-surface-variant hover:border-[#004883] hover:text-[#004883]',
+                      ].join(' ')}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between gap-3 rounded-2xl border border-[#d4e3ff] bg-white p-4 shadow-[0_10px_28px_rgba(0,72,131,0.06)] lg:w-64">
+          <div>
+            <p className="text-xs font-black uppercase tracking-wide text-[#004883]">Status Bank Soal</p>
+            <p className="mt-2 text-sm font-semibold text-on-surface-variant">
+              Terakhir diperbarui: <span className="font-black text-on-surface">{lastUpdated}</span>
+            </p>
+            <p className="mt-1 text-xs text-on-surface-variant">
+              Menampilkan {filtered.length} dari {questions.length} pertanyaan.
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            className="rounded-[16px] font-black shadow-[0_5px_0_0_#004883]"
+            onClick={handleAddNew}
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            Tambah Pertanyaan
+          </Button>
+        </div>
+      </section>
+
+      {fetchError ? (
+        <div className="flex min-h-80 flex-col items-center justify-center rounded-[24px] border-2 border-dashed border-[#ffd6d6] bg-white p-8 text-center shadow-[0_16px_40px_rgba(186,26,26,0.06)]">
+          <Image
+            src={APP_IMAGES.adminEmptyState}
+            alt="Ilustrasi error pertanyaan"
+            width={220}
+            height={180}
+            className="mb-4 h-auto w-full max-w-[190px]"
+          />
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffd6d6]">
+            <AlertTriangle className="h-7 w-7 text-[#ba1a1a]" aria-hidden="true" />
+          </div>
+          <h3 className="mb-2 text-lg font-black text-on-surface">Gagal Memuat Pertanyaan</h3>
+          <p className="mb-6 max-w-md text-sm text-on-surface-variant">{fetchError}</p>
+          <Button variant="outline" icon={RefreshCw} onClick={() => fetchQuestions(getToken() || '')}>
+            Coba Lagi
+          </Button>
+        </div>
+      ) : filtered.length === 0 ? (
+        <EmptyQuestionsState
+          isFilterActive={isFilterActive}
+          onAdd={handleAddNew}
+        />
+      ) : (
+        <section className="grid gap-3">
+          {loadingQuestions && questions.length > 0 ? (
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-[#d4e3ff] bg-white px-4 py-3 text-xs font-bold text-[#004883] shadow-[0_8px_22px_rgba(0,72,131,0.06)]">
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              Memperbarui daftar pertanyaan
+            </div>
+          ) : null}
+
+          {filtered.map((question) => (
+            <QuestionCard
+              key={question.id}
+              question={question}
+              onEdit={handleEdit}
+              onDelete={confirmDelete}
+            />
+          ))}
+        </section>
+      )}
+
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f1d24]/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-[24px] bg-white p-6 shadow-[0_24px_70px_rgba(15,29,36,0.24)]">
+            <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffd6d6]">
+              <AlertTriangle className="h-7 w-7 text-[#ba1a1a]" aria-hidden="true" />
+            </div>
+
+            <h3 className="mb-1 text-lg font-black text-on-surface">Hapus Pertanyaan?</h3>
+            <p className="mb-2 text-sm text-on-surface-variant">
               Pertanyaan berikut akan dihapus permanen:
             </p>
 
-            {/* question preview */}
             {questionToDelete && (
-              <div className="mb-5 rounded-[14px] border border-outline-variant/30 bg-surface-container-lowest p-3">
-                <span className={`mb-1.5 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-black ${getCategoryStyle(questionToDelete.category).bg} ${getCategoryStyle(questionToDelete.category).fg}`}>
-                  {questionToDelete.category}
-                </span>
-                <p className="text-sm font-bold text-on-surface line-clamp-2">{questionToDelete.text}</p>
+              <div className="mb-5 rounded-2xl border border-[#d4e3ff] bg-surface-container-lowest p-4">
+                <LevelBadge level={questionToDelete.level} />
+                <p className="mt-3 line-clamp-3 text-sm font-bold text-on-surface">
+                  {questionToDelete.text}
+                </p>
               </div>
             )}
 
             <p className="mb-5 text-xs text-on-surface-variant">
-              ⚠️ Tindakan ini tidak dapat dibatalkan.
+              Tindakan ini tidak dapat dibatalkan.
             </p>
 
             <div className="flex justify-end gap-3">
@@ -418,6 +457,160 @@ export function QuestionsClient() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function SummaryCard({
+  icon: Icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: number | string;
+  tone: 'blue' | 'green' | 'yellow';
+}) {
+  const toneClass = {
+    blue: 'bg-[#d4e3ff] text-[#004883]',
+    green: 'bg-[#96f89f] text-[#00531d]',
+    yellow: 'bg-[#ffe173] text-[#0f1d24]',
+  }[tone];
+
+  return (
+    <div className="rounded-2xl bg-white/75 p-3 shadow-[0_8px_22px_rgba(0,72,131,0.08)] transition-all duration-200 hover:scale-[1.01] motion-reduce:transition-none motion-reduce:hover:scale-100">
+      <div className="flex items-center gap-3">
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneClass}`}>
+          <Icon className="h-5 w-5" aria-hidden="true" />
+        </div>
+        <div>
+          <p className="text-xl font-black text-[#0f1d24]">{value}</p>
+          <p className="text-[11px] font-bold text-on-surface-variant">{label}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LevelBadge({ level }: { level: AssessmentQuestion['level'] | undefined }) {
+  const style = getLevelStyle(level);
+
+  return (
+    <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${style.bg} ${style.fg}`}>
+      {style.label}
+    </span>
+  );
+}
+
+function QuestionCard({
+  question,
+  onEdit,
+  onDelete,
+}: {
+  question: AdminQuestion;
+  onEdit: (question: AssessmentQuestion) => void;
+  onDelete: (question: AssessmentQuestion) => void;
+}) {
+  const categoryStyle = getCategoryStyle(question.category);
+  const questionColor = getQuestionColor(question);
+  const Icon = getIconByName(question.icon ?? 'ClipboardCheck');
+
+  return (
+    <article className="group rounded-[22px] border border-[#d4e3ff] bg-white p-4 shadow-[0_10px_28px_rgba(0,72,131,0.06)] transition-all duration-200 hover:scale-[1.005] hover:shadow-[0_14px_34px_rgba(0,72,131,0.11)] motion-reduce:transition-none motion-reduce:hover:scale-100">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 flex-1 gap-4">
+          <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${questionColor.bg}`}>
+            <Icon className={`h-6 w-6 ${questionColor.fg}`} aria-hidden="true" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${categoryStyle.bg} ${categoryStyle.fg}`}>
+                {question.category}
+              </span>
+              <LevelBadge level={question.level} />
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#e5e7eb] px-2.5 py-1 text-[10px] font-black text-[#374151]">
+                <span
+                  className="h-2.5 w-2.5 rounded-full border border-black/10"
+                  style={{ backgroundColor: questionColor.swatch }}
+                  aria-hidden="true"
+                />
+                Color
+              </span>
+            </div>
+
+            <p className="line-clamp-3 text-sm font-bold leading-relaxed text-on-surface">
+              {question.text}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-3 text-[10px] font-bold text-on-surface-variant">
+              <span>ID #{question.id}</span>
+              <span>Icon: {question.icon || 'ClipboardCheck'}</span>
+              <span>Dibuat: {formatDate(question.createdAt)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 gap-2 md:flex-col lg:flex-row">
+          <button
+            type="button"
+            onClick={() => onEdit(question)}
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#d4e3ff] bg-white px-3 py-2 text-xs font-black text-[#004883] transition-colors hover:bg-[#d4e3ff]"
+            aria-label={`Edit pertanyaan ${question.id}`}
+          >
+            <Edit2 className="h-3.5 w-3.5" aria-hidden="true" />
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => onDelete(question)}
+            className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#ffd6d6] bg-white px-3 py-2 text-xs font-black text-[#ba1a1a] transition-colors hover:bg-[#ffd6d6]"
+            aria-label={`Hapus pertanyaan ${question.id}`}
+          >
+            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+            Hapus
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function EmptyQuestionsState({
+  isFilterActive,
+  onAdd,
+}: {
+  isFilterActive: boolean;
+  onAdd: () => void;
+}) {
+  return (
+    <div className="flex min-h-80 flex-col items-center justify-center rounded-[24px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+      <Image
+        src={APP_IMAGES.adminEmptyState}
+        alt="Ilustrasi pertanyaan kosong"
+        width={220}
+        height={180}
+        className="mb-4 h-auto w-full max-w-[190px]"
+      />
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#d4e3ff] text-[#004883]">
+        {isFilterActive ? (
+          <HelpCircle className="h-6 w-6" aria-hidden="true" />
+        ) : (
+          <ClipboardList className="h-6 w-6" aria-hidden="true" />
+        )}
+      </div>
+      <h3 className="text-lg font-black text-on-surface">
+        {isFilterActive ? 'Tidak ada pertanyaan untuk filter ini.' : 'Belum ada pertanyaan'}
+      </h3>
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-on-surface-variant">
+        {isFilterActive
+          ? 'Coba ubah filter kategori atau level.'
+          : 'Tambahkan pertanyaan assessment untuk mulai menyusun modul.'}
+      </p>
+      <Button variant="primary" className="mt-6 rounded-[14px] font-black" onClick={onAdd}>
+        <Plus className="h-4 w-4" aria-hidden="true" />
+        Tambah Pertanyaan
+      </Button>
     </div>
   );
 }

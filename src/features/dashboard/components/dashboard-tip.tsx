@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Recommendation } from '@/types';
+import { APP_IMAGES } from '@/lib/assets';
 
 export async function DashboardTip() {
   let tip: Recommendation | null = null;
@@ -24,16 +26,18 @@ export async function DashboardTip() {
       p-7 sm:p-8
       shadow-[0_6px_0_0_#00531d]
     ">
-      {/* decorative blobs */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[#00531d] opacity-30" />
-      <div className="pointer-events-none absolute -bottom-6 left-1/4 h-20 w-20 rounded-full bg-tertiary-light opacity-10" />
-
       <div className="relative z-10 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-
-        {/* icon badge */}
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-white/20 backdrop-blur-sm">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-white/20 backdrop-blur-sm sm:hidden">
           <Lightbulb className="h-6 w-6 text-white" aria-hidden="true" />
         </div>
+
+        <Image
+          src={APP_IMAGES.tipsHero}
+          alt="Ilustrasi tips aktivitas anak"
+          width={170}
+          height={130}
+          className="hidden h-auto w-full max-w-[140px] shrink-0 transition-transform duration-300 motion-safe:hover:-translate-y-1 sm:block"
+        />
 
         <div className="flex-1">
           {title && (

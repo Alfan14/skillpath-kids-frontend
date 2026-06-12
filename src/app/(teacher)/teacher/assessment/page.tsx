@@ -19,6 +19,9 @@ export default function TeacherAssessmentPage() {
           resultPath="/teacher/results"
           title="Teacher Assessment"
           subtitle="Soal advanced untuk kompetensi profesional guru."
+          enableCategorySelection
+          categorySelectionTitle="Pilih Kategori Assessment Guru"
+          categorySelectionSubtitle="Pilih area kompetensi yang ingin dievaluasi terlebih dahulu."
         />
       </Suspense>
     </ErrorBoundary>

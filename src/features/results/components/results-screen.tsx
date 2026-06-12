@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import { Trophy, AlertCircle, LineChart, Loader2 } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, CircleDot, LineChart, Loader2, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, KidCard } from '@/components/ui/card';
 import { BadgePill } from '@/components/ui/badge';
 import { ProgressRing } from '@/components/ui/progress-ring';
-import { SkillProgressBar } from '@/components/ui/skill-progress-bar';
 import {
   getParentResults,
   ParentResultsError,
@@ -15,16 +15,58 @@ import {
 } from '@/actions/parent-actions';
 import { getSession, getToken, logout } from '@/lib/auth';
 import { formatSkillLabel, safeParseArray, safeParseObject } from '@/lib/result-parsers';
-
-function scoreToStatus(score: number): 'excellent' | 'warning' | 'low' {
-  if (score >= 80) return 'excellent';
-  if (score >= 50) return 'warning';
-  return 'low';
-}
+import { APP_IMAGES } from '@/lib/assets';
 
 function getScore(value: ParentResult['overallScore']) {
   const score = Number(value ?? 0);
   return Number.isFinite(score) ? Math.round(score) : 0;
+}
+
+function getResultIllustration(score: number, category: string) {
+  const normalizedCategory = category.toLowerCase();
+
+  if (score >= 85 || normalizedCategory.includes('sangat baik')) {
+    return APP_IMAGES.resultGoodScore;
+  }
+
+  if (score < 70 || normalizedCategory.includes('perlu')) {
+    return APP_IMAGES.resultNeedAttention;
+  }
+
+  return APP_IMAGES.resultReport;
+}
+
+function normalizeSkillScore(value: unknown) {
+  const score = Number(value);
+  if (!Number.isFinite(score)) return 0;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+function getSkillStatus(score: number) {
+  if (score >= 85) {
+    return {
+      label: 'Sangat Baik',
+      icon: CheckCircle2,
+      barClassName: 'bg-[#96f89f]',
+      textClassName: 'text-[#00531d]',
+    };
+  }
+
+  if (score >= 70) {
+    return {
+      label: 'Perlu Perhatian',
+      icon: AlertTriangle,
+      barClassName: 'bg-[#ffe173]',
+      textClassName: 'text-[#0f1d24]',
+    };
+  }
+
+  return {
+    label: 'Butuh Dukungan',
+    icon: CircleDot,
+    barClassName: 'bg-[#ffd6d6]',
+    textClassName: 'text-[#ba1a1a]',
+  };
 }
 
 function readStoredResult(): ParentResult | null {
@@ -125,15 +167,19 @@ export function ResultsScreen({
   if (!result) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
-        <div className="w-16 h-16 flex items-center justify-center rounded-full bg-secondary-container">
-          <AlertCircle className="w-8 h-8 text-on-secondary-container" aria-hidden="true" />
-        </div>
-        <h2 className="text-xl font-bold text-on-surface">Belum ada asesmen.</h2>
-        <p className="text-on-surface-variant">
+        <Image
+          src={APP_IMAGES.emptyAssessment}
+          alt="Ilustrasi belum ada hasil asesmen"
+          width={240}
+          height={180}
+          className="h-auto w-full max-w-[170px] transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:max-w-[220px]"
+        />
+        <h2 className="text-xl font-bold text-on-surface">Belum ada hasil asesmen</h2>
+        <p className="max-w-md text-on-surface-variant">
           {error ?? "It looks like you haven't completed an assessment for your child."}
         </p>
         <Button variant="primary" asChild>
-          <Link href={assessmentPath}>Start Assessment</Link>
+          <Link href={assessmentPath}>Mulai Asesmen</Link>
         </Button>
       </div>
     );
@@ -144,6 +190,7 @@ export function ResultsScreen({
   const focusSummary = result.focusSummary ?? '';
   const focusAreas = safeParseArray(result.focusAreas);
   const skillEntries = Object.entries(safeParseObject(result.skillsData));
+  const resultIllustration = getResultIllustration(overallScore, category);
 
   return (
     <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto">
@@ -160,6 +207,14 @@ export function ResultsScreen({
           {title}
         </h1>
         <p className="text-on-surface-variant">{subtitle}</p>
+        <Image
+          src={resultIllustration}
+          alt="Ilustrasi hasil asesmen anak"
+          width={260}
+          height={210}
+          priority
+          className="h-auto w-full max-w-[180px] transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:max-w-[220px]"
+        />
       </div>
 
       {/* ── Score cards row ────────────────────────────────────────────────── */}
@@ -208,19 +263,60 @@ export function ResultsScreen({
 
       {/* ── Skill breakdown ────────────────────────────────────────────────── */}
       <Card className="w-full flex flex-col gap-5">
-        <h2 className="flex items-center gap-2 text-xl font-black italic text-on-surface">
-          <LineChart className="w-5 h-5 text-primary" aria-hidden="true" />
-          Rincian Keterampilan
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 text-xl font-black italic text-on-surface">
+            <LineChart className="w-5 h-5 text-primary" aria-hidden="true" />
+            Rincian Keterampilan
+          </h2>
+          <Image
+            src={APP_IMAGES.resultReport}
+            alt=""
+            width={92}
+            height={72}
+            className="hidden h-auto w-16 shrink-0 transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:block"
+          />
+        </div>
         {skillEntries.length > 0 ? (
-          skillEntries.map(([skill, score]) => (
-            <SkillProgressBar
-              key={skill}
-              label={formatSkillLabel(skill)}
-              value={Math.round(score)}
-              status={scoreToStatus(score)}
-            />
-          ))
+          <div className="grid gap-4">
+            {skillEntries.map(([skill, score]) => {
+              const normalizedScore = normalizeSkillScore(score);
+              const status = getSkillStatus(normalizedScore);
+              const StatusIcon = status.icon;
+
+              return (
+                <div
+                  key={skill}
+                  className="rounded-3xl border border-[#d4e3ff] bg-white p-4 shadow-[0_8px_20px_rgba(0,72,131,0.06)]"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-black text-on-surface">
+                      {formatSkillLabel(skill)}
+                    </span>
+                    <span className={`text-sm font-black ${status.textClassName}`}>
+                      {normalizedScore}%
+                    </span>
+                  </div>
+
+                  <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-[#d4e3ff]">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ease-out ${status.barClassName}`}
+                      style={{ width: `${normalizedScore}%` }}
+                      role="progressbar"
+                      aria-label={`${formatSkillLabel(skill)} ${normalizedScore}%`}
+                      aria-valuenow={normalizedScore}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                    />
+                  </div>
+
+                  <div className={`mt-3 flex items-center gap-2 text-xs font-bold ${status.textClassName}`}>
+                    <StatusIcon className="h-4 w-4" aria-hidden="true" />
+                    <span>{status.label}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         ) : (
           <p className="text-sm text-on-surface-variant">Data keterampilan belum tersedia.</p>
         )}

@@ -272,7 +272,7 @@ export function QuestionForm({ initialData, onSuccess, onCancel }: QuestionFormP
 
       {/* icon */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-sm font-black text-on-surface">Ikon (Lucide)</label>
+        <label className="text-sm font-black text-on-surface">Ikon</label>
         <div className="relative">
           <select
             name="icon"
