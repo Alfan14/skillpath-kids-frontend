@@ -16,6 +16,7 @@ import {
 import { getSession, getToken, logout } from '@/lib/auth';
 import { formatSkillLabel, safeParseArray, safeParseObject } from '@/lib/result-parsers';
 import { APP_IMAGES } from '@/lib/assets';
+import { useUiSound } from '@/hooks/use-ui-sound';
 
 function getScore(value: ParentResult['overallScore']) {
   const score = Number(value ?? 0);
@@ -94,6 +95,7 @@ export function ResultsScreen({
   const [result, setResult] = useState<ParentResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { playTap, playSuccess } = useUiSound();
 
   useEffect(() => {
     let active = true;
@@ -157,7 +159,7 @@ export function ResultsScreen({
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-20 text-center">
+      <div className="animate-fade-up flex flex-col items-center justify-center gap-3 py-20 text-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
         <p className="text-sm font-bold text-on-surface-variant">Memuat hasil asesmen...</p>
       </div>
@@ -166,20 +168,20 @@ export function ResultsScreen({
 
   if (!result) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+      <div className="animate-fade-up flex flex-col items-center justify-center gap-4 py-20 text-center">
         <Image
           src={APP_IMAGES.emptyAssessment}
           alt="Ilustrasi belum ada hasil asesmen"
           width={240}
           height={180}
-          className="h-auto w-full max-w-[170px] transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:max-w-[220px]"
+          className="animate-float-soft h-auto w-full max-w-[170px] sm:max-w-[220px]"
         />
         <h2 className="text-xl font-bold text-on-surface">Belum ada hasil asesmen</h2>
         <p className="max-w-md text-on-surface-variant">
           {error ?? "It looks like you haven't completed an assessment for your child."}
         </p>
-        <Button variant="primary" asChild>
-          <Link href={assessmentPath}>Mulai Asesmen</Link>
+        <Button variant="primary" className="press-soft" asChild>
+          <Link href={assessmentPath} onClick={playSuccess}>Mulai Asesmen</Link>
         </Button>
       </div>
     );
@@ -193,10 +195,10 @@ export function ResultsScreen({
   const resultIllustration = getResultIllustration(overallScore, category);
 
   return (
-    <div className="flex flex-col items-center gap-6 max-w-2xl mx-auto">
+    <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col items-center gap-3 pt-4 text-center">
+      <div className="animate-fade-up flex flex-col items-center gap-3 pt-4 text-center">
         <div className="w-20 h-20 flex items-center justify-center rounded-full bg-secondary-container">
           <Trophy className="w-10 h-10 text-on-secondary-container" aria-hidden="true" />
         </div>
@@ -213,15 +215,15 @@ export function ResultsScreen({
           width={260}
           height={210}
           priority
-          className="h-auto w-full max-w-[180px] transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:max-w-[220px]"
+          className="animate-float-soft h-auto w-full max-w-[180px] sm:max-w-[220px]"
         />
       </div>
 
       {/* ── Score cards row ────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
 
         {/* Overall score */}
-        <Card className="flex flex-col gap-4">
+        <Card className="animate-fade-up flex flex-col gap-4">
           <h2 className="text-xs font-bold uppercase tracking-widest text-on-surface-variant">
             Kategori Keseluruhan
           </h2>
@@ -239,7 +241,7 @@ export function ResultsScreen({
         </Card>
 
         {/* Focus area */}
-        <Card className="flex flex-col gap-3">
+        <Card className="animate-fade-up flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 flex items-center justify-center rounded-full bg-secondary-container">
               <AlertCircle className="w-5 h-5 text-on-secondary-container" aria-hidden="true" />
@@ -252,7 +254,13 @@ export function ResultsScreen({
           <div className="flex flex-wrap gap-2">
             {focusAreas.length > 0 ? (
               focusAreas.map((area) => (
-                <BadgePill key={area} color="neutral">{area}</BadgePill>
+                <BadgePill
+                  key={area}
+                  color="neutral"
+                  className="transition-transform duration-150 hover:scale-[1.03] motion-reduce:transition-none motion-reduce:hover:scale-100"
+                >
+                  {area}
+                </BadgePill>
               ))
             ) : (
               <p className="text-sm text-on-surface-variant">Keep exploring daily activities!</p>
@@ -262,7 +270,7 @@ export function ResultsScreen({
       </div>
 
       {/* ── Skill breakdown ────────────────────────────────────────────────── */}
-      <Card className="w-full flex flex-col gap-5">
+      <Card className="animate-fade-up flex w-full flex-col gap-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="flex items-center gap-2 text-xl font-black italic text-on-surface">
             <LineChart className="w-5 h-5 text-primary" aria-hidden="true" />
@@ -273,7 +281,7 @@ export function ResultsScreen({
             alt=""
             width={92}
             height={72}
-            className="hidden h-auto w-16 shrink-0 transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:block"
+            className="hidden h-auto w-16 shrink-0 transition-transform duration-300 hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100 sm:block"
           />
         </div>
         {skillEntries.length > 0 ? (
@@ -286,7 +294,7 @@ export function ResultsScreen({
               return (
                 <div
                   key={skill}
-                  className="rounded-3xl border border-[#d4e3ff] bg-white p-4 shadow-[0_8px_20px_rgba(0,72,131,0.06)]"
+                  className="hover-lift-soft rounded-3xl border border-[#d4e3ff] bg-white p-4 shadow-[0_8px_20px_rgba(0,72,131,0.06)]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-sm font-black text-on-surface">
@@ -299,7 +307,7 @@ export function ResultsScreen({
 
                   <div className="mt-3 h-3 w-full overflow-hidden rounded-full bg-[#d4e3ff]">
                     <div
-                      className={`h-full rounded-full transition-all duration-500 ease-out ${status.barClassName}`}
+                      className={`progress-motion h-full rounded-full ${status.barClassName}`}
                       style={{ width: `${normalizedScore}%` }}
                       role="progressbar"
                       aria-label={`${formatSkillLabel(skill)} ${normalizedScore}%`}
@@ -322,12 +330,15 @@ export function ResultsScreen({
         )}
       </Card>
 
-      <div className="flex flex-col gap-3 w-full">
-        <Button variant="primary" size="lg" className="w-full" asChild>
+      <div className="animate-fade-up flex w-full flex-col gap-3">
+        <Button
+          variant="primary"
+          size="lg"
+          className="press-soft w-full"
+          onClick={playSuccess}
+          asChild
+        >
           <Link href={recommendationsPath}>Lanjut ke Rekomendasi →</Link>
-        </Button>
-        <Button variant="ghost" size="md" className="w-full text-primary font-bold">
-          Unduh Hasil PDF
         </Button>
       </div>
 

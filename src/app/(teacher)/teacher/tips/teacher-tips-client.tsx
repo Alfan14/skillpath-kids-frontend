@@ -18,6 +18,7 @@ import {
 import { BadgePill } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useUiSound } from '@/hooks/use-ui-sound';
 import { APP_IMAGES } from '@/lib/assets';
 import { getIcon, iconMap } from '@/lib/icon-map';
 import type { Recommendation } from '@/types';
@@ -118,6 +119,7 @@ function getBenefitText(tip: TeacherTip) {
 }
 
 export function TeacherTipsClient() {
+  const { playTap, playSoft, playSuccess } = useUiSound();
   const [tips, setTips] = useState<TeacherTip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -150,12 +152,33 @@ export function TeacherTipsClient() {
     fetchTips();
   }, [fetchTips]);
 
+  const handleRetry = useCallback(() => {
+    if (loading) return;
+    playTap();
+    fetchTips();
+  }, [fetchTips, loading, playTap]);
+
+  const handleStartActivity = useCallback((tip: TeacherTip) => {
+    playSuccess();
+    setSelectedTip(tip);
+  }, [playSuccess]);
+
+  const handleOpenDetail = useCallback((tip: TeacherTip) => {
+    playSoft();
+    setSelectedTip(tip);
+  }, [playSoft]);
+
+  const handleCloseDetail = useCallback(() => {
+    playSoft();
+    setSelectedTip(null);
+  }, [playSoft]);
+
   const mainTip = tips.find((tip) => tip.isMain) ?? tips[0] ?? null;
   const otherTips = tips.filter((tip) => tip.id !== mainTip?.id);
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="overflow-hidden rounded-[28px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
+      <section className="animate-fade-up overflow-hidden rounded-[28px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-3 flex flex-wrap gap-2">
@@ -177,9 +200,9 @@ export function TeacherTipsClient() {
               variant="outline"
               size="sm"
               icon={RefreshCw}
-              onClick={fetchTips}
+              onClick={handleRetry}
               disabled={loading}
-              className="mt-4 border-[#004883]/30 bg-white text-[#004883]"
+              className="press-soft mt-4 border-[#004883]/30 bg-white text-[#004883] transition-transform duration-150 motion-reduce:transition-none"
             >
               Coba Lagi
             </Button>
@@ -191,20 +214,20 @@ export function TeacherTipsClient() {
             width={280}
             height={220}
             priority
-            className="teacher-float mx-auto h-auto w-full max-w-[190px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[240px]"
+            className="animate-float-soft mx-auto h-auto w-full max-w-[190px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[240px]"
           />
         </div>
       </section>
 
       {loading ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-[22px] border border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-3 rounded-[22px] border border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d4e3ff]">
             <Loader2 className="h-7 w-7 animate-spin text-[#004883]" aria-hidden="true" />
           </div>
           <p className="text-sm font-bold text-on-surface-variant">Memuat tips...</p>
         </div>
       ) : error ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border border-[#ffd6d6] bg-white p-8 text-center shadow-[0_12px_32px_rgba(186,26,26,0.06)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border border-[#ffd6d6] bg-white p-8 text-center shadow-[0_12px_32px_rgba(186,26,26,0.06)]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffd6d6]">
             <AlertTriangle className="h-7 w-7 text-[#ba1a1a]" aria-hidden="true" />
           </div>
@@ -212,12 +235,19 @@ export function TeacherTipsClient() {
             <h2 className="text-lg font-black text-on-surface">Gagal Memuat Tips</h2>
             <p className="mt-1 text-sm text-on-surface-variant">{error}</p>
           </div>
-          <Button type="button" variant="outline" icon={RefreshCw} onClick={fetchTips}>
+          <Button
+            type="button"
+            variant="outline"
+            icon={RefreshCw}
+            onClick={handleRetry}
+            disabled={loading}
+            className="press-soft transition-transform duration-150 motion-reduce:transition-none"
+          >
             Coba Lagi
           </Button>
         </div>
       ) : !mainTip ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
           <Image
             src={APP_IMAGES.teacherEmptyState}
             alt="Ilustrasi tips guru kosong"
@@ -234,7 +264,7 @@ export function TeacherTipsClient() {
         </div>
       ) : (
         <>
-          <Card className="overflow-hidden border-[#d4e3ff] p-0 shadow-[0_16px_40px_rgba(0,72,131,0.10)] transition-all duration-200 hover:scale-[1.01] motion-reduce:transition-none motion-reduce:hover:scale-100">
+          <Card className="animate-fade-up hover-lift-soft overflow-hidden border-[#d4e3ff] p-0 shadow-[0_16px_40px_rgba(0,72,131,0.10)] transition-all duration-200 motion-reduce:transition-none">
             <div className="grid gap-5 p-5 sm:grid-cols-[1fr_auto] sm:p-6">
               <div className="flex flex-col gap-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -272,8 +302,8 @@ export function TeacherTipsClient() {
                   variant="primary"
                   size="lg"
                   icon={PlayCircle}
-                  onClick={() => setSelectedTip(mainTip)}
-                  className="w-full bg-[#004883] text-white shadow-[0_5px_0_0_#002f55] sm:w-fit"
+                  onClick={() => handleStartActivity(mainTip)}
+                  className="press-soft w-full bg-[#004883] text-white shadow-[0_5px_0_0_#002f55] transition-transform duration-150 motion-reduce:transition-none sm:w-fit"
                 >
                   Mulai Aktivitas
                 </Button>
@@ -284,13 +314,13 @@ export function TeacherTipsClient() {
                 alt="Ilustrasi rekomendasi aktivitas guru"
                 width={180}
                 height={150}
-                className="mx-auto h-auto w-full max-w-[150px] shrink-0 transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:max-w-[180px]"
+                className="mx-auto h-auto w-full max-w-[150px] shrink-0 transition-transform duration-300 hover:scale-105 motion-reduce:transition-none motion-reduce:hover:scale-100 sm:max-w-[180px]"
               />
             </div>
           </Card>
 
           {otherTips.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="animate-fade-up grid gap-4 md:grid-cols-2">
               {otherTips.map((tip, index) => {
                 const Icon = getTipIcon(tip.icon);
                 const palette = cardPalettes[index % cardPalettes.length];
@@ -298,10 +328,10 @@ export function TeacherTipsClient() {
                 return (
                   <Card
                     key={tip.id}
-                    className="flex gap-4 border-[#d4e3ff] p-4 transition-all duration-200 hover:scale-[1.01] hover:shadow-md motion-reduce:transition-none motion-reduce:hover:scale-100"
+                    className="group hover-lift-soft flex gap-4 border-[#d4e3ff] p-4 transition-all duration-200 hover:shadow-md motion-reduce:transition-none"
                   >
                     <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] ${palette.shell}`}>
-                      <Icon className={`h-5 w-5 ${palette.text}`} aria-hidden="true" />
+                      <Icon className={`h-5 w-5 ${palette.text} transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none`} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <div className="mb-2 flex flex-wrap gap-2">
@@ -319,8 +349,8 @@ export function TeacherTipsClient() {
                       </p>
                       <button
                         type="button"
-                        onClick={() => setSelectedTip(tip)}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#d4e3ff] px-3 py-1.5 text-xs font-black text-[#004883] transition-colors hover:bg-[#004883] hover:text-white"
+                        onClick={() => handleOpenDetail(tip)}
+                        className="press-soft mt-3 inline-flex items-center gap-1.5 rounded-full bg-[#d4e3ff] px-3 py-1.5 text-xs font-black text-[#004883] transition-colors duration-150 hover:bg-[#004883] hover:text-white motion-reduce:transition-none"
                       >
                         <PlayCircle className="h-3.5 w-3.5" aria-hidden="true" />
                         Lihat Aktivitas
@@ -337,7 +367,7 @@ export function TeacherTipsClient() {
       {selectedTip && (
         <TeacherTipDetailModal
           tip={selectedTip}
-          onClose={() => setSelectedTip(null)}
+          onClose={handleCloseDetail}
         />
       )}
     </div>
@@ -361,7 +391,7 @@ function TeacherTipDetailModal({
       aria-labelledby="teacher-tip-detail-title"
       className="fixed inset-0 z-50 flex items-end justify-center bg-[#0f1d24]/45 px-4 py-4 sm:items-center"
     >
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[24px] bg-white p-5 shadow-[0_24px_70px_rgba(15,29,36,0.25)] sm:p-6">
+      <div className="dropdown-scale-in max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[24px] bg-white p-5 shadow-[0_24px_70px_rgba(15,29,36,0.25)] sm:p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <div className="mb-3 flex flex-wrap gap-2">
@@ -390,7 +420,7 @@ function TeacherTipDetailModal({
             type="button"
             onClick={onClose}
             aria-label="Tutup detail aktivitas"
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant/40 text-on-surface-variant transition-colors hover:bg-surface-container-low"
+            className="press-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-outline-variant/40 text-on-surface-variant transition-colors duration-150 hover:bg-surface-container-low motion-reduce:transition-none"
           >
             <X className="h-5 w-5" aria-hidden="true" />
           </button>
@@ -445,7 +475,7 @@ function TeacherTipDetailModal({
             type="button"
             variant="primary"
             onClick={onClose}
-            className="bg-[#004883] text-white shadow-[0_5px_0_0_#002f55]"
+            className="press-soft bg-[#004883] text-white shadow-[0_5px_0_0_#002f55] transition-transform duration-150 motion-reduce:transition-none"
           >
             Kembali ke Tips
           </Button>

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { BadgePill } from '@/components/ui/badge';
 import { APP_IMAGES } from '@/lib/assets';
 import { getIcon, iconMap } from '@/lib/icon-map';
+import { useUiSound } from '@/hooks/use-ui-sound';
 import {
   buildWhatsAppOrderUrl,
   isPaidFile,
@@ -65,6 +66,7 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
   const [loading, setLoading] = useState(initialFiles.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [pageUrl, setPageUrl] = useState('');
+  const { playTap, playSuccess } = useUiSound();
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -101,7 +103,7 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <FilesHeader />
-        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-[22px] border border-[#d4e3ff] bg-white p-8 text-center shadow-[0_16px_40px_rgba(0,72,131,0.08)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-3 rounded-[22px] border border-[#d4e3ff] bg-white p-8 text-center shadow-[0_16px_40px_rgba(0,72,131,0.08)]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d4e3ff]">
             <Loader2 className="h-7 w-7 animate-spin text-[#004883]" aria-hidden="true" />
           </div>
@@ -115,7 +117,7 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <FilesHeader />
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border border-[#ffd6d6] bg-white p-8 text-center shadow-[0_16px_40px_rgba(186,26,26,0.06)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border border-[#ffd6d6] bg-white p-8 text-center shadow-[0_16px_40px_rgba(186,26,26,0.06)]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffd6d6]">
             <AlertTriangle className="h-7 w-7 text-[#ba1a1a]" aria-hidden="true" />
           </div>
@@ -123,7 +125,16 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
             <h2 className="text-lg font-black text-on-surface">Gagal Memuat File</h2>
             <p className="mt-1 text-sm text-on-surface-variant">{error}</p>
           </div>
-          <Button type="button" variant="outline" icon={RefreshCw} onClick={fetchFiles}>
+          <Button
+            type="button"
+            variant="outline"
+            icon={RefreshCw}
+            className="press-soft"
+            onClick={() => {
+              playTap();
+              fetchFiles();
+            }}
+          >
             Coba Lagi
           </Button>
         </div>
@@ -136,13 +147,13 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
       <FilesHeader />
 
       {files.length === 0 ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_16px_40px_rgba(0,72,131,0.08)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_16px_40px_rgba(0,72,131,0.08)]">
           <Image
             src={APP_IMAGES.filesCard}
             alt="Ilustrasi file pembelajaran"
             width={220}
             height={180}
-            className="h-auto w-full max-w-[180px] transition-transform duration-300 motion-safe:hover:-translate-y-1 motion-reduce:transition-none sm:max-w-[220px]"
+            className="animate-float-soft h-auto w-full max-w-[180px] sm:max-w-[220px]"
           />
           <div className="space-y-2">
             <h2 className="text-lg font-black text-on-surface">Belum ada file tersedia</h2>
@@ -162,11 +173,11 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
             return (
               <article
                 key={file.id}
-                className={`flex min-h-60 flex-col rounded-[22px] border-2 bg-white p-5 shadow-[0_12px_32px_rgba(0,93,167,0.08)] transition-all duration-200 hover:scale-[1.01] hover:shadow-[0_16px_40px_rgba(0,93,167,0.12)] motion-reduce:transition-none motion-reduce:hover:scale-100 ${accent.border}`}
+                className={`hover-lift-soft flex min-h-60 flex-col rounded-[22px] border-2 bg-white p-5 shadow-[0_12px_32px_rgba(0,93,167,0.08)] hover:shadow-[0_16px_40px_rgba(0,93,167,0.12)] ${accent.border}`}
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div className={`group flex h-14 w-14 shrink-0 items-center justify-center rounded-[18px] ${accent.bg}`}>
-                    <Icon className={`h-7 w-7 transition-transform duration-200 group-hover:-translate-y-0.5 motion-reduce:transition-none ${accent.fg}`} aria-hidden="true" />
+                    <Icon className={`h-7 w-7 transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${accent.fg}`} aria-hidden="true" />
                   </div>
                   <div className="flex flex-wrap justify-end gap-2">
                     <BadgePill className={isPaid ? 'bg-[#ffe173] text-[#0f1d24]' : 'bg-[#96f89f] text-[#00531d]'}>
@@ -191,9 +202,10 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
                       href={whatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-5 inline-flex items-center justify-center gap-2 rounded-[16px] bg-[#00531d] px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_0_#003d15] transition-transform hover:translate-y-[1px] motion-reduce:transition-none"
+                      onClick={playSuccess}
+                      className="press-soft group mt-5 inline-flex items-center justify-center gap-2 rounded-[16px] bg-[#00531d] px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_0_#003d15] transition-transform hover:translate-y-[1px] motion-reduce:transition-none"
                     >
-                      <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                      <MessageCircle className="h-4 w-4 transition-transform duration-150 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" aria-hidden="true" />
                       Pesan via WhatsApp
                     </a>
                   ) : (
@@ -210,9 +222,10 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
                     href={file.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-5 inline-flex items-center justify-center gap-2 rounded-[16px] bg-[#004883] px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_0_#002f55] transition-transform hover:translate-y-[1px] motion-reduce:transition-none"
+                    onClick={playTap}
+                    className="press-soft group mt-5 inline-flex items-center justify-center gap-2 rounded-[16px] bg-[#004883] px-4 py-3 text-sm font-black text-white shadow-[0_4px_0_0_#002f55] transition-transform hover:translate-y-[1px] motion-reduce:transition-none"
                   >
-                    <Download className="h-4 w-4" aria-hidden="true" />
+                    <Download className="h-4 w-4 transition-transform duration-150 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" aria-hidden="true" />
                     Buka File
                   </a>
                 ) : (
@@ -239,7 +252,7 @@ export function FilesReadonlyClient({ initialFiles = [] }: FilesReadonlyClientPr
 
 function FilesHeader() {
   return (
-    <div className="overflow-hidden rounded-[24px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
+    <div className="animate-fade-up overflow-hidden rounded-[24px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-4">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#ffe173] shadow-[0_6px_0_#e8c900]">
@@ -263,7 +276,7 @@ function FilesHeader() {
           width={260}
           height={210}
           priority
-          className="files-float mx-auto h-auto w-full max-w-[180px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[220px]"
+          className="animate-float-soft mx-auto h-auto w-full max-w-[180px] shrink-0 sm:mx-0 sm:max-w-[220px]"
         />
       </div>
     </div>

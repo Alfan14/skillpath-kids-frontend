@@ -30,6 +30,7 @@ import {
   type TeacherResult,
 } from '@/actions/teacher-actions';
 import { Button } from '@/components/ui/button';
+import { useUiSound } from '@/hooks/use-ui-sound';
 import { APP_IMAGES } from '@/lib/assets';
 import { getToken, logout } from '@/lib/auth';
 
@@ -159,6 +160,7 @@ function getSkillIcon(skill: string) {
 }
 
 export function TeacherResultsClient() {
+  const { playTap, playSuccess } = useUiSound();
   const [results, setResults] = useState<TeacherResult[]>([]);
   const [pagination, setPagination] = useState<Pagination>(fallbackPagination);
   const [page, setPage] = useState(1);
@@ -205,11 +207,29 @@ export function TeacherResultsClient() {
     fetchResults();
   }, [fetchResults]);
 
+  const handleRetry = useCallback(() => {
+    if (loading) return;
+    playTap();
+    fetchResults();
+  }, [fetchResults, loading, playTap]);
+
+  const handlePreviousPage = useCallback(() => {
+    if (loading || pagination.page <= 1) return;
+    playTap();
+    setPage((current) => Math.max(1, current - 1));
+  }, [loading, pagination.page, playTap]);
+
+  const handleNextPage = useCallback(() => {
+    if (loading || pagination.page >= pagination.totalPages) return;
+    playTap();
+    setPage((current) => current + 1);
+  }, [loading, pagination.page, pagination.totalPages, playTap]);
+
   const hasResults = results.length > 0;
 
   return (
     <div className="flex flex-col gap-6">
-      <section className="overflow-hidden rounded-[28px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
+      <section className="animate-fade-up overflow-hidden rounded-[28px] border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-6">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="mb-3 flex flex-wrap gap-2">
@@ -231,9 +251,9 @@ export function TeacherResultsClient() {
               variant="outline"
               size="sm"
               icon={RefreshCw}
-              onClick={fetchResults}
+              onClick={handleRetry}
               disabled={loading}
-              className="mt-4 border-[#004883]/30 bg-white text-[#004883]"
+              className="press-soft mt-4 border-[#004883]/30 bg-white text-[#004883] transition-transform duration-150 motion-reduce:transition-none"
             >
               Coba Lagi
             </Button>
@@ -245,20 +265,20 @@ export function TeacherResultsClient() {
             width={280}
             height={220}
             priority
-            className="teacher-float mx-auto h-auto w-full max-w-[190px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[240px]"
+            className="animate-float-soft mx-auto h-auto w-full max-w-[190px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[240px]"
           />
         </div>
       </section>
 
       {loading && !hasResults ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-3 rounded-[22px] border border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-3 rounded-[22px] border border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d4e3ff]">
             <Loader2 className="h-7 w-7 animate-spin text-[#004883]" aria-hidden="true" />
           </div>
           <p className="text-sm font-bold text-on-surface-variant">Memuat hasil assessment...</p>
         </div>
       ) : error ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border border-[#ffd6d6] bg-white p-8 text-center shadow-[0_12px_32px_rgba(186,26,26,0.06)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border border-[#ffd6d6] bg-white p-8 text-center shadow-[0_12px_32px_rgba(186,26,26,0.06)]">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffd6d6]">
             {accessDenied ? (
               <ShieldAlert className="h-7 w-7 text-[#ba1a1a]" aria-hidden="true" />
@@ -273,13 +293,20 @@ export function TeacherResultsClient() {
             <p className="mt-1 text-sm text-on-surface-variant">{error}</p>
           </div>
           {!accessDenied && (
-            <Button type="button" variant="outline" icon={RefreshCw} onClick={fetchResults}>
+            <Button
+              type="button"
+              variant="outline"
+              icon={RefreshCw}
+              onClick={handleRetry}
+              disabled={loading}
+              className="press-soft transition-transform duration-150 motion-reduce:transition-none"
+            >
               Coba Lagi
             </Button>
           )}
         </div>
       ) : !hasResults ? (
-        <div className="flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+        <div className="animate-fade-up flex min-h-64 flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
           <Image
             src={APP_IMAGES.teacherEmptyState}
             alt="Ilustrasi hasil assessment guru kosong"
@@ -295,14 +322,15 @@ export function TeacherResultsClient() {
           </div>
           <Link
             href="/teacher/assessment"
-            className="inline-flex items-center justify-center gap-2 rounded-[16px] bg-[#004883] px-5 py-3 text-sm font-black text-white shadow-[0_4px_0_0_#002f55] transition-transform hover:translate-y-[1px]"
+            onClick={playSuccess}
+            className="press-soft inline-flex items-center justify-center gap-2 rounded-[16px] bg-[#004883] px-5 py-3 text-sm font-black text-white shadow-[0_4px_0_0_#002f55] transition-transform duration-150 hover:translate-y-[1px] motion-reduce:transition-none"
           >
             <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
             Mulai Assessment
           </Link>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[22px] border border-[#d4e3ff] bg-white shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+        <div className="animate-fade-up overflow-hidden rounded-[22px] border border-[#d4e3ff] bg-white shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[820px] text-left text-sm">
               <thead className="bg-surface-container-lowest text-[10px] font-black uppercase tracking-wide text-on-surface-variant">
@@ -356,7 +384,7 @@ export function TeacherResultsClient() {
                             {focusAreas.map((area) => (
                               <span
                                 key={`${item.id}-${area}`}
-                                className="inline-flex items-center gap-1 rounded-lg bg-[#ffe173] px-2 py-1 text-[11px] font-bold text-[#0f1d24]"
+                                className="inline-flex items-center gap-1 rounded-lg bg-[#ffe173] px-2 py-1 text-[11px] font-bold text-[#0f1d24] transition-transform duration-200 hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                               >
                                 <Target className="h-3 w-3" aria-hidden="true" />
                                 {area}
@@ -387,7 +415,7 @@ export function TeacherResultsClient() {
                                   </div>
                                   <div className="h-2 overflow-hidden rounded-full bg-[#d4e3ff]/55">
                                     <div
-                                      className="h-full rounded-full bg-[#004883] transition-all duration-500"
+                                      className="progress-motion h-full rounded-full bg-[#004883]"
                                       style={{ width: `${normalizedScore}%` }}
                                     />
                                   </div>
@@ -421,9 +449,9 @@ export function TeacherResultsClient() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-9 rounded-xl px-3"
+                className="press-soft h-9 rounded-xl px-3 transition-transform duration-150 motion-reduce:transition-none"
                 disabled={loading || pagination.page <= 1}
-                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                onClick={handlePreviousPage}
                 aria-label="Halaman sebelumnya"
               >
                 <ChevronLeft className="h-4 w-4" aria-hidden="true" />
@@ -432,9 +460,9 @@ export function TeacherResultsClient() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="h-9 rounded-xl px-3"
+                className="press-soft h-9 rounded-xl px-3 transition-transform duration-150 motion-reduce:transition-none"
                 disabled={loading || pagination.page >= pagination.totalPages}
-                onClick={() => setPage((current) => current + 1)}
+                onClick={handleNextPage}
                 aria-label="Halaman berikutnya"
               >
                 <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -445,13 +473,13 @@ export function TeacherResultsClient() {
       )}
 
       {hasResults && (
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="animate-fade-up grid gap-3 md:grid-cols-3">
           {results.slice(0, 3).map((item, index) => {
             const score = getScore(item.overallScore);
             return (
               <div
                 key={`summary-${item.id}`}
-                className="rounded-[18px] border border-[#d4e3ff] bg-white p-4 shadow-[0_10px_28px_rgba(0,72,131,0.06)] transition-all duration-200 hover:scale-[1.01] motion-reduce:transition-none motion-reduce:hover:scale-100"
+                className="rounded-[18px] border border-[#d4e3ff] bg-white p-4 shadow-[0_10px_28px_rgba(0,72,131,0.06)] transition-all duration-200 motion-reduce:transition-none"
               >
                 <div className="mb-3 flex items-center justify-between gap-3">
                   {index === 0 ? (

@@ -33,7 +33,7 @@ export default async function WorksheetsPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 md:px-6 lg:px-8">
-      <section className="mb-8 overflow-hidden rounded-3xl border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-7">
+      <section className="animate-fade-up mb-8 overflow-hidden rounded-3xl border border-[#d4e3ff] bg-[#d4e3ff] p-5 shadow-[0_16px_40px_rgba(0,72,131,0.10)] sm:p-7">
         <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div className="max-w-2xl">
             <div className="mb-3 flex flex-wrap gap-2">
@@ -58,7 +58,7 @@ export default async function WorksheetsPage({
             width={300}
             height={240}
             priority
-            className="files-float mx-auto h-auto w-full max-w-[190px] shrink-0 motion-reduce:animate-none md:mx-0 md:max-w-[260px]"
+            className="animate-float-soft mx-auto h-auto w-full max-w-[190px] shrink-0 motion-reduce:animate-none md:mx-0 md:max-w-[260px]"
           />
         </div>
       </section>

@@ -9,12 +9,15 @@ import {
   ClipboardCheck,
   FileText,
   LogOut,
+  Volume2,
+  VolumeX,
   Search,
   User,
   UserCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getSession, logout, type User as AuthUser } from "@/lib/auth";
+import { useUiSound } from "@/hooks/use-ui-sound";
 
 const notifications = [
   {
@@ -61,6 +64,7 @@ export function TopBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const { playSoft, playTap, isSoundEnabled, toggleSound } = useUiSound();
 
   useEffect(() => {
     const user = getSession();
@@ -132,7 +136,11 @@ export function TopBar() {
             aria-label="Buka notifikasi"
             aria-expanded={isNotificationOpen}
             onClick={() => {
-              setIsNotificationOpen((value) => !value);
+              setIsNotificationOpen((value) => {
+                const next = !value;
+                if (next) playSoft();
+                return next;
+              });
               setIsProfileOpen(false);
             }}
           >
@@ -146,11 +154,15 @@ export function TopBar() {
 
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-pill bg-primary-fixed text-primary transition-all hover:bg-primary/20 md:h-11 md:w-11"
+            className="press-soft flex h-10 w-10 items-center justify-center rounded-pill bg-primary-fixed text-primary transition-all hover:bg-primary/20 md:h-11 md:w-11"
             aria-label="Buka menu profil"
             aria-expanded={isProfileOpen}
             onClick={() => {
-              setIsProfileOpen((value) => !value);
+              setIsProfileOpen((value) => {
+                const next = !value;
+                if (next) playSoft();
+                return next;
+              });
               setIsNotificationOpen(false);
             }}
           >
@@ -158,7 +170,7 @@ export function TopBar() {
           </button>
 
           {isNotificationOpen && (
-            <div className="absolute right-12 top-14 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-[22px] border border-[#d4e3ff] bg-white shadow-[0_18px_45px_rgba(0,72,131,0.16)] md:right-14">
+            <div className="dropdown-scale-in absolute right-12 top-14 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-[22px] border border-[#d4e3ff] bg-white shadow-[0_18px_45px_rgba(0,72,131,0.16)] md:right-14">
               <div className="border-b border-outline-variant/20 bg-[#d4e3ff] px-4 py-3">
                 <p className="text-sm font-black text-[#004883]">Notifikasi</p>
                 <p className="text-xs font-semibold text-[#004883]/80">
@@ -173,7 +185,10 @@ export function TopBar() {
                       key={id}
                       href={href}
                       className="flex gap-3 rounded-2xl px-3 py-3 transition-colors hover:bg-surface-container-low"
-                      onClick={() => setIsNotificationOpen(false)}
+                      onClick={() => {
+                        playTap();
+                        setIsNotificationOpen(false);
+                      }}
                     >
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[14px] bg-[#ffe173] text-[#0f1d24]">
                         <Icon className="h-5 w-5" aria-hidden="true" />
@@ -199,7 +214,7 @@ export function TopBar() {
           )}
 
           {isProfileOpen && (
-            <div className="absolute right-0 top-14 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[22px] border border-[#d4e3ff] bg-white shadow-[0_18px_45px_rgba(0,72,131,0.16)]">
+            <div className="dropdown-scale-in absolute right-0 top-14 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[22px] border border-[#d4e3ff] bg-white shadow-[0_18px_45px_rgba(0,72,131,0.16)]">
               <div className="flex items-center gap-3 border-b border-outline-variant/20 bg-[#d4e3ff] px-4 py-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-sm font-black text-[#004883]">
                   {initials}
@@ -225,11 +240,29 @@ export function TopBar() {
                 <Link
                   href="/profile"
                   className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-low"
-                  onClick={() => setIsProfileOpen(false)}
+                  onClick={() => {
+                    playTap();
+                    setIsProfileOpen(false);
+                  }}
                 >
                   <UserCircle className="h-5 w-5 text-[#004883]" aria-hidden="true" />
                   Lihat Profil
                 </Link>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    toggleSound();
+                  }}
+                  className="flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm font-bold text-on-surface transition-colors hover:bg-surface-container-low"
+                >
+                  {isSoundEnabled ? (
+                    <Volume2 className="h-5 w-5 text-[#004883]" aria-hidden="true" />
+                  ) : (
+                    <VolumeX className="h-5 w-5 text-[#004883]" aria-hidden="true" />
+                  )}
+                  Sound: {isSoundEnabled ? "Aktif" : "Nonaktif"}
+                </button>
 
                 <button
                   type="button"
@@ -253,7 +286,7 @@ function TopIconButton({ className, ...props }: React.ButtonHTMLAttributes<HTMLB
     <button
       type="button"
       className={cn(
-        "relative flex h-10 w-10 items-center justify-center rounded-pill border border-outline-variant/30 bg-white transition-all hover:scale-105 hover:bg-surface-container-low md:h-11 md:w-11",
+        "press-soft relative flex h-10 w-10 items-center justify-center rounded-pill border border-outline-variant/30 bg-white transition-all hover:scale-105 hover:bg-surface-container-low md:h-11 md:w-11",
         className
       )}
       {...props}

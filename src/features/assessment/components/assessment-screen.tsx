@@ -9,6 +9,7 @@ import { AssessmentGroup } from '@/components/ui/assessment-option';
 import { useAssessment } from '../hooks/use-assessment';
 import { getIcon } from '@/lib/icon-map';
 import { APP_IMAGES } from '@/lib/assets';
+import { useUiSound } from '@/hooks/use-ui-sound';
 import type { AssessmentQuestion } from '@/types';
 
 const DEFAULT_LIKERT_LEGEND = [
@@ -75,9 +76,33 @@ function buildCategoryOptions(questions: AssessmentQuestion[]): CategoryOption[]
 }
 
 function getCategoryAsset(label: string, isTeacher = false): string | null {
-  const normalized = label.toLowerCase();
+  const normalized = label.toLowerCase().trim().replace(/[-_]+/g, ' ');
 
   if (isTeacher) {
+    if (!label || normalized.includes('semua') || normalized.includes('all')) {
+      return APP_IMAGES.teacherAssessmentAllCategories;
+    }
+
+    if (normalized.includes('motorik kasar') || normalized.includes('gross motor')) {
+      return APP_IMAGES.teacherAssessmentGrossMotor;
+    }
+
+    if (normalized.includes('profesional') || normalized.includes('professional')) {
+      return APP_IMAGES.teacherAssessmentProfessional;
+    }
+
+    if (normalized.includes('diferensiasi') || normalized.includes('diferensiasi')) {
+      return APP_IMAGES.assessmentCategoryKognitif;
+    }
+
+    if (normalized.includes('analitik') || normalized.includes('analytics')) {
+      return APP_IMAGES.teacherAssessmentClassroomAnalytics;
+    }
+
+    if (normalized.includes('observasi perkembangan') || normalized.includes('development observation')) {
+      return APP_IMAGES.teacherAssessmentDevelopmentObservation;
+    }
+
     if (normalized.includes('pedagogi') || normalized.includes('pedagogy')) {
       return APP_IMAGES.teacherAssessmentPedagogy;
     }
@@ -146,18 +171,18 @@ function CategorySelectionScreen({
   isTeacher?: boolean;
   onSelect: (category: string) => void;
 }) {
+  const { playTap } = useUiSound();
   const allColor = CATEGORY_COLORS[0];
   const AllIcon = getIcon('ClipboardCheck');
-  const containerClassName = isTeacher
-    ? 'mx-auto flex max-w-4xl flex-col gap-5'
-    : 'mx-auto flex max-w-2xl flex-col gap-5';
-  const gridClassName = isTeacher
-    ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3'
-    : 'grid gap-4 sm:grid-cols-2';
+  const allCategoryAsset = isTeacher ? getCategoryAsset('Semua Kategori', true) : null;
+  const containerClassName = isTeacher? 'mx-auto flex max-w-4xl flex-col gap-5': 'mx-auto flex max-w-2xl flex-col gap-5';
+  const gridClassName = isTeacher? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3': 'grid gap-4 sm:grid-cols-2';
+  const parentScreenMotion = 'animate-fade-up';
+  const categoryCardMotion = isTeacher? 'press-soft hover-lift-soft transition-all duration-200': 'press-soft hover-lift-soft';
 
   if (loading) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col gap-4 py-10">
+      <div className={`${parentScreenMotion} mx-auto flex max-w-2xl flex-col gap-4 py-10`}>
         <div className="h-32 animate-pulse rounded-[28px] bg-surface-container-high" />
         <div className="grid gap-4 sm:grid-cols-2">
           {[1, 2, 3, 4].map((item) => (
@@ -170,7 +195,7 @@ function CategorySelectionScreen({
 
   if (totalQuestions === 0) {
     return (
-      <div className="mx-auto flex max-w-2xl flex-col items-center justify-center gap-4 py-20 text-center">
+      <div className={`${parentScreenMotion} mx-auto flex max-w-2xl flex-col items-center justify-center gap-4 py-20 text-center`}>
         {isTeacher ? (
           <Image
             src={APP_IMAGES.teacherEmptyState}
@@ -189,15 +214,14 @@ function CategorySelectionScreen({
         </h1>
         <p className="max-w-md text-sm leading-relaxed text-on-surface-variant">
           {isTeacher
-            ? 'Silakan hubungi administrator untuk menambahkan soal level Teacher.'
-            : 'Soal akan tampil di sini setelah tersedia.'}
+            ? 'Silakan hubungi administrator untuk menambahkan soal level Teacher.': 'Soal akan tampil di sini setelah tersedia.'}
         </p>
       </div>
     );
   }
 
   return (
-    <div className={containerClassName}>
+    <div className={`${containerClassName} ${parentScreenMotion}`}>
       <div className={`relative overflow-hidden rounded-[28px] px-5 py-6 shadow-[0_8px_32px_rgba(0,93,167,0.14)] ${isTeacher ? 'border border-[#d4e3ff] bg-[#d4e3ff] text-[#004883]' : 'bg-primary text-white'}`}>
         <div className="relative z-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -226,7 +250,7 @@ function CategorySelectionScreen({
               width={260}
               height={210}
               priority
-              className="teacher-float mx-auto h-auto w-full max-w-[180px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[230px]"
+              className="animate-float-soft mx-auto h-auto w-full max-w-[180px] shrink-0 motion-reduce:animate-none sm:mx-0 sm:max-w-[230px]"
             />
           )}
         </div>
@@ -235,12 +259,25 @@ function CategorySelectionScreen({
       <div className={gridClassName}>
         <button
           type="button"
-          onClick={() => onSelect(ALL_CATEGORIES)}
-          className={`group flex min-h-36 flex-col items-start justify-between rounded-[22px] border border-outline-variant/20 p-5 text-left transition-all hover:-translate-y-0.5 hover:scale-[1.01] motion-reduce:hover:scale-100 ${allColor.bg} ${allColor.fg} ${allColor.shadow}`}
+          onClick={() => {
+            playTap();
+            onSelect(ALL_CATEGORIES);
+          }}
+          className={`group flex min-h-36 flex-col items-start justify-between rounded-[22px] border border-outline-variant/20 p-5 text-left ${categoryCardMotion} ${allColor.bg} ${allColor.fg} ${allColor.shadow}`}
         >
           <div className="flex w-full items-start justify-between gap-3">
             <div className="flex h-16 w-16 items-center justify-center rounded-[18px] bg-white/55 sm:h-20 sm:w-20">
-              <AllIcon className="h-7 w-7" aria-hidden="true" />
+              {allCategoryAsset ? (
+                <Image
+                  src={allCategoryAsset}
+                  alt=""
+                  width={96}
+                  height={96}
+                  className="h-auto w-full max-w-[72px] transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-hover:scale-100 sm:max-w-[88px]"
+                />
+              ) : (
+                <AllIcon className="h-7 w-7" aria-hidden="true" />
+              )}
             </div>
             <span className="rounded-full bg-white/55 px-3 py-1 text-[10px] font-black">
               {totalQuestions} soal
@@ -259,8 +296,11 @@ function CategorySelectionScreen({
             <button
               key={category.key}
               type="button"
-              onClick={() => onSelect(category.key)}
-              className={`group flex min-h-36 flex-col items-start justify-between rounded-[22px] border border-outline-variant/20 p-5 text-left transition-all hover:-translate-y-0.5 hover:scale-[1.01] motion-reduce:hover:scale-100 ${category.bg} ${category.fg} ${category.shadow}`}
+              onClick={() => {
+                playTap();
+                onSelect(category.key);
+              }}
+              className={`group flex min-h-36 flex-col items-start justify-between rounded-[22px] border border-outline-variant/20 p-5 text-left ${categoryCardMotion} ${category.bg} ${category.fg} ${category.shadow}`}
             >
               <div className="flex w-full items-start justify-between gap-3">
                 <div className="flex h-16 w-16 items-center justify-center rounded-[18px] bg-white/55 sm:h-20 sm:w-20">
@@ -270,7 +310,7 @@ function CategorySelectionScreen({
                       alt=""
                       width={96}
                       height={96}
-                      className="h-auto w-full max-w-[72px] transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 sm:max-w-[88px]"
+                      className="h-auto w-full max-w-[72px] transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:translate-y-0 motion-reduce:group-hover:scale-100 sm:max-w-[88px]"
                     />
                   ) : (
                     <Icon className="h-7 w-7" aria-hidden="true" />
@@ -314,6 +354,7 @@ export function AssessmentScreen({
   const isTeacher = level === 'TEACHER';
   const shouldEnableCategorySelection = enableCategorySelection ?? !isTeacher;
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { playSoft } = useUiSound();
   const {
     answers,
     status,
@@ -351,8 +392,11 @@ export function AssessmentScreen({
     if (totalAnswered > 0 && !window.confirm('Ganti kategori? Jawaban yang sudah dipilih tetap tersimpan.')) {
       return;
     }
+    playSoft();
     setSelectedCategory(null);
   };
+  const parentQuestionMotion = 'animate-fade-up';
+  const parentQuestionCardMotion = 'animate-fade-up hover-lift-soft';
 
   if (shouldEnableCategorySelection && !selectedCategory) {
     return (
@@ -373,7 +417,7 @@ export function AssessmentScreen({
     <div className="flex flex-col gap-4 max-w-2xl mx-auto">
 
       {/* ── Hero Header ──────────────────────────────────────────────────────── */}
-      <div className={`relative -mx-4 overflow-hidden rounded-b-[32px] px-5 pb-6 pt-4 md:-mx-8 ${isTeacher ? 'border-b border-[#d4e3ff] bg-[#d4e3ff]' : 'bg-primary'}`}>
+      <div className={`${parentQuestionMotion} relative -mx-4 overflow-hidden rounded-b-[32px] px-5 pb-6 pt-4 md:-mx-8 ${isTeacher ? 'border-b border-[#d4e3ff] bg-[#d4e3ff]' : 'bg-primary'}`}>
         {isTeacher && teacherHeaderAsset ? (
           <Image
             src={teacherHeaderAsset}
@@ -381,7 +425,7 @@ export function AssessmentScreen({
             width={150}
             height={120}
             priority
-            className="teacher-float pointer-events-none absolute right-3 top-2 hidden h-auto w-24 opacity-95 drop-shadow-[0_12px_22px_rgba(0,72,131,0.16)] motion-reduce:animate-none md:block"
+            className="animate-float-soft pointer-events-none absolute right-3 top-2 hidden h-auto w-24 opacity-95 drop-shadow-[0_12px_22px_rgba(0,72,131,0.16)] motion-reduce:animate-none md:block"
           />
         ) : (
           <Image
@@ -390,7 +434,7 @@ export function AssessmentScreen({
             width={140}
             height={100}
             priority
-            className="pointer-events-none absolute right-3 top-2 hidden h-auto w-24 opacity-95 drop-shadow-[0_12px_22px_rgba(0,72,131,0.20)] md:block"
+            className="animate-float-soft pointer-events-none absolute right-3 top-2 hidden h-auto w-24 opacity-95 drop-shadow-[0_12px_22px_rgba(0,72,131,0.20)] md:block"
           />
         )}
 
@@ -425,7 +469,7 @@ export function AssessmentScreen({
             <button
               type="button"
               onClick={handleBackToCategories}
-              className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-[#004883] transition-colors hover:bg-[#d4e3ff]"
+              className="press-soft rounded-full bg-white px-3 py-1 text-[10px] font-black text-[#004883] transition-colors hover:bg-[#d4e3ff]"
             >
               Ganti Kategori
             </button>
@@ -440,7 +484,7 @@ export function AssessmentScreen({
         >
           <ProgressBar
             value={progress}
-            fillClass={isTeacher ? 'bg-[#ffe173]' : 'bg-[#ffe173]'}
+            fillClass="progress-motion bg-[#ffe173]"
             heightClass="h-3.5"
             label={`Progres asesmen: ${progress}%`}
             className={isTeacher ? 'border-transparent bg-[#d4e3ff] shadow-none' : 'border-transparent bg-[#004883] shadow-none'}
@@ -485,7 +529,7 @@ export function AssessmentScreen({
 
       {/* ── Question cards ───────────────────────────────────────────────────── */}
       {filteredQuestions.length === 0 && (
-        <div className="flex flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-primary-container bg-white p-8 text-center">
+        <div className={`${parentQuestionMotion} flex flex-col items-center justify-center gap-4 rounded-[22px] border-2 border-dashed border-primary-container bg-white p-8 text-center`}>
           <AlertCircle className="h-10 w-10 text-primary" aria-hidden="true" />
           <div>
             <p className="text-base font-black text-on-surface">Belum ada soal pada kategori ini.</p>
@@ -495,8 +539,11 @@ export function AssessmentScreen({
             <Button
               type="button"
               variant="outline"
-              onClick={() => setSelectedCategory(null)}
-              className="rounded-[14px] font-black"
+              onClick={() => {
+                playSoft();
+                setSelectedCategory(null);
+              }}
+              className="press-soft rounded-[14px] font-black"
             >
               Kembali ke Kategori
             </Button>
@@ -517,7 +564,7 @@ export function AssessmentScreen({
             <div
               key={question.id}
               className={[
-                'relative overflow-hidden rounded-[22px] border-2 p-5 transition-all duration-300',
+                `${parentQuestionCardMotion} relative overflow-hidden rounded-[22px] border-2 p-5 transition-all duration-300`,
                 isAnswered
                   ? 'border-tertiary-container bg-[#f4fff5]'
                   : 'border-transparent bg-white shadow-[0_10px_30px_rgba(0,93,167,0.06)]',
@@ -537,7 +584,7 @@ export function AssessmentScreen({
               {/* Question icon + number label + text — single block, no duplication */}
               <div className="mb-5 flex items-start gap-3">
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${question.color}`}
+                  className={`group flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${question.color}`}
                 >
                   {questionCategoryAsset ? (
                     <Image
@@ -545,10 +592,10 @@ export function AssessmentScreen({
                       alt=""
                       width={56}
                       height={56}
-                      className="h-auto w-full max-w-[34px]"
+                      className="h-auto w-full max-w-[34px] transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                     />
                   ) : (
-                    <Icon className="h-5 w-5 text-on-surface" aria-hidden="true" />
+                    <Icon className="h-5 w-5 text-on-surface transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100" aria-hidden="true" />
                   )}
                 </div>
                 <div>
@@ -604,7 +651,7 @@ export function AssessmentScreen({
             size="lg"
             onClick={prevPage}
             disabled={isSubmitting}
-            className="flex-1 rounded-[18px] border-2 border-primary font-extrabold text-primary hover:bg-primary-container"
+            className="press-soft flex-1 rounded-[18px] border-2 border-primary font-extrabold text-primary hover:bg-primary-container"
             aria-label="Kembali ke halaman sebelumnya"
           >
             ← Sebelumnya
@@ -618,7 +665,7 @@ export function AssessmentScreen({
             onClick={() => submitAssessment()}
             disabled={!answeredOnPage || isSubmitting}
             loading={isSubmitting}
-            className="flex-1 rounded-[18px] font-black"
+            className="press-soft flex-1 rounded-[18px] font-black"
             aria-label="Simpan dan lihat hasil asesmen"
           >
             {isSubmitting ? 'Menyimpan...' : '🎉 Simpan & Lihat Hasil'}
@@ -629,7 +676,7 @@ export function AssessmentScreen({
             size="lg"
             onClick={nextPage}
             disabled={!answeredOnPage}
-            className="flex-1 rounded-[18px] font-black"
+            className="press-soft flex-1 rounded-[18px] font-black"
             aria-label="Lanjut ke halaman berikutnya"
           >
             Simpan & Lanjutkan ✨

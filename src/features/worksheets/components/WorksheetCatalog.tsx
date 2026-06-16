@@ -6,6 +6,7 @@ import { ChevronRight, FileText, RotateCcw, Star } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { ProductCard } from '@/components/shop/ProductCard';
+import { useUiSound } from '@/hooks/use-ui-sound';
 import { APP_IMAGES } from '@/lib/assets';
 import type { WorksheetProduct } from '@/types';
 import {
@@ -22,11 +23,13 @@ interface WorksheetCatalogProps {
 export function WorksheetCatalog({ worksheets, bestSellers, categories }: WorksheetCatalogProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { playTap, playSoft } = useUiSound();
 
   const currentCategory = searchParams.get('category') || '';
   const currentVariant = searchParams.get('variant') || '';
 
   const handleFilter = (key: string, value: string) => {
+    playTap();
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     if (value) {
       params.set(key, value);
@@ -38,14 +41,14 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
   };
 
   const getFilterClass = (active: boolean) => [
-    'w-full rounded-xl px-3 py-2 text-left text-sm font-bold transition-colors',
+    'press-soft w-full rounded-xl px-3 py-2 text-left text-sm font-bold transition-colors duration-150 motion-reduce:transition-none',
     active
       ? 'bg-[#d4e3ff] text-[#004883]'
       : 'text-on-surface-variant hover:bg-[#d4e3ff]/60 hover:text-[#004883]',
   ].join(' ');
 
   return (
-    <div className="mt-6 flex flex-col gap-6 md:flex-row">
+    <div className="animate-fade-up mt-6 flex flex-col gap-6 md:flex-row">
       <aside className="flex w-full flex-shrink-0 flex-col gap-6 md:w-64">
         <div className="rounded-2xl border border-[#d4e3ff] bg-white p-5 shadow-[0_10px_28px_rgba(0,72,131,0.06)]">
           <h3 className="mb-4 text-xs font-black uppercase tracking-wider text-on-surface">
@@ -120,6 +123,7 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
               <Link
                 href={`/worksheets/${product.slug}`}
                 key={product.id}
+                onClick={playTap}
                 className="group flex gap-3"
               >
                 <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-[#d4e3ff]/45">
@@ -166,13 +170,13 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
         </div>
 
         {worksheets.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="animate-fade-up grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {worksheets.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div className="flex min-h-80 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
+          <div className="animate-fade-up flex min-h-80 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-[#d4e3ff] bg-white p-8 text-center shadow-[0_12px_32px_rgba(0,72,131,0.08)]">
             <Image
               src={APP_IMAGES.teacherEmptyState}
               alt="Ilustrasi data worksheet kosong"
@@ -189,8 +193,11 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
             </p>
             <button
               type="button"
-              onClick={() => router.push('/worksheets')}
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#004883] px-5 py-2.5 text-sm font-black text-white transition-colors hover:bg-[#003b6b]"
+              onClick={() => {
+                playSoft();
+                router.push('/worksheets');
+              }}
+              className="press-soft mt-6 inline-flex items-center gap-2 rounded-xl bg-[#004883] px-5 py-2.5 text-sm font-black text-white transition-colors duration-150 hover:bg-[#003b6b] motion-reduce:transition-none"
             >
               <RotateCcw className="h-4 w-4" aria-hidden="true" />
               Reset Filter

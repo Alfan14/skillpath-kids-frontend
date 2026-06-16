@@ -17,6 +17,7 @@ import {
   isFreeWorksheet,
   isPaidWorksheet,
 } from '@/features/worksheets/utils/whatsapp-order';
+import { useUiSound } from '@/hooks/use-ui-sound';
 import { APP_IMAGES } from '@/lib/assets';
 import { formatCurrency } from '@/lib/utils';
 import type { WorksheetProduct } from '@/types';
@@ -26,6 +27,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const { playTap, playSuccess } = useUiSound();
   const isPaid = isPaidWorksheet(product);
   const isFree = isFreeWorksheet(product);
   const effectivePrice = getWorksheetEffectivePrice(product);
@@ -39,12 +41,13 @@ export function ProductCard({ product }: ProductCardProps) {
 
     if (!whatsappUrl) return;
 
+    playSuccess();
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#d4e3ff] bg-white shadow-[0_12px_32px_rgba(0,72,131,0.07)] transition-all duration-200 hover:scale-[1.01] hover:shadow-[0_16px_40px_rgba(0,72,131,0.12)] motion-reduce:transition-none motion-reduce:hover:scale-100">
-      <Link href={detailHref} className="block">
+    <article className="group hover-lift-soft flex h-full flex-col overflow-hidden rounded-2xl border border-[#d4e3ff] bg-white shadow-[0_12px_32px_rgba(0,72,131,0.07)] transition-all duration-200 hover:shadow-[0_16px_40px_rgba(0,72,131,0.12)] motion-reduce:transition-none">
+      <Link href={detailHref} onClick={playTap} className="block">
         <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-[#d4e3ff]/45">
           {product.mainImageUrl ? (
             <img
@@ -59,7 +62,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 alt="Ilustrasi worksheet"
                 width={220}
                 height={170}
-                className="h-auto w-full max-w-[170px] transition-transform duration-300 group-hover:-translate-y-1 motion-reduce:transition-none"
+                className="h-auto w-full max-w-[170px] transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
               />
             </div>
           )}
@@ -93,7 +96,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         </div>
 
-        <Link href={detailHref}>
+        <Link href={detailHref} onClick={playTap}>
           <h3 className="line-clamp-2 text-sm font-black leading-tight text-on-surface transition-colors group-hover:text-[#004883]">
             {product.title}
           </h3>
@@ -140,9 +143,10 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="grid gap-2">
             <Link
               href={detailHref}
-              className="flex items-center justify-center gap-2 rounded-xl border border-[#004883]/30 px-3 py-2 text-xs font-black text-[#004883] transition-colors hover:bg-[#d4e3ff]"
+              onClick={playTap}
+              className="press-soft flex items-center justify-center gap-2 rounded-xl border border-[#004883]/30 px-3 py-2 text-xs font-black text-[#004883] transition-colors duration-150 hover:bg-[#d4e3ff] motion-reduce:transition-none"
             >
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              <ExternalLink className="h-3.5 w-3.5 transition-transform duration-150 group-hover:scale-105 motion-reduce:transition-none" aria-hidden="true" />
               Lihat Detail
             </Link>
 
@@ -152,9 +156,10 @@ export function ProductCard({ product }: ProductCardProps) {
                   href={product.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#004883] px-3 py-2 text-xs font-black text-white transition-colors hover:bg-[#003b6b]"
+                  onClick={playTap}
+                  className="press-soft flex w-full items-center justify-center gap-2 rounded-xl bg-[#004883] px-3 py-2 text-xs font-black text-white transition-colors duration-150 hover:bg-[#003b6b] motion-reduce:transition-none"
                 >
-                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                  <ExternalLink className="h-4 w-4 transition-transform duration-150 group-hover:scale-105 motion-reduce:transition-none" aria-hidden="true" />
                   Buka File
                 </a>
               ) : (
@@ -171,10 +176,10 @@ export function ProductCard({ product }: ProductCardProps) {
                 type="button"
                 onClick={handleWhatsAppOrder}
                 disabled={!canOrderViaWhatsApp}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-3 py-2 text-xs font-black text-[#00531d] transition-colors hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant"
+                className="press-soft flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-3 py-2 text-xs font-black text-[#00531d] transition-colors duration-150 hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant motion-reduce:transition-none"
               >
                 {canOrderViaWhatsApp ? (
-                  <MessageCircle className="h-4 w-4" aria-hidden="true" />
+                  <MessageCircle className="h-4 w-4 transition-transform duration-150 group-hover:scale-105 motion-reduce:transition-none" aria-hidden="true" />
                 ) : (
                   <ShoppingBag className="h-4 w-4" aria-hidden="true" />
                 )}

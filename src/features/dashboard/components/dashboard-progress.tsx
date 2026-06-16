@@ -24,6 +24,7 @@ import {
 import { getSession, getToken, logout } from '@/lib/auth';
 import { safeParseObject } from '@/lib/result-parsers';
 import { APP_IMAGES } from '@/lib/assets';
+import { useUiSound } from '@/hooks/use-ui-sound';
 
 function getRecommendation(skill: string, score: number): string {
   if (score >= 80) return 'Pertahankan aktivitas fisik!';
@@ -82,6 +83,7 @@ export function DashboardProgress() {
   const [latestResult, setLatestResult] = useState<ParentResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { playTap } = useUiSound();
 
   useEffect(() => {
     let active = true;
@@ -148,7 +150,7 @@ export function DashboardProgress() {
 
   if (error && !latestResult) {
     return (
-      <section aria-labelledby="progress-heading" className="flex flex-col gap-4">
+      <section aria-labelledby="progress-heading" className="animate-fade-up flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2
             id="progress-heading"
@@ -187,7 +189,7 @@ export function DashboardProgress() {
         </div>
 
         {/* empty state card */}
-        <div className="flex flex-col items-center justify-center gap-5 rounded-[22px] border-2 border-dashed border-primary-container bg-surface-container-lowest p-8 text-center">
+        <div className="hover-lift-soft flex flex-col items-center justify-center gap-5 rounded-[22px] border-2 border-dashed border-primary-container bg-surface-container-lowest p-8 text-center">
           <Image
             src={APP_IMAGES.emptyAssessment}
             alt="Ilustrasi belum ada asesmen"
@@ -203,10 +205,10 @@ export function DashboardProgress() {
           </div>
           <Button
             variant="primary"
-            className="rounded-[18px] font-black px-8"
+            className="press-soft rounded-[18px] px-8 font-black"
             asChild
           >
-            <Link href="/assessment">Mulai Asesmen</Link>
+            <Link href="/assessment" onClick={playTap}>Mulai Asesmen</Link>
           </Button>
         </div>
       </section>
@@ -225,7 +227,7 @@ export function DashboardProgress() {
   ];
 
   return (
-    <section aria-labelledby="progress-heading" className="flex flex-col gap-4">
+    <section aria-labelledby="progress-heading" className="animate-fade-up flex flex-col gap-4">
 
       {/* section header */}
       <div className="flex items-center justify-between">
@@ -240,7 +242,8 @@ export function DashboardProgress() {
         </h2>
         <Link
           href="/results"
-          className="flex items-center gap-1 text-sm font-bold text-primary hover:underline"
+          className="press-soft flex items-center gap-1 text-sm font-bold text-primary hover:underline"
+          onClick={playTap}
         >
           Lihat Riwayat
           <ChevronRight className="h-4 w-4" aria-hidden="true" />
@@ -266,6 +269,7 @@ export function DashboardProgress() {
               rounded-[24px] border border-[#d4e3ff]
               bg-white p-5
               shadow-[0_10px_28px_rgba(0,72,131,0.08)]
+              hover-lift-soft
             "
           >
             <div className="relative flex items-start justify-between gap-3">
@@ -284,7 +288,7 @@ export function DashboardProgress() {
             <div className="relative">
               <div className="h-3 w-full overflow-hidden rounded-full bg-[#d4e3ff]">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ease-out ${tone.barClassName}`}
+                  className={`progress-motion h-full rounded-full ${tone.barClassName}`}
                   style={{ width: `${item.value}%` }}
                   role="progressbar"
                   aria-label={`${item.label} ${item.value}%`}

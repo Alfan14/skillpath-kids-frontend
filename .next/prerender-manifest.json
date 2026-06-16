@@ -26,7 +26,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/profile": {
+    "/administrator/assessments": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -39,32 +39,8 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/profile",
-      "dataRoute": "/profile.rsc",
-      "allowHeader": [
-        "host",
-        "x-matched-path",
-        "x-prerender-revalidate",
-        "x-prerender-revalidate-if-generated",
-        "x-next-revalidated-tags",
-        "x-next-revalidate-tag-token"
-      ]
-    },
-    "/signup": {
-      "experimentalBypassFor": [
-        {
-          "type": "header",
-          "key": "next-action"
-        },
-        {
-          "type": "header",
-          "key": "content-type",
-          "value": "multipart/form-data;.*"
-        }
-      ],
-      "initialRevalidateSeconds": false,
-      "srcRoute": "/signup",
-      "dataRoute": "/signup.rsc",
+      "srcRoute": "/administrator/assessments",
+      "dataRoute": "/administrator/assessments.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -146,7 +122,7 @@
         "x-next-revalidate-tag-token"
       ]
     },
-    "/administrator/assessments": {
+    "/signup": {
       "experimentalBypassFor": [
         {
           "type": "header",
@@ -159,8 +135,32 @@
         }
       ],
       "initialRevalidateSeconds": false,
-      "srcRoute": "/administrator/assessments",
-      "dataRoute": "/administrator/assessments.rsc",
+      "srcRoute": "/signup",
+      "dataRoute": "/signup.rsc",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/profile": {
+      "experimentalBypassFor": [
+        {
+          "type": "header",
+          "key": "next-action"
+        },
+        {
+          "type": "header",
+          "key": "content-type",
+          "value": "multipart/form-data;.*"
+        }
+      ],
+      "initialRevalidateSeconds": false,
+      "srcRoute": "/profile",
+      "dataRoute": "/profile.rsc",
       "allowHeader": [
         "host",
         "x-matched-path",
@@ -198,8 +198,8 @@
   "dynamicRoutes": {},
   "notFoundRoutes": [],
   "preview": {
-    "previewModeId": "4bfa1d18e150ea0c62c4ab1a5a117f53",
-    "previewModeSigningKey": "64da47719e870890805ff8cd83d9d1ac475c42beeb466c4599b62f608dd4ce85",
-    "previewModeEncryptionKey": "0e27111dfa16d11e68ff66ab1ad0295571a1446a450c46fd0195689f091416da"
+    "previewModeId": "f4b8a20a5c711cba8402df8f515ce851",
+    "previewModeSigningKey": "f0bdd69336c5fba94a12a482febd0ac8a3afc779760a8a559360c8e468a2f3a3",
+    "previewModeEncryptionKey": "13da31f34a074f5bdd3d2757ab751774af1fcb781c5f30ba5b96caedf66ce777"
   }
 }

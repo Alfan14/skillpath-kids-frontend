@@ -28,7 +28,7 @@ export const AssessmentOption = React.forwardRef<HTMLButtonElement, AssessmentOp
     };
 
     // Use similar squishy-press mechanics from your BigTouchButton
-    const baseStyles = 'relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl font-bold text-lg transition-all duration-150 select-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:ring-offset-2';
+    const baseStyles = 'press-soft relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl font-bold text-lg transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:ring-offset-2';
     
     const answerStyles: Record<LikertValue, { unselected: string; selected: string }> = {
       SS: {
@@ -49,7 +49,9 @@ export const AssessmentOption = React.forwardRef<HTMLButtonElement, AssessmentOp
       },
     };
 
-    const optionStyles = selected ? answerStyles[value].selected : answerStyles[value].unselected;
+    const optionStyles = selected
+      ? `${answerStyles[value].selected} scale-[1.01]`
+      : answerStyles[value].unselected;
 
     return (
       <button

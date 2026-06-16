@@ -62,6 +62,13 @@
     @apply bg-surface text-on-surface font-sans;
   }
 
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
+  }
+
   /* Smooth scrolling for the whole app */
   html {
     scroll-behavior: smooth;
@@ -153,5 +160,89 @@
 
   .admin-float {
     animation: admin-float 4s ease-in-out infinite;
+  }
+
+  @keyframes sk-float-soft {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+
+  @keyframes sk-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes sk-scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-float-soft {
+    animation: sk-float-soft 4.5s ease-in-out infinite;
+  }
+
+  .animate-fade-up {
+    animation: sk-fade-up 360ms ease-out both;
+  }
+
+  .dropdown-scale-in {
+    animation: sk-scale-in 180ms ease-out both;
+    transform-origin: top right;
+  }
+
+  .hover-lift-soft {
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+
+  .hover-lift-soft:hover {
+    transform: translateY(-2px);
+  }
+
+  .press-soft {
+    transition: transform 120ms ease;
+  }
+
+  .press-soft:active {
+    transform: scale(0.98);
+  }
+
+  .progress-motion {
+    transition: width 500ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-float-soft,
+    .animate-fade-up,
+    .dropdown-scale-in {
+      animation: none !important;
+    }
+
+    .hover-lift-soft,
+    .press-soft,
+    .progress-motion {
+      transition: none !important;
+    }
+
+    .hover-lift-soft:hover,
+    .press-soft:active {
+      transform: none !important;
+    }
   }
 }

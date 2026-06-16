@@ -11,7 +11,7 @@ import type {
   AssessmentQuestion,
 } from "@/types";
 
-import { useSound } from "@/hooks/use-sound";
+import { useUiSound } from "@/hooks/use-ui-sound";
 
 export type AssessmentStatus =
   | "idle" | "in-progress" | "submitting" | "analyzing" | "done" | "error";
@@ -28,7 +28,7 @@ export function useAssessment({
   selectedCategory = null,
 }: UseAssessmentOptions = {}) {
   const router = useRouter();
-  const { play } = useSound();
+  const { playTap, playSoft, playSuccess } = useUiSound();
   const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
   const [answers, setAnswers] = useState<AssessmentAnswers>({});
   const [status, setStatus] = useState<AssessmentStatus>("idle");
@@ -99,37 +99,41 @@ export function useAssessment({
 
   const answer = useCallback(
     (questionId: number, value: LikertValue) => {
-      play("CLICK");
+      playTap();
       setAnswers((prev) => ({
         ...prev,
         [questionId]: value,
       }));
     },
-    [play],
+    [playTap],
   );
 
   const nextPage = useCallback(() => {
     if (!answeredOnPage) return;
-    play("POP");
+    playTap();
     setPage((p) => Math.min(p + 1, totalPages - 1));
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  }, [answeredOnPage, play, totalPages]);
+  }, [answeredOnPage, playTap, totalPages]);
 
   const prevPage = useCallback(() => {
-    play("POP");
+    if (level === "CHILD") {
+      playSoft();
+    } else {
+      playTap();
+    }
     setPage((p) => Math.max(p - 1, 0));
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  }, [play]);
+  }, [level, playSoft, playTap]);
 
   const submitAssessment = useCallback(async (childProfileId?: string) => {
     try {
-      play("SUCCESS");
+      playSuccess();
       setStatus("analyzing");
       setMessage("Analyzing your child's progress... this usually takes a moment.");
       setError(null);
@@ -196,7 +200,7 @@ export function useAssessment({
       setMessage(null);
       setError(err.message || "We couldn't save your answers. Your internet might be unstable. Please try again.");
     }
-  }, [answers, play, resultPath, router]);
+  }, [answers, playSuccess, resultPath, router]);
 
   const reset = useCallback(() => {
     setAnswers({});

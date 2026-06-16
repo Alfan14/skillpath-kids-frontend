@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import Image from 'next/image';
 import { Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Recommendation } from '@/types';
 import { APP_IMAGES } from '@/lib/assets';
+import { DashboardSoundLink } from './dashboard-sound-link';
 
 export async function DashboardTip() {
   let tip: Recommendation | null = null;
@@ -25,8 +25,9 @@ export async function DashboardTip() {
       bg-tertiary
       p-7 sm:p-8
       shadow-[0_6px_0_0_#00531d]
+      animate-fade-up hover-lift-soft
     ">
-      <div className="relative z-10 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
+      <div className="group relative z-10 flex flex-col sm:flex-row gap-5 items-start sm:items-center">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] bg-white/20 backdrop-blur-sm sm:hidden">
           <Lightbulb className="h-6 w-6 text-white" aria-hidden="true" />
         </div>
@@ -36,7 +37,7 @@ export async function DashboardTip() {
           alt="Ilustrasi tips aktivitas anak"
           width={170}
           height={130}
-          className="hidden h-auto w-full max-w-[140px] shrink-0 transition-transform duration-300 motion-safe:hover:-translate-y-1 sm:block"
+          className="hidden h-auto w-full max-w-[140px] shrink-0 transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100 sm:block"
         />
 
         <div className="flex-1">
@@ -50,10 +51,10 @@ export async function DashboardTip() {
 
         <Button
           variant="outline"
-          className="shrink-0 rounded-[16px] border-2 border-white/30 bg-white/10 font-bold text-white backdrop-blur-sm hover:bg-white/20"
+          className="press-soft shrink-0 rounded-[16px] border-2 border-white/30 bg-white/10 font-bold text-white backdrop-blur-sm hover:bg-white/20"
           asChild
         >
-          <Link href="/tips">Lihat Tips Lainnya</Link>
+          <DashboardSoundLink href="/tips">Lihat Tips Lainnya</DashboardSoundLink>
         </Button>
       </div>
     </div>

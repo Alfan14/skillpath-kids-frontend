@@ -33,17 +33,6 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({
     },
   };
 
-  const floatingIconVariants: Variants = {
-    animate: {
-      y: [0, -5, 0],
-      transition: {
-        duration: 3.4,
-        repeat: Infinity,
-        ease: 'easeInOut',
-      },
-    },
-  };
-
   return (
     <motion.article
       aria-label={cardAriaLabel}
@@ -51,10 +40,9 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({
       initial={animateOnMount ? 'hidden' : 'visible'}
       animate="visible"
       variants={cardVariants}
-      whileHover={{ scale: 1.01 }}
       className={`
-        relative flex min-h-64 flex-col items-center rounded-2xl border-2 bg-white p-5 text-center
-        shadow-[0_12px_32px_rgba(0,72,131,0.08)] transition-all duration-200
+        group hover-lift-soft relative flex min-h-64 flex-col items-center rounded-2xl border-2 bg-white p-5 text-center
+        shadow-[0_12px_32px_rgba(0,72,131,0.08)] transition-all duration-200 motion-reduce:transition-none
         ${badge.unlocked ? 'border-[#96f89f]' : 'border-[#d4e3ff]'}
       `}
     >
@@ -69,10 +57,9 @@ export const BadgeCard: React.FC<BadgeCardProps> = ({
       </span>
 
       <motion.div
-        variants={badge.unlocked ? floatingIconVariants : undefined}
-        animate={badge.unlocked ? 'animate' : undefined}
         className={`
           mb-4 mt-7 flex h-20 w-20 items-center justify-center rounded-[24px]
+          transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none
           ${badge.unlocked ? 'bg-[#ffe173] text-[#0f1d24] shadow-[0_7px_0_#e8c900]' : 'bg-[#d4e3ff] text-[#004883]'}
         `}
       >

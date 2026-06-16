@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
   ChevronRight,
   ExternalLink,
-  Heart,
   MessageCircle,
   Minus,
   Plus,
@@ -19,6 +18,7 @@ import type { WorksheetProduct } from '@/types';
 import { WorksheetGallery } from './WorksheetGallery';
 import { WorksheetTabs } from './WorksheetTabs';
 import { TrustBadges } from '@/components/shop/TrustBadges';
+import { useUiSound } from '@/hooks/use-ui-sound';
 import { parseFeatures } from '@/features/worksheets/utils/worksheet-parsers';
 import {
   createWhatsAppOrderUrl,
@@ -35,6 +35,7 @@ interface WorksheetDetailProps {
 }
 
 export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) {
+  const { playTap, playSuccess } = useUiSound();
   const [quantity, setQuantity] = useState(1);
   const isPaid = isPaidWorksheet(product);
   const isFree = isFreeWorksheet(product);
@@ -54,6 +55,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
   const handlePrimaryAction = () => {
     if (isFree) {
       if (!product.url) return;
+      playTap();
       window.open(product.url, '_blank', 'noopener,noreferrer');
       return;
     }
@@ -61,10 +63,12 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
     const whatsappUrl = createWhatsAppOrderUrl(product, quantity, window.location.href);
     if (!whatsappUrl) return;
 
+    playSuccess();
     window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleShare = async () => {
+    playTap();
     const shareData = {
       title: product.title,
       text: product.shortDescription || product.description,
@@ -80,7 +84,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
   };
 
   return (
-    <div className="mt-6 flex flex-col gap-8 lg:flex-row">
+    <div className="animate-fade-up mt-6 flex flex-col gap-8 lg:flex-row">
       <aside className="hidden w-64 flex-shrink-0 flex-col gap-6 lg:flex">
         <div className="rounded-2xl border border-outline-variant/30 bg-white p-5">
           <h3 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-wider text-on-surface">
@@ -91,6 +95,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
               <Link
                 href={`/worksheets/${item.slug}`}
                 key={item.id}
+                onClick={playTap}
                 className="group flex gap-3"
               >
                 <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface-container">
@@ -125,7 +130,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
           <span className="max-w-[150px] truncate font-bold text-on-surface sm:max-w-xs">{product.title}</span>
         </div>
 
-        <div className="flex flex-col gap-8 md:flex-row">
+        <div className="animate-fade-up flex flex-col gap-8 md:flex-row">
           <div className="w-full md:w-1/2">
             <WorksheetGallery
               mainImage={product.mainImageUrl}
@@ -200,8 +205,11 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
                 <div className="inline-flex items-center rounded-xl border border-outline-variant/30 bg-surface-container">
                   <button
                     type="button"
-                    onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                    className="p-3 text-on-surface-variant transition-colors hover:text-primary"
+                    onClick={() => {
+                      playTap();
+                      setQuantity((current) => Math.max(1, current - 1));
+                    }}
+                    className="press-soft p-3 text-on-surface-variant transition-colors duration-150 hover:text-primary motion-reduce:transition-none"
                     aria-label="Kurangi jumlah"
                   >
                     <Minus className="h-4 w-4" />
@@ -209,8 +217,11 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
                   <span className="w-12 text-center text-sm font-black text-on-surface">{quantity}</span>
                   <button
                     type="button"
-                    onClick={() => setQuantity((current) => current + 1)}
-                    className="p-3 text-on-surface-variant transition-colors hover:text-primary"
+                    onClick={() => {
+                      playTap();
+                      setQuantity((current) => current + 1);
+                    }}
+                    className="press-soft p-3 text-on-surface-variant transition-colors duration-150 hover:text-primary motion-reduce:transition-none"
                     aria-label="Tambah jumlah"
                   >
                     <Plus className="h-4 w-4" />
@@ -238,7 +249,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
                 type="button"
                 onClick={handlePrimaryAction}
                 disabled={isFree ? !canOpenFile : !canOrderViaWhatsApp}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-4 py-3 text-sm font-black text-[#00531d] transition-colors hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant"
+                className="press-soft flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-4 py-3 text-sm font-black text-[#00531d] transition-colors duration-150 hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant motion-reduce:transition-none"
               >
                 {isFree ? (
                   <ExternalLink className="h-5 w-5" />
@@ -252,7 +263,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
               <button
                 type="button"
                 onClick={handleShare}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-outline-variant/30 bg-white px-4 py-3 text-sm font-bold text-on-surface-variant transition-colors hover:text-primary"
+                className="press-soft flex w-full items-center justify-center gap-2 rounded-xl border border-outline-variant/30 bg-white px-4 py-3 text-sm font-bold text-on-surface-variant transition-colors duration-150 hover:text-primary motion-reduce:transition-none"
               >
                 <Share2 className="h-4 w-4" />
                 Bagikan
@@ -297,8 +308,11 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
                 <div className="flex items-center rounded-lg border border-outline-variant/30 bg-white">
                   <button
                     type="button"
-                    onClick={() => setQuantity((current) => Math.max(1, current - 1))}
-                    className="p-2 text-on-surface-variant hover:text-primary"
+                    onClick={() => {
+                      playTap();
+                      setQuantity((current) => Math.max(1, current - 1));
+                    }}
+                    className="press-soft p-2 text-on-surface-variant hover:text-primary"
                     aria-label="Kurangi jumlah"
                   >
                     <Minus className="h-3.5 w-3.5" />
@@ -306,8 +320,11 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
                   <span className="w-8 text-center text-xs font-black">{quantity}</span>
                   <button
                     type="button"
-                    onClick={() => setQuantity((current) => current + 1)}
-                    className="p-2 text-on-surface-variant hover:text-primary"
+                    onClick={() => {
+                      playTap();
+                      setQuantity((current) => current + 1);
+                    }}
+                    className="press-soft p-2 text-on-surface-variant hover:text-primary"
                     aria-label="Tambah jumlah"
                   >
                     <Plus className="h-3.5 w-3.5" />
@@ -333,7 +350,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
               type="button"
               onClick={handlePrimaryAction}
               disabled={isFree ? !canOpenFile : !canOrderViaWhatsApp}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-4 py-3 text-sm font-black text-[#00531d] transition-colors hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant"
+              className="press-soft flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-4 py-3 text-sm font-black text-[#00531d] transition-colors duration-150 hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant motion-reduce:transition-none"
             >
               {isFree ? (
                 <ExternalLink className="h-5 w-5" />
@@ -348,13 +365,10 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
         </div>
 
         <div className="mt-6 flex justify-center gap-6">
-          <button className="flex items-center gap-2 text-sm font-bold text-on-surface-variant transition-colors hover:text-error">
-            <Heart className="h-4 w-4" /> Wishlist
-          </button>
           <button
             type="button"
             onClick={handleShare}
-            className="flex items-center gap-2 text-sm font-bold text-on-surface-variant transition-colors hover:text-primary"
+            className="press-soft flex items-center gap-2 text-sm font-bold text-on-surface-variant transition-colors duration-150 hover:text-primary motion-reduce:transition-none"
           >
             <Share2 className="h-4 w-4" /> Bagikan
           </button>
@@ -365,7 +379,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
         <button
           type="button"
           onClick={handleShare}
-          className="flex-1 rounded-xl border border-outline-variant/30 bg-surface-container px-4 py-3 text-sm font-bold text-on-surface"
+          className="press-soft flex-1 rounded-xl border border-outline-variant/30 bg-surface-container px-4 py-3 text-sm font-bold text-on-surface motion-reduce:transition-none"
         >
           Bagikan
         </button>
@@ -373,7 +387,7 @@ export function WorksheetDetail({ product, bestSellers }: WorksheetDetailProps) 
           type="button"
           onClick={handlePrimaryAction}
           disabled={isFree ? !canOpenFile : !canOrderViaWhatsApp}
-          className="flex-[2] rounded-xl bg-[#96f89f] px-4 py-3 text-sm font-black text-[#00531d] shadow-md transition-colors hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant"
+          className="press-soft flex-[2] rounded-xl bg-[#96f89f] px-4 py-3 text-sm font-black text-[#00531d] shadow-md transition-colors duration-150 hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant motion-reduce:transition-none"
         >
           {primaryActionLabel}
         </button>

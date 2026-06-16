@@ -1,9 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { APP_IMAGES } from '@/lib/assets';
+import { useUiSound } from '@/hooks/use-ui-sound';
 
 export function DashboardHero() {
+  const { playTap } = useUiSound();
+
   return (
     <section
       aria-label="Welcome section"
@@ -12,6 +17,7 @@ export function DashboardHero() {
         rounded-[28px]
         bg-primary
         shadow-[0_8px_32px_rgba(0,93,167,0.18)]
+        animate-fade-up
       "
     >
       <div className="relative flex flex-col md:flex-row">
@@ -32,10 +38,10 @@ export function DashboardHero() {
             <Button
               variant="secondary"
               size="lg"
-              className="rounded-[18px] px-8 font-black shadow-[0_5px_0_0_rgba(15,29,36,0.12)]"
+              className="press-soft rounded-[18px] px-8 font-black shadow-[0_5px_0_0_rgba(15,29,36,0.12)]"
               asChild
             >
-              <Link href="/assessment">Mulai Asesmen</Link>
+              <Link href="/assessment" onClick={playTap}>Mulai Asesmen</Link>
             </Button>
           </div>
         </div>
@@ -47,7 +53,7 @@ export function DashboardHero() {
             width={560}
             height={420}
             priority
-            className="h-auto w-full max-w-[260px] drop-shadow-[0_18px_30px_rgba(0,72,131,0.18)] transition-transform duration-300 motion-safe:hover:-translate-y-1 md:max-w-[420px]"
+            className="animate-float-soft h-auto w-full max-w-[260px] drop-shadow-[0_18px_30px_rgba(0,72,131,0.18)] md:max-w-[420px]"
           />
         </div>
       </div>
