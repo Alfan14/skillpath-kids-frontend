@@ -1,26 +1,7 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/assess/route": "app/api/assess/route.js",
-  "/api/admin/uploads/route": "app/api/admin/uploads/route.js",
   "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(auth)/signup/page": "app/(auth)/signup/page.js",
-  "/(dashboard)/profile/page": "app/(dashboard)/profile/page.js",
-  "/(dashboard)/achievements/page": "app/(dashboard)/achievements/page.js",
-  "/(dashboard)/files/page": "app/(dashboard)/files/page.js",
   "/(dashboard)/page": "app/(dashboard)/page.js",
-  "/(dashboard)/assessment/page": "app/(dashboard)/assessment/page.js",
-  "/(dashboard)/results/page": "app/(dashboard)/results/page.js",
+  "/(teacher)/teacher/files/page": "app/(teacher)/teacher/files/page.js",
   "/(teacher)/teacher/dashboard/page": "app/(teacher)/teacher/dashboard/page.js",
-  "/(dashboard)/tips/page": "app/(dashboard)/tips/page.js",
-  "/(shop)/worksheets/[slug]/page": "app/(shop)/worksheets/[slug]/page.js",
-  "/(teacher)/teacher/results/page": "app/(teacher)/teacher/results/page.js",
-  "/(teacher)/teacher/assessment/page": "app/(teacher)/teacher/assessment/page.js",
-  "/(teacher)/teacher/tips/page": "app/(teacher)/teacher/tips/page.js",
-  "/(shop)/worksheets/page": "app/(shop)/worksheets/page.js",
-  "/(administrator)/administrator/dashboard/page": "app/(administrator)/administrator/dashboard/page.js",
-  "/(administrator)/administrator/tips/page": "app/(administrator)/administrator/tips/page.js",
-  "/(administrator)/administrator/users/page": "app/(administrator)/administrator/users/page.js",
-  "/(administrator)/administrator/assessments/page": "app/(administrator)/administrator/assessments/page.js",
-  "/(administrator)/administrator/files/page": "app/(administrator)/administrator/files/page.js",
-  "/(administrator)/administrator/questions/page": "app/(administrator)/administrator/questions/page.js"
+  "/(shop)/worksheets/[slug]/page": "app/(shop)/worksheets/[slug]/page.js"
 }

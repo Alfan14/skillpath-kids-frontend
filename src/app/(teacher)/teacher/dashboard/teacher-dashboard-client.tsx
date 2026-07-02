@@ -68,7 +68,7 @@ const quickLinks = [
   {
     title: 'Files / Worksheet',
     description: 'Akses worksheet dan materi pendukung yang tersedia.',
-    href: '/worksheets',
+    href: '/teacher/files',
     image: APP_IMAGES.filesHero,
     icon: FileText,
     badge: 'Files',

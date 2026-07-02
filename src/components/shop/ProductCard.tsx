@@ -53,6 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <img
               src={product.mainImageUrl}
               alt={product.title}
+              loading="lazy"
               className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none"
             />
           ) : (
@@ -62,6 +63,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 alt="Ilustrasi worksheet"
                 width={220}
                 height={170}
+                priority={false}
                 className="h-auto w-full max-w-[170px] transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
               />
             </div>
@@ -144,6 +146,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <Link
               href={detailHref}
               onClick={playTap}
+              aria-label={`Lihat detail ${product.title}`}
               className="press-soft flex items-center justify-center gap-2 rounded-xl border border-[#004883]/30 px-3 py-2 text-xs font-black text-[#004883] transition-colors duration-150 hover:bg-[#d4e3ff] motion-reduce:transition-none"
             >
               <ExternalLink className="h-3.5 w-3.5 transition-transform duration-150 group-hover:scale-105 motion-reduce:transition-none" aria-hidden="true" />
@@ -157,6 +160,7 @@ export function ProductCard({ product }: ProductCardProps) {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={playTap}
+                  aria-label={`Buka file ${product.title}`}
                   className="press-soft flex w-full items-center justify-center gap-2 rounded-xl bg-[#004883] px-3 py-2 text-xs font-black text-white transition-colors duration-150 hover:bg-[#003b6b] motion-reduce:transition-none"
                 >
                   <ExternalLink className="h-4 w-4 transition-transform duration-150 group-hover:scale-105 motion-reduce:transition-none" aria-hidden="true" />
@@ -176,6 +180,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 type="button"
                 onClick={handleWhatsAppOrder}
                 disabled={!canOrderViaWhatsApp}
+                aria-label={`Pesan ${product.title} via WhatsApp`}
                 className="press-soft flex w-full items-center justify-center gap-2 rounded-xl bg-[#96f89f] px-3 py-2 text-xs font-black text-[#00531d] transition-colors duration-150 hover:bg-[#83ee8e] disabled:cursor-not-allowed disabled:bg-surface-container disabled:text-on-surface-variant motion-reduce:transition-none"
               >
                 {canOrderViaWhatsApp ? (

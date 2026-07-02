@@ -18,9 +18,11 @@ interface WorksheetCatalogProps {
   worksheets: WorksheetProduct[];
   bestSellers: WorksheetProduct[];
   categories: string[];
+  basePath?: string;
+  breadcrumbLabel?: string;
 }
 
-export function WorksheetCatalog({ worksheets, bestSellers, categories }: WorksheetCatalogProps) {
+export function WorksheetCatalog({ worksheets, bestSellers, categories, basePath = '/worksheets', breadcrumbLabel = 'Worksheets' }: WorksheetCatalogProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { playTap, playSoft } = useUiSound();
@@ -37,7 +39,7 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
       params.delete(key);
     }
     params.delete('page');
-    router.push(`/worksheets?${params.toString()}`);
+    router.push(`${basePath}?${params.toString()}`);
   };
 
   const getFilterClass = (active: boolean) => [
@@ -131,6 +133,7 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
                     <img
                       src={product.mainImageUrl}
                       alt={product.title}
+                      loading="lazy"
                       className="h-full w-full object-cover transition-transform group-hover:scale-105 motion-reduce:transition-none"
                     />
                   ) : (
@@ -163,7 +166,7 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
         <div className="mb-4 flex flex-wrap items-center gap-1 text-xs text-on-surface-variant">
           <Link href="/" className="hover:text-[#004883]">Beranda</Link>
           <ChevronRight className="h-3 w-3" aria-hidden="true" />
-          <span className="font-bold text-on-surface">Worksheets</span>
+          <span className="font-bold text-on-surface">{breadcrumbLabel}</span>
           <span className="ml-2 rounded-full bg-[#d4e3ff] px-2 py-0.5 font-bold text-[#004883]">
             {worksheets.length} Produk
           </span>
@@ -195,7 +198,7 @@ export function WorksheetCatalog({ worksheets, bestSellers, categories }: Worksh
               type="button"
               onClick={() => {
                 playSoft();
-                router.push('/worksheets');
+                router.push(basePath);
               }}
               className="press-soft mt-6 inline-flex items-center gap-2 rounded-xl bg-[#004883] px-5 py-2.5 text-sm font-black text-white transition-colors duration-150 hover:bg-[#003b6b] motion-reduce:transition-none"
             >

@@ -23,7 +23,7 @@ const navItems = [
   { label: 'Assessment', href: '/teacher/assessment', icon: ClipboardCheck },
   { label: 'Results', href: '/teacher/results', icon: BarChart3 },
   { label: 'Tips', href: '/teacher/tips', icon: Lightbulb },
-  { label: 'Files', href: '/worksheets', icon: FileText },
+  { label: 'Files', href: '/teacher/files', icon: FileText },
 ];
 
 export default function TeacherLayout({ children }: LayoutProps) {

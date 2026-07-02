@@ -6,21 +6,6 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/(teacher)/teacher/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(teacher)/teacher/layout.js"
-    ],
-    "/(teacher)/teacher/assessment/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(teacher)/teacher/assessment/page.js"
-    ],
-    "/(auth)/login/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/(auth)/login/page.js"
-    ],
     "/(dashboard)/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -31,20 +16,35 @@
       "static/chunks/main-app.js",
       "static/chunks/app/(dashboard)/page.js"
     ],
-    "/(dashboard)/assessment/page": [
+    "/(auth)/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/assessment/page.js"
+      "static/chunks/app/(auth)/login/page.js"
     ],
-    "/(dashboard)/results/page": [
+    "/(teacher)/teacher/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/results/page.js"
+      "static/chunks/app/(teacher)/teacher/layout.js"
     ],
-    "/(dashboard)/files/page": [
+    "/(teacher)/teacher/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(dashboard)/files/page.js"
+      "static/chunks/app/(teacher)/teacher/dashboard/page.js"
+    ],
+    "/(teacher)/teacher/files/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(teacher)/teacher/files/page.js"
+    ],
+    "/(shop)/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(shop)/layout.js"
+    ],
+    "/(shop)/worksheets/[slug]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(shop)/worksheets/[slug]/page.js"
     ]
   }
 }
