@@ -13,17 +13,17 @@ import { useUiSound } from '@/hooks/use-ui-sound';
 import type { AssessmentQuestion } from '@/types';
 
 const DEFAULT_LIKERT_LEGEND = [
-  { code: 'SS', label: 'Sangat Setuju', score: '(4)', chipBg: 'bg-[#96f89f]', chipText: 'text-[#00531d]' },
-  { code: 'S', label: 'Setuju', score: '(3)', chipBg: 'bg-[#d4e3ff]', chipText: 'text-[#004883]' },
-  { code: 'TS', label: 'Tidak Setuju', score: '(2)', chipBg: 'bg-[#ffe173]', chipText: 'text-[#0f1d24]' },
-  { code: 'STS', label: 'Sangat Tidak Setuju', score: '(1)', chipBg: 'bg-error-container', chipText: 'text-on-error-container' },
+  { code: 'BB', label: 'Belum Berkembang', desc: 'Anak masih harus dicontohkan dan didampingi penuh oleh guru/orang tua.', score: '(1)', chipBg: 'bg-[#ffd6d6]', chipText: 'text-[#ba1a1a]' },
+  { code: 'MB', label: 'Mulai Berkembang', desc: 'Anak sudah mulai bisa tetapi masih harus diingatkan atau dibantu oleh pendidik.', score: '(2)', chipBg: 'bg-[#ffe173]', chipText: 'text-[#0f1d24]' },
+  { code: 'BSH', label: 'Berkembang Sesuai Harapan', desc: 'Anak sudah dapat melakukannya secara mandiri dan konsisten.', score: '(3)', chipBg: 'bg-[#96f89f]', chipText: 'text-[#00531d]' },
+  { code: 'BSB', label: 'Berkembang Sangat Baik', desc: 'Anak sudah mandiri, konsisten, dan mampu berkreasi lebih atau membantu temannya.', score: '(4)', chipBg: 'bg-[#d4e3ff]', chipText: 'text-[#004883]' },
 ];
 
 const TEACHER_LIKERT_LEGEND = [
-  { code: 'SS', label: 'Sangat Setuju', score: '(4)', chipBg: 'bg-[#96f89f]', chipText: 'text-[#00531d]' },
-  { code: 'S', label: 'Setuju', score: '(3)', chipBg: 'bg-[#d4e3ff]', chipText: 'text-[#004883]' },
-  { code: 'TS', label: 'Tidak Setuju', score: '(2)', chipBg: 'bg-[#ffe173]', chipText: 'text-[#0f1d24]' },
-  { code: 'STS', label: 'Sangat Tidak Setuju', score: '(1)', chipBg: 'bg-error-container', chipText: 'text-on-error-container' },
+  { code: 'BB', label: 'Belum Berkembang', desc: 'Anak masih harus dicontohkan dan didampingi penuh oleh guru/orang tua.', score: '(1)', chipBg: 'bg-[#ffd6d6]', chipText: 'text-[#ba1a1a]' },
+  { code: 'MB', label: 'Mulai Berkembang', desc: 'Anak sudah mulai bisa tetapi masih harus diingatkan atau dibantu oleh pendidik.', score: '(2)', chipBg: 'bg-[#ffe173]', chipText: 'text-[#0f1d24]' },
+  { code: 'BSH', label: 'Berkembang Sesuai Harapan', desc: 'Anak sudah dapat melakukannya secara mandiri dan konsisten.', score: '(3)', chipBg: 'bg-[#96f89f]', chipText: 'text-[#00531d]' },
+  { code: 'BSB', label: 'Berkembang Sangat Baik', desc: 'Anak sudah mandiri, konsisten, dan mampu berkreasi lebih atau membantu temannya.', score: '(4)', chipBg: 'bg-[#d4e3ff]', chipText: 'text-[#004883]' },
 ];
 
 const ALL_CATEGORIES = '__ALL__';
@@ -511,17 +511,17 @@ export function AssessmentScreen({
       </div>
 
       {/* ── Legend strip ─────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap gap-2 rounded-[18px] border-2 border-primary-container bg-white px-3 py-2.5">
-        {likertLegend.map(({ code, label, score, chipBg, chipText }) => (
-          <div key={code} className="flex flex-1 basis-[40%] items-center gap-2">
+      <div className="flex flex-col gap-2 rounded-[18px] border-2 border-primary-container bg-white px-3 py-2.5">
+        {likertLegend.map(({ code, label, desc, chipBg, chipText }) => (
+          <div key={code} className="flex items-start gap-2">
             <span
               className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] text-[10px] font-black ${chipBg} ${chipText}`}
             >
               {code}
             </span>
-            <div>
-              <p className={`text-[10px] font-extrabold leading-none ${chipText}`}>{label}</p>
-              <p className="text-[9px] text-on-surface-variant">{score}</p>
+            <div className="flex flex-col pt-0.5">
+              <p className={`text-[11px] font-extrabold leading-none ${chipText}`}>{label}</p>
+              <p className="mt-1 text-[10px] leading-tight text-on-surface-variant">{desc}</p>
             </div>
           </div>
         ))}

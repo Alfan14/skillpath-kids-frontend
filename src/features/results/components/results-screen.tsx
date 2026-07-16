@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertCircle, AlertTriangle, CheckCircle2, CircleDot, LineChart, Loader2, Trophy } from 'lucide-react';
+import { AlertCircle, AlertTriangle, CheckCircle2, LineChart, Loader2, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, KidCard } from '@/components/ui/card';
 import { BadgePill } from '@/components/ui/badge';
@@ -26,11 +26,11 @@ function getScore(value: ParentResult['overallScore']) {
 function getResultIllustration(score: number, category: string) {
   const normalizedCategory = category.toLowerCase();
 
-  if (score >= 85 || normalizedCategory.includes('sangat baik')) {
+  if (score >= 76 || normalizedCategory.includes('sangat baik')) {
     return APP_IMAGES.resultGoodScore;
   }
 
-  if (score < 70 || normalizedCategory.includes('perlu')) {
+  if (score <= 25 || normalizedCategory.includes('belum')) {
     return APP_IMAGES.resultNeedAttention;
   }
 
@@ -43,19 +43,36 @@ function normalizeSkillScore(value: unknown) {
   return Math.max(0, Math.min(100, Math.round(score)));
 }
 
+function getStageIconPath(stage: string | null) {
+  if (stage === 'BSB') return '/images/BSB-Icon-Berkembang-Sangat-Baik.png';
+  if (stage === 'BSH') return '/images/BSH-Icon-Berkembang-Sesuai-Harapan.png';
+  if (stage === 'MB') return '/images/MB-Icon-Mulai-Berkembang.png';
+  if (stage === 'BB') return '/images/BB-Icon-Belum-Berkembang.png';
+  return null;
+}
+
 function getSkillStatus(score: number) {
-  if (score >= 85) {
+  if (score >= 76) {
     return {
-      label: 'Sangat Baik',
+      label: 'Berkembang Sangat Baik',
+      icon: CheckCircle2,
+      barClassName: 'bg-[#d4e3ff]',
+      textClassName: 'text-[#004883]',
+    };
+  }
+
+  if (score >= 51) {
+    return {
+      label: 'Berkembang Sesuai Harapan',
       icon: CheckCircle2,
       barClassName: 'bg-[#96f89f]',
       textClassName: 'text-[#00531d]',
     };
   }
 
-  if (score >= 70) {
+  if (score >= 26) {
     return {
-      label: 'Perlu Perhatian',
+      label: 'Mulai Berkembang',
       icon: AlertTriangle,
       barClassName: 'bg-[#ffe173]',
       textClassName: 'text-[#0f1d24]',
@@ -63,8 +80,8 @@ function getSkillStatus(score: number) {
   }
 
   return {
-    label: 'Butuh Dukungan',
-    icon: CircleDot,
+    label: 'Belum Berkembang',
+    icon: AlertTriangle,
     barClassName: 'bg-[#ffd6d6]',
     textClassName: 'text-[#ba1a1a]',
   };
@@ -189,10 +206,40 @@ export function ResultsScreen({
 
   const overallScore = getScore(result.overallScore);
   const category     = result.categoryResult ?? 'Unknown';
+  const developmentStage = result.developmentStage ?? null;
   const focusSummary = result.focusSummary ?? '';
   const focusAreas = safeParseArray(result.focusAreas);
   const skillEntries = Object.entries(safeParseObject(result.skillsData));
   const resultIllustration = getResultIllustration(overallScore, category);
+  const stageIcon = getStageIconPath(developmentStage);
+
+  let devLabel = category;
+  let devDesc = 'Terdapat potensi besar untuk berkembang lebih jauh.';
+  let devColor: 'danger' | 'warning' | 'success' | 'primary' | 'neutral' = 'neutral';
+
+  if (developmentStage === 'BSB') {
+    devLabel = 'Berkembang Sangat Baik';
+    devDesc = 'Anak sudah mandiri, konsisten, dan mampu berkreasi lebih atau membantu temannya.';
+    devColor = 'primary';
+  } else if (developmentStage === 'BSH') {
+    devLabel = 'Berkembang Sesuai Harapan';
+    devDesc = 'Anak sudah dapat melakukannya secara mandiri dan konsisten.';
+    devColor = 'success';
+  } else if (developmentStage === 'MB') {
+    devLabel = 'Mulai Berkembang';
+    devDesc = 'Anak sudah mulai bisa tetapi masih harus diingatkan atau dibantu oleh pendidik.';
+    devColor = 'warning';
+  } else if (developmentStage === 'BB') {
+    devLabel = 'Belum Berkembang';
+    devDesc = 'Anak masih harus dicontohkan dan didampingi penuh oleh guru/orang tua.';
+    devColor = 'danger';
+  } else if (category && category !== 'Unknown') {
+    devLabel = category;
+    if (overallScore >= 76) devColor = 'primary';
+    else if (overallScore >= 51) devColor = 'success';
+    else if (overallScore >= 26) devColor = 'warning';
+    else devColor = 'danger';
+  }
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col items-center gap-6">
@@ -200,7 +247,11 @@ export function ResultsScreen({
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="animate-fade-up flex flex-col items-center gap-3 pt-4 text-center">
         <div className="w-20 h-20 flex items-center justify-center rounded-full bg-secondary-container">
-          <Trophy className="w-10 h-10 text-on-secondary-container" aria-hidden="true" />
+          {stageIcon ? (
+            <Image src={stageIcon} alt={devLabel} width={64} height={64} className="drop-shadow-sm" priority />
+          ) : (
+            <Trophy className="w-10 h-10 text-on-secondary-container" aria-hidden="true" />
+          )}
         </div>
         <BadgePill color="neutral" className="gap-1">
           ✓ Asesmen Selesai!
@@ -230,11 +281,12 @@ export function ResultsScreen({
           <div className="flex items-center gap-4">
             <ProgressRing value={overallScore} size={96} />
             <div className="flex flex-col gap-2">
-              <BadgePill color="warning">{category}</BadgePill>
+              <BadgePill color={devColor} className="w-fit flex items-center gap-1.5 px-3 py-1 text-[11px]">
+                {stageIcon && <Image src={stageIcon} alt={devLabel} width={20} height={20} />}
+                {devLabel}
+              </BadgePill>
               <p className="text-sm text-on-surface-variant leading-snug">
-                Motorik anak berada pada kategori{' '}
-                <strong className="text-secondary">&ldquo;{category}&rdquo;</strong>.
-                Terdapat potensi besar untuk berkembang lebih jauh.
+                {devDesc}
               </p>
             </div>
           </div>

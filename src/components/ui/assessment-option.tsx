@@ -1,7 +1,15 @@
 import React, { KeyboardEvent, useRef } from 'react';
+import Image from 'next/image';
+import { AlertTriangle, Clock3, CheckCircle2, Star } from 'lucide-react';
 
-export type LikertValue = 'SS' | 'S' | 'TS' | 'STS';
+export type LikertValue = 'BB' | 'MB' | 'BSH' | 'BSB';
 
+const OPTION_IMAGE_PATHS: Record<LikertValue, string> = {
+  BB: '/images/BB-Icon-Belum-Berkembang.png',
+  MB: '/images/MB-Icon-Mulai-Berkembang.png',
+  BSH: '/images/BSH-Icon-Berkembang-Sesuai-Harapan.png',
+  BSB: '/images/BSB-Icon-Berkembang-Sangat-Baik.png',
+};
 
 export interface AssessmentOptionProps {
   value: LikertValue;
@@ -12,40 +20,38 @@ export interface AssessmentOptionProps {
   tabIndex?: number;
   onKeyDown?: (e: KeyboardEvent<HTMLButtonElement>) => void;
   'data-value'?: LikertValue;
-  // A forwardRef would be ideal here if the parent needs direct DOM access,
-  // but we can also use a callback ref or let the parent query the DOM.
 }
 
 export const AssessmentOption = React.forwardRef<HTMLButtonElement, AssessmentOptionProps>(
   ({ value, selected, onSelect, 'aria-label': ariaLabel, tabIndex = -1, onKeyDown, 'data-value': dataValue }, ref) => {
+    const imagePath = OPTION_IMAGE_PATHS[value];
     
-    // Map values to display labels (you can adjust these or pass them as children)
+    // Map values to display labels
     const displayLabels: Record<LikertValue, string> = {
-      SS: 'SS',
-      S: 'S',
-      TS: 'TS',
-      STS: 'STS',
+      BB: 'BB',
+      MB: 'MB',
+      BSH: 'BSH',
+      BSB: 'BSB',
     };
 
-    // Use similar squishy-press mechanics from your BigTouchButton
-    const baseStyles = 'press-soft relative flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-2xl font-bold text-lg transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:ring-offset-2';
+    const baseStyles = 'press-soft relative flex flex-col items-center justify-center gap-1 w-[72px] h-[72px] md:w-20 md:h-20 rounded-2xl font-bold text-xs transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-400 focus-visible:ring-offset-2';
     
     const answerStyles: Record<LikertValue, { unselected: string; selected: string }> = {
-      SS: {
-        unselected: 'border-2 border-[#96f89f] bg-[#96f89f] text-[#00531d] shadow-[0_4px_0_rgba(0,83,29,0.18)] hover:bg-[#83ee8e]',
-        selected: 'border-2 border-[#00531d] bg-[#96f89f] text-[#00531d] shadow-[0_4px_0_rgba(0,83,29,0.22)] ring-4 ring-[#96f89f]/35',
+      BB: {
+        unselected: 'border-2 border-[#ffd6d6] bg-[#ffd6d6] text-[#ba1a1a] shadow-[0_4px_0_rgba(186,26,26,0.18)] hover:bg-[#ffc4c4]',
+        selected: 'border-2 border-[#ba1a1a] bg-[#ffd6d6] text-[#ba1a1a] shadow-[0_4px_0_rgba(186,26,26,0.22)] ring-4 ring-[#ffd6d6]/45',
       },
-      S: {
-        unselected: 'border-2 border-[#d4e3ff] bg-[#d4e3ff] text-[#004883] shadow-[0_4px_0_rgba(0,72,131,0.16)] hover:bg-[#c4d9ff]',
-        selected: 'border-2 border-[#004883] bg-[#d4e3ff] text-[#004883] shadow-[0_4px_0_rgba(0,72,131,0.22)] ring-4 ring-[#d4e3ff]/60',
-      },
-      TS: {
+      MB: {
         unselected: 'border-2 border-[#ffe173] bg-[#ffe173] text-[#0f1d24] shadow-[0_4px_0_rgba(15,29,36,0.14)] hover:bg-[#ffd84d]',
         selected: 'border-2 border-[#0f1d24] bg-[#ffe173] text-[#0f1d24] shadow-[0_4px_0_rgba(15,29,36,0.2)] ring-4 ring-[#ffe173]/45',
       },
-      STS: {
-        unselected: 'border-2 border-error/30 bg-error-container text-on-error-container shadow-[0_4px_0_rgba(147,0,10,0.14)] hover:bg-error-container/90',
-        selected: 'border-2 border-error bg-error-container text-on-error-container shadow-[0_4px_0_rgba(147,0,10,0.2)] ring-4 ring-error/20',
+      BSH: {
+        unselected: 'border-2 border-[#96f89f] bg-[#96f89f] text-[#00531d] shadow-[0_4px_0_rgba(0,83,29,0.18)] hover:bg-[#83ee8e]',
+        selected: 'border-2 border-[#00531d] bg-[#96f89f] text-[#00531d] shadow-[0_4px_0_rgba(0,83,29,0.22)] ring-4 ring-[#96f89f]/35',
+      },
+      BSB: {
+        unselected: 'border-2 border-[#d4e3ff] bg-[#d4e3ff] text-[#004883] shadow-[0_4px_0_rgba(0,72,131,0.16)] hover:bg-[#c4d9ff]',
+        selected: 'border-2 border-[#004883] bg-[#d4e3ff] text-[#004883] shadow-[0_4px_0_rgba(0,72,131,0.22)] ring-4 ring-[#d4e3ff]/60',
       },
     };
 
@@ -60,13 +66,14 @@ export const AssessmentOption = React.forwardRef<HTMLButtonElement, AssessmentOp
         role="radio"
         aria-checked={selected}
         aria-label={ariaLabel}
-        tabIndex={tabIndex} // -1 for unselected, 0 for selected (roving tabindex)
+        tabIndex={tabIndex}
         data-value={dataValue}
         onClick={() => onSelect(value)}
         onKeyDown={onKeyDown}
         className={`${baseStyles} ${optionStyles}`}
       >
-        {displayLabels[value]}
+        <Image src={imagePath} alt={value} width={28} height={28} className="drop-shadow-sm" priority />
+        <span className="text-[11px] font-black leading-none">{displayLabels[value]}</span>
       </button>
     );
   }
@@ -92,10 +99,10 @@ export const AssessmentGroup: React.FC<AssessmentGroupProps> = ({
   variant = 'default',
 }) => {
   const options: { value: LikertValue; label: string }[] = [
-    { value: 'SS', label: 'Sangat Setuju, nilai 4' },
-    { value: 'S', label: 'Setuju, nilai 3' },
-    { value: 'TS', label: 'Tidak Setuju, nilai 2' },
-    { value: 'STS', label: 'Sangat Tidak Setuju, nilai 1' },
+    { value: 'BB', label: 'Belum Berkembang, nilai 1' },
+    { value: 'MB', label: 'Mulai Berkembang, nilai 2' },
+    { value: 'BSH', label: 'Berkembang Sesuai Harapan, nilai 3' },
+    { value: 'BSB', label: 'Berkembang Sangat Baik, nilai 4' },
   ];
 
   const groupRef = useRef<HTMLDivElement>(null);
@@ -132,8 +139,7 @@ export const AssessmentGroup: React.FC<AssessmentGroupProps> = ({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* The hidden ID links the question text to the radiogroup for screen readers.
-      */}
+      {/* The hidden ID links the question text to the radiogroup for screen readers. */}
       <h3 id={`question-${questionId}`} className="text-xl font-semibold text-gray-900">
         {questionText}
       </h3>
@@ -151,7 +157,7 @@ export const AssessmentGroup: React.FC<AssessmentGroupProps> = ({
           // Roving tabIndex logic: 
           // If nothing is selected, the first item is focusable (0).
           // Otherwise, ONLY the selected item is focusable (0), others are (-1).
-          const isFocusable = isSelected || (selectedValue === null && opt.value === 'SS');
+          const isFocusable = isSelected || (selectedValue === null && opt.value === 'BB');
 
           return (
             <AssessmentOption
@@ -162,7 +168,7 @@ export const AssessmentGroup: React.FC<AssessmentGroupProps> = ({
               variant={variant}
               aria-label={opt.label}
               tabIndex={isFocusable ? 0 : -1}
-              data-value={opt.value} // Used for the querySelector focus shift
+              data-value={opt.value}
             />
           );
         })}

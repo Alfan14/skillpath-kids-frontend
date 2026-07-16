@@ -1,7 +1,9 @@
 {
   "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(dashboard)/page": "app/(dashboard)/page.js",
+  "/(teacher)/teacher/assessment/page": "app/(teacher)/teacher/assessment/page.js",
+  "/(teacher)/teacher/results/page": "app/(teacher)/teacher/results/page.js",
   "/(teacher)/teacher/files/page": "app/(teacher)/teacher/files/page.js",
-  "/(teacher)/teacher/dashboard/page": "app/(teacher)/teacher/dashboard/page.js",
-  "/(shop)/worksheets/[slug]/page": "app/(shop)/worksheets/[slug]/page.js"
+  "/(dashboard)/page": "app/(dashboard)/page.js",
+  "/(dashboard)/assessment/page": "app/(dashboard)/assessment/page.js",
+  "/(dashboard)/results/page": "app/(dashboard)/results/page.js"
 }

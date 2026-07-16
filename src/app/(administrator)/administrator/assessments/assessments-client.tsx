@@ -44,11 +44,10 @@ const ROLE_OPTIONS = [
 
 const CATEGORY_OPTIONS = [
   { value: 'Semua', label: 'Semua Kategori' },
-  { value: 'Sangat Baik', label: 'Sangat Baik' },
-  { value: 'Baik', label: 'Baik' },
-  { value: 'Cukup', label: 'Cukup' },
-  { value: 'Perlu Perhatian', label: 'Perlu Perhatian' },
-  { value: 'Perlu Bantuan', label: 'Perlu Bantuan' },
+  { value: 'Berkembang Sangat Baik', label: 'Berkembang Sangat Baik' },
+  { value: 'Berkembang Sesuai Harapan', label: 'Berkembang Sesuai Harapan' },
+  { value: 'Mulai Berkembang', label: 'Mulai Berkembang' },
+  { value: 'Belum Berkembang', label: 'Belum Berkembang' },
 ];
 
 const ROLE_STYLES: Record<string, string> = {
@@ -110,6 +109,9 @@ function clampScore(value: unknown) {
     : value;
   const parsed = Number(raw);
   if (!Number.isFinite(parsed)) return 0;
+  if (parsed <= 4 && parsed > 0) {
+    return Math.min(100, Math.max(0, (parsed / 4) * 100));
+  }
   return Math.min(100, Math.max(0, Math.round(parsed)));
 }
 
@@ -124,18 +126,25 @@ function getNullableScore(item: AssessmentItem) {
 
 function getScoreStyle(score: number | null) {
   if (score === null) return 'bg-[#e5e7eb] text-[#374151]';
-  if (score >= 85) return 'bg-[#96f89f] text-[#00531d]';
-  if (score >= 70) return 'bg-[#ffe173] text-[#0f1d24]';
-  return 'bg-[#ffd6d6] text-[#ba1a1a]';
+  if (score > 4) {
+    if (score >= 76) return 'bg-[#d4e3ff] text-[#004883]';
+    if (score >= 51) return 'bg-[#96f89f] text-[#00531d]';
+    if (score >= 26) return 'bg-[#ffe173] text-[#0f1d24]';
+    return 'bg-[#ffd6d6] text-[#ba1a1a]';
+  } else {
+    if (score >= 4) return 'bg-[#d4e3ff] text-[#004883]';
+    if (score >= 3) return 'bg-[#96f89f] text-[#00531d]';
+    if (score >= 2) return 'bg-[#ffe173] text-[#0f1d24]';
+    return 'bg-[#ffd6d6] text-[#ba1a1a]';
+  }
 }
 
 function getCategoryStyle(category: string | null | undefined) {
   const value = String(category ?? '').toLowerCase();
-  if (value.includes('sangat') || value === 'excellent') return 'bg-[#96f89f] text-[#00531d]';
-  if (value === 'baik' || value.includes('cukup')) return 'bg-[#ffe173] text-[#0f1d24]';
-  if (value.includes('bantuan') || value.includes('perhatian') || value === 'low' || value === 'warning') {
-    return 'bg-[#ffd6d6] text-[#ba1a1a]';
-  }
+  if (value.includes('sangat baik') || value === 'bsb') return 'bg-[#d4e3ff] text-[#004883]';
+  if (value.includes('sesuai harapan') || value === 'bsh') return 'bg-[#96f89f] text-[#00531d]';
+  if (value.includes('mulai berkembang') || value === 'mb') return 'bg-[#ffe173] text-[#0f1d24]';
+  if (value.includes('belum berkembang') || value === 'bb') return 'bg-[#ffd6d6] text-[#ba1a1a]';
   return 'bg-[#e5e7eb] text-[#374151]';
 }
 
@@ -699,8 +708,8 @@ function AssessmentDetailModal({
                             </div>
                             <span className="truncate text-sm font-black text-on-surface">{formatKey(skill)}</span>
                           </div>
-                          <span className={`rounded-full px-2.5 py-1 text-xs font-black ${getScoreStyle(normalizedScore)}`}>
-                            {normalizedScore}%
+                          <span className={`rounded-full px-2.5 py-1 text-xs font-black ${getScoreStyle(Number(value))}`}>
+                            {Number(value)}
                           </span>
                         </div>
                         <div className="h-2 overflow-hidden rounded-full bg-[#e5e7eb]">

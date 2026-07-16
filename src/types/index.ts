@@ -19,13 +19,13 @@ export interface NavItem {
 
 // ─── Assessment ───────────────────────────────────────────────────────────────
 
-export type LikertValue = 'SS' | 'S' | 'TS' | 'STS';
+export type LikertValue = 'BB' | 'MB' | 'BSH' | 'BSB';
 
 export const LIKERT_SCORE: Record<LikertValue, number> = {
-  SS: 4,
-  S: 3,
-  TS: 2,
-  STS: 1,
+  BB: 1,
+  MB: 2,
+  BSH: 3,
+  BSB: 4,
 };
 
 export type SkillCategory =

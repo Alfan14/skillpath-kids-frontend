@@ -103,26 +103,29 @@ function getScore(value: TeacherResult['overallScore']) {
 }
 
 function getCategoryColor(category?: string | null) {
-  if (category === 'Sangat Baik' || category === 'Bagus') {
-    return 'bg-tertiary-container text-tertiary';
+  const cat = category?.toLowerCase() || '';
+  if (cat.includes('sangat baik') || cat === 'bsb') {
+    return 'bg-[#d4e3ff] text-[#004883]';
   }
-  if (category === 'Cukup' || category === 'Perlu Perhatian') {
-    return 'bg-secondary-container text-on-secondary-container';
+  if (cat.includes('sesuai harapan') || cat === 'bsh') {
+    return 'bg-[#96f89f] text-[#00531d]';
   }
-  if (category === 'Perlu Bantuan' || category === 'Perlu Latihan') {
-    return 'bg-error-container text-error';
+  if (cat.includes('mulai') || cat === 'mb') {
+    return 'bg-[#ffe173] text-[#0f1d24]';
   }
-  return 'bg-surface-container text-on-surface-variant';
-}
-
-function getScoreColor(score: number) {
-  if (score >= 85) return 'bg-[#96f89f] text-[#00531d]';
-  if (score >= 70) return 'bg-[#ffe173] text-[#0f1d24]';
   return 'bg-[#ffd6d6] text-[#ba1a1a]';
 }
 
+function getScoreColor(score: number) {
+  if (score >= 4) return 'bg-[#d4e3ff] text-[#004883]'; // BSB
+  if (score >= 3) return 'bg-[#96f89f] text-[#00531d]'; // BSH
+  if (score >= 2) return 'bg-[#ffe173] text-[#0f1d24]'; // MB
+  return 'bg-[#ffd6d6] text-[#ba1a1a]'; // BB
+}
+
 function normalizeScore(score: number) {
-  return Math.min(100, Math.max(0, Math.round(score)));
+  // Map 1-4 scale to 0-100% for progress bars
+  return Math.min(100, Math.max(0, (score / 4) * 100));
 }
 
 function getSkillLabel(key: string) {
@@ -410,7 +413,7 @@ export function TeacherResultsClient() {
                                       {getSkillLabel(skill)}
                                     </span>
                                     <span className="rounded-md bg-[#d4e3ff] px-2 py-0.5 text-xs font-black text-[#004883]">
-                                      {normalizedScore}
+                                      {value}
                                     </span>
                                   </div>
                                   <div className="h-2 overflow-hidden rounded-full bg-[#d4e3ff]/55">

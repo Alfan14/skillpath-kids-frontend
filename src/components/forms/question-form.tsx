@@ -243,8 +243,19 @@ export function QuestionForm({ initialData, onSuccess, onCancel }: QuestionFormP
           </span>
         </div>
         <p className="text-[11px] text-on-surface-variant">
-          Tulis pertanyaan dengan jelas dan mudah dipahami anak.
+          Tulis pertanyaan dengan jelas dan mudah dipahami.
         </p>
+        <div className="mt-2 rounded-[14px] border border-[#d4e3ff] bg-surface-container-lowest p-3">
+          <p className="mb-2 text-[10px] font-black uppercase tracking-wide text-[#004883]">
+            Skala Jawaban Assessment
+          </p>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+            <span className="inline-flex rounded-md bg-[#ffd6d6] px-2 py-1 text-[10px] font-bold text-[#ba1a1a]">BB = Belum Berkembang (1)</span>
+            <span className="inline-flex rounded-md bg-[#ffe173] px-2 py-1 text-[10px] font-bold text-[#0f1d24]">MB = Mulai Berkembang (2)</span>
+            <span className="inline-flex rounded-md bg-[#96f89f] px-2 py-1 text-[10px] font-bold text-[#00531d]">BSH = Berkembang Sesuai Harapan (3)</span>
+            <span className="inline-flex rounded-md bg-[#d4e3ff] px-2 py-1 text-[10px] font-bold text-[#004883]">BSB = Berkembang Sangat Baik (4)</span>
+          </div>
+        </div>
       </div>
 
       {/* category */}

@@ -70,6 +70,14 @@ function getProgressTone(score: number): {
   };
 }
 
+function getDevelopmentStageBadge(stage: string | null) {
+  if (stage === 'BSB') return { label: 'BSB', bg: 'bg-[#d4e3ff]', text: 'text-[#004883]', icon: '/images/BSB-Icon-Berkembang-Sangat-Baik.png' };
+  if (stage === 'BSH') return { label: 'BSH', bg: 'bg-[#96f89f]', text: 'text-[#00531d]', icon: '/images/BSH-Icon-Berkembang-Sesuai-Harapan.png' };
+  if (stage === 'MB') return { label: 'MB', bg: 'bg-[#fff1c2]', text: 'text-[#ad6800]', icon: '/images/MB-Icon-Mulai-Berkembang.png' };
+  if (stage === 'BB') return { label: 'BB', bg: 'bg-[#ffd6d6]', text: 'text-[#b42318]', icon: '/images/BB-Icon-Belum-Berkembang.png' };
+  return null;
+}
+
 function readStoredResult(): ParentResult | null {
   try {
     const raw = sessionStorage.getItem('assessment_result');
@@ -226,20 +234,33 @@ export function DashboardProgress() {
     { label: 'Sosial & Emosional', value: sosial, Icon: HeartHandshake, recommendation: getRecommendation('Sosial', sosial) },
   ];
 
+  const devStageBadge = getDevelopmentStageBadge(latestResult.developmentStage);
+
   return (
     <section aria-labelledby="progress-heading" className="animate-fade-up flex flex-col gap-4">
 
       {/* section header */}
       <div className="flex items-center justify-between">
-        <h2
-          id="progress-heading"
-          className="flex items-center gap-2 text-xl font-black text-on-surface"
-        >
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#d4e3ff]">
-            <LineChart className="h-4 w-4 text-[#004883]" aria-hidden="true" />
-          </div>
-          Progress Anak
-        </h2>
+        <div className="flex flex-col gap-2">
+          <h2
+            id="progress-heading"
+            className="flex items-center gap-2 text-xl font-black text-on-surface"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#d4e3ff]">
+              <LineChart className="h-4 w-4 text-[#004883]" aria-hidden="true" />
+            </div>
+            Progress Anak
+          </h2>
+          {devStageBadge && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-on-surface-variant">Tahap Perkembangan:</span>
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-black ${devStageBadge.bg} ${devStageBadge.text}`}>
+                <Image src={devStageBadge.icon} alt={devStageBadge.label} width={18} height={18} />
+                {devStageBadge.label}
+              </span>
+            </div>
+          )}
+        </div>
         <Link
           href="/results"
           className="press-soft flex items-center gap-1 text-sm font-bold text-primary hover:underline"

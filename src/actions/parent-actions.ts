@@ -17,6 +17,7 @@ export interface ParentResult {
   childName: string | null;
   overallScore: number | string | null;
   categoryResult: string | null;
+  developmentStage: string | null;
   focusSummary: string | null;
   focusAreas: string[] | string | null;
   skillsData: Record<string, unknown> | string | null;
